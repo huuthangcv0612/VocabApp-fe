@@ -1,0 +1,42 @@
+.level-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.level-tab {
+  padding: 0.75rem 2rem;
+  background-color: transparent;
+  color: #4a5568;
+  border: 2px solid #003d82;
+  border-radius: 2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.level-tab:hover {
+  border-color: #fbb81c;
+  color: #fbb81c;
+}
+
+.level-tab.active {
+  background-color: #003d82;
+  color: #ffffff;
+  border-color: #003d82;
+  box-shadow: 0 4px 12px rgba(0, 61, 130, 0.3);
+}
+
+@media (max-width: 768px) {
+  .level-tabs {
+    gap: 0.5rem;
+  }
+
+  .level-tab {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,100 @@
+.tool-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border: 1px solid rgba(251, 184, 28, 0.2);
+  border-radius: 1rem;
+  padding: 2rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tool-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(251, 184, 28, 0.4);
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+  box-shadow: 0 20px 40px rgba(251, 184, 28, 0.15);
+}
+
+.tool-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tool-badge {
+  font-size: 1.5rem;
+  width: 50px;
+  height: 50px;
+  background: rgba(251, 184, 28, 0.15);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-icon {
+  font-size: 2.5rem;
+}
+
+.tool-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.tool-description {
+  font-size: 0.9rem;
+  color: #b0b8c1;
+  line-height: 1.6;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.tool-button {
+  background: linear-gradient(135deg, #fbb81c 0%, #f0a800 100%);
+  color: #003d82;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tool-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(251, 184, 28, 0.4);
+}
+
+.tool-button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .tool-card {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+
+  .tool-title {
+    font-size: 1.1rem;
+  }
+
+  .tool-description {
+    font-size: 0.85rem;
+  }
+
+  .tool-badge {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .tool-icon {
+    font-size: 2rem;
+  }
+}
