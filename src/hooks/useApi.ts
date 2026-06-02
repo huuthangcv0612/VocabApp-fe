@@ -10,7 +10,7 @@ export const useLevels = () => {
     setLoading(true)
     setError(null)
     try {
-      console.log('Fetching levels from:', import.meta.env.VITE_API_BASE_URL)
+      console.log('Fetching levels from:', import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL)
       const data = await levelsApi.getAll()
       console.log('Levels data:', data)
       setLevels(data)

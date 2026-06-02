@@ -1,6 +1,8 @@
 import axios from 'axios'
+import type { AuthUser } from '../types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+const STORAGE_TOKEN_KEY = 'vocabapp_token'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +10,29 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 10000,
+})
+
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    localStorage.setItem(STORAGE_TOKEN_KEY, token)
+    api.defaults.headers.common.Authorization = `Bearer ${token}`
+  } else {
+    localStorage.removeItem(STORAGE_TOKEN_KEY)
+    delete api.defaults.headers.common.Authorization
+  }
+}
+
+export const clearAuthToken = () => {
+  localStorage.removeItem(STORAGE_TOKEN_KEY)
+  delete api.defaults.headers.common.Authorization
+}
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem(STORAGE_TOKEN_KEY)
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 // Types for API responses
@@ -165,6 +190,73 @@ export const vocabularyApi = {
     }
 
     return feedback
+  },
+}
+
+export interface AuthResponse<T = unknown> {
+  success: boolean
+  token?: string
+  user?: T
+  data?: T
+  error?: string
+  message?: string
+}
+
+export const authApi = {
+  register: async (name: string, email: string, password: string, passwordConfirm: string) => {
+    const response = await api.post<AuthResponse<AuthUser>>('/auth/register', {
+      name,
+      email,
+      password,
+      passwordConfirm,
+    })
+
+    console.log('REGISTER RESPONSE:', response)
+    console.log('REGISTER DATA:', response.data)
+
+    // Check if response indicates success: either HTTP 200/201 or success field is true
+    const isSuccess = response.status === 200 || response.status === 201 || response.data.success === true
+    if (!isSuccess) {
+      throw new Error(response.data.error || response.data.message || 'Đăng ký thất bại, vui lòng thử lại.')
+    }
+
+    // Extract user data - might be in user or data field
+    const user = response.data.user ?? response.data.data
+    if (!user) {
+      throw new Error('Đăng ký thất bại: không nhận được dữ liệu user.')
+    }
+
+    return {
+      token: response.data.token || '',
+      user,
+    }
+  },
+
+  login: async (email: string, password: string) => {
+    const response = await api.post<AuthResponse<AuthUser>>('/auth/login', {
+      email,
+      password,
+    })
+
+    console.log('LOGIN RESPONSE:', response)
+    console.log('LOGIN DATA:', response.data)
+
+    // Check if response indicates success: either HTTP 200/201 or success field is true
+    const isSuccess = response.status === 200 || response.status === 201 || response.data.success === true
+    if (!isSuccess) {
+      throw new Error(response.data.error || response.data.message || 'Đăng nhập thất bại, vui lòng kiểm tra email và mật khẩu.')
+    }
+
+    // Extract user data - might be in user or data field
+    const user = response.data.user ?? response.data.data
+    if (!user) {
+      throw new Error('Đăng nhập thất bại: không nhận được dữ liệu user.')
+    }
+
+    return {
+      token: response.data.token || '',
+      user,
+    }
   },
 }
 
