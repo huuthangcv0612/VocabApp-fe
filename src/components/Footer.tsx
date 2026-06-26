@@ -33,7 +33,7 @@ const Footer = () => {
                 <Link to="/levels">Trình Độ</Link>
               </li>
               <li>
-                <Link to="/">Phòng Học Tương Tác</Link>
+                <Link to="/">Phòng Học Tương Tác AI</Link>
               </li>
             </ul>
           </div>

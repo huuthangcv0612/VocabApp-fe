@@ -1,8 +1,8 @@
 .hero {
   background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-  padding: 4rem 2rem;
-  padding-top: 6rem;
-  min-height: calc(100vh - 80px);
+  padding: 3rem 2rem 4rem;
+  padding-top: 5rem;
+  min-height: calc(100vh - 100px);
   display: flex;
   align-items: center;
 }
@@ -66,13 +66,16 @@
 
 .hero-buttons {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.25rem;
   flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .btn {
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+  padding: 1rem 1.8rem;
+  border-radius: 0.75rem;
+  min-width: 160px;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;

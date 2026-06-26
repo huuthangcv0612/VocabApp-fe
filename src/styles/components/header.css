@@ -6,8 +6,27 @@
   width: 100%;
   background-color: #ffffff;
   padding: 1.5rem 0;
+  box-sizing: border-box;
+  min-height: 100px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
   z-index: 100;
+  transform: translateY(0);
+}
+
+.header--animated {
+  transform: translateY(-100%);
+  animation: slideDownHeader 0.6s ease-out forwards;
+}
+
+@keyframes slideDownHeader {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .header-container {
