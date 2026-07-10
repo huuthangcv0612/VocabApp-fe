@@ -27,7 +27,7 @@ const Header = ({ animate = false }: HeaderProps) => {
           <Link to="/levels" className="nav-link">
             Trình Độ
           </Link>
-          <Link to="/classroom" className="nav-link">
+          <Link to="/interactive-room" className="nav-link">
             Phòng Học Tương Tác
           </Link>
         </nav>

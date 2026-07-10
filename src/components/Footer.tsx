@@ -99,7 +99,7 @@ const Footer = () => {
 
       {/* Copyright Section */}
       <div className="footer-copyright">
-        <p>© 2026 DeutschUp. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU. Version1.0</p>
+        <p>© 2026 DeutschUp. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU. Version1.0.0</p>
       </div>
     </footer>
   )

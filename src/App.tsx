@@ -8,6 +8,7 @@ import Lektion from './pages/Lektion'
 import Flashcard from './pages/Flashcard'
 import Quiz from './pages/Quiz'
 import SpinWheel from './pages/SpinWheel'
+import InteractiveRoomPage from './pages/InteractiveRoomPage'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="/flashcard/:lektionId" element={<Flashcard />} />
           <Route path="/quiz/:lektionId" element={<Quiz />} />
           <Route path="/spinwheel/:lektionId" element={<SpinWheel />} />
+          <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -42,7 +42,7 @@ const LevelDetail = () => {
                 <div key={lektion._id} className="level-card">
                   <div className="card-icon">📘</div>
                   <h3 className="card-title">{displayTitle}</h3>
-                  <p className="card-description">{count} từ vựng trong lektion này</p>
+                  <p className="card-description">{count} từ vựng </p>
                   <Link to={`/lektion/${lektion._id}`} className="card-button">
                     Xem bài học
                   </Link>
