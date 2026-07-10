@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { AuthUser } from '../types/auth'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 const STORAGE_TOKEN_KEY = 'vocabapp_token'
 
 const api = axios.create({
@@ -51,6 +51,7 @@ export interface Lektion {
   lektion_name: string
   description: string
   order: number
+  vocabularyCount?: number
   createdAt?: string
   updatedAt?: string
 }
@@ -137,18 +138,23 @@ export const vocabularyApi = {
   },
 
   getByLektionId: async (lektionId: string): Promise<Vocabulary[]> => {
-    const response = await api.get(`/vocabulary/lektion/${lektionId}`)
-    const responseData = response.data as ApiResponse<Vocabulary> | Vocabulary[]
-
-    if (Array.isArray(responseData)) {
-      return responseData
+    const response = await api.get('/vocabularies?limit=5000')
+    const responseData = response.data as {
+      success?: boolean
+      data?: {
+        vocabularies?: Vocabulary[]
+      } | Vocabulary[]
+      error?: string
     }
 
-    if (!responseData.success) {
-      throw new Error(responseData.error || 'Failed to fetch vocabulary')
-    }
+    const allVocabularies: Vocabulary[] =
+      (responseData?.data as { vocabularies?: Vocabulary[] })?.vocabularies ||
+      (responseData?.data as Vocabulary[]) ||
+      (Array.isArray(responseData) ? responseData : [])
 
-    return responseData.data
+    return allVocabularies.filter(
+      (vocab) => String(vocab.lektionId) === String(lektionId)
+    )
   },
 
   search: async (keyword: string): Promise<Vocabulary[]> => {

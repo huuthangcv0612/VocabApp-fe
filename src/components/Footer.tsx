@@ -33,7 +33,7 @@ const Footer = () => {
                 <Link to="/levels">Trình Độ</Link>
               </li>
               <li>
-                <Link to="/">Phòng Học Tương Tác</Link>
+                <Link to="/">Phòng Học Tương Tác AI</Link>
               </li>
             </ul>
           </div>
@@ -99,7 +99,7 @@ const Footer = () => {
 
       {/* Copyright Section */}
       <div className="footer-copyright">
-        <p>© 2026 DeutschUp. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU.</p>
+        <p>© 2026 DeutschUp. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU. Version1.0</p>
       </div>
     </footer>
   )

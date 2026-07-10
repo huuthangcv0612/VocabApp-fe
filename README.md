@@ -85,7 +85,7 @@ yarn lint
 Create a `.env` file in the root directory:
 
 ```
-VITE_API_URL=http://localhost:3001
+VITE_API_URL=http://localhost:3000
 VITE_APP_NAME=VocabApp
 ```
 

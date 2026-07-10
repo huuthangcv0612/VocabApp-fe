@@ -3,7 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import '../styles/components/header.css'
 import useAuth from '../hooks/useAuth'
 
-const Header = () => {
+type HeaderProps = {
+  animate?: boolean
+}
+
+const Header = ({ animate = false }: HeaderProps) => {
   const { isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -13,7 +17,7 @@ const Header = () => {
   }
 
   return (
-    <header className="header">
+    <header className={`header ${animate ? 'header--animated' : ''}`}>
       <div className="header-container">
         <Link to="/" className="logo">
           <span className="logo-text">DeutschUp</span>

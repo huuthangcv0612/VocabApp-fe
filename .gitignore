@@ -30,3 +30,11 @@ dist-ssr
 
 # Build output
 coverage
+*.tsbuildinfo
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Vite generated files
+vite.config.js
+vite.config.d.ts

@@ -11,7 +11,6 @@
 }
 
 .level-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 61, 130, 0.15);
 }
 
@@ -74,9 +73,8 @@
 }
 
 .card-button:hover {
-  background-color: #002d63;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 61, 130, 0.3);
+  background-color: #ff6b02;
+  box-shadow: 0 4px 12px rgba(255, 107, 2, 0.3);
 }
 
 .button-icon {

@@ -6,7 +6,7 @@ import '../styles/pages/home.css'
 const Home = () => {
   return (
     <div className="home">
-      <Header />
+      <Header animate />
       <Hero />
       <Footer />
     </div>
