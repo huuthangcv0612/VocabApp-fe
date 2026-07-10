@@ -51,6 +51,7 @@ export interface Lektion {
   lektion_name: string
   description: string
   order: number
+  vocabularyCount?: number
   createdAt?: string
   updatedAt?: string
 }

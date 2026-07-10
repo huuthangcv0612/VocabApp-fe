@@ -88,26 +88,25 @@
 }
 
 .btn-primary {
-  background-color: #fbb81c;
-  color: #003d82;
+  background-color: #F87B1B;
+  color: #EEEEEE;
+  border: 1px solid #F87B1B;
 }
 
 .btn-primary:hover {
-  background-color: #f0a800;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(251, 184, 28, 0.4);
+  background-color: #EEEEEE;
+  border: 1px solid #F87B1B;
 }
 
 .btn-secondary {
   background-color: transparent;
-  color: #003d82;
-  border: 2px solid #003d82;
+  color: #F87B1B;
+  border: 1px solid #F87B1B;
 }
 
 .btn-secondary:hover {
-  background-color: #003d82;
+  background-color: #F87B1B;
   color: #ffffff;
-  transform: translateY(-2px);
 }
 
 .course-badges {
@@ -120,13 +119,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #003d82;
+  color: #11224E;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
 .badge-checkmark {
-  color: #10b981;
+  color: #CBD99B;
   font-weight: bold;
 }
 

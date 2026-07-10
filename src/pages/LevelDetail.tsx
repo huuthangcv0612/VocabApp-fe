@@ -1,40 +1,13 @@
-import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useLektions, useLevels } from '../hooks/useApi'
-import { vocabularyApi } from '../services/api'
 import '../styles/pages/levels.css'
 
 const LevelDetail = () => {
   const { levelId } = useParams<{ levelId: string }>()
   const { lektions, loading, error } = useLektions(levelId)
   const { levels } = useLevels()
-  const [vocabCounts, setVocabCounts] = useState<Record<string, number>>({})
-
-  useEffect(() => {
-    if (lektions.length === 0) {
-      setVocabCounts({})
-      return
-    }
-
-    const loadCounts = async () => {
-      const counts: Record<string, number> = {}
-      await Promise.all(
-        lektions.map(async (lektion) => {
-          try {
-            const vocab = await vocabularyApi.getByLektionId(lektion._id)
-            counts[lektion._id] = Array.isArray(vocab) ? vocab.length : 0
-          } catch {
-            counts[lektion._id] = 0
-          }
-        })
-      )
-      setVocabCounts(counts)
-    }
-
-    loadCounts()
-  }, [lektions])
 
   const level = levels.find((item) => item._id === levelId)
   const levelTitle = level ? `Cấp Độ ${level.level_name}` : 'Danh sách bài học'
@@ -63,7 +36,7 @@ const LevelDetail = () => {
               const displayTitle = lektion.lektion_name.includes('-')
                 ? lektion.lektion_name.split('-').pop()?.trim() || lektion.lektion_name
                 : lektion.lektion_name
-              const count = vocabCounts[lektion._id] ?? 0
+              const count = typeof lektion.vocabularyCount === 'number' ? lektion.vocabularyCount : 0
 
               return (
                 <div key={lektion._id} className="level-card">
