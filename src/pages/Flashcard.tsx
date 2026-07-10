@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useVocabulary } from '../hooks/useApi'
 import '../styles/pages/flashcard.css'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { EffectCards } from 'swiper/modules'
+import type { Swiper as SwiperType } from 'swiper'
+
+import 'swiper/css'
+import 'swiper/css/effect-cards'
 
 const Flashcard = () => {
   const { lektionId } = useParams<{ lektionId: string }>()
@@ -11,6 +17,7 @@ const Flashcard = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [learned, setLearned] = useState<string[]>([])
+  const swiperRef = useRef<SwiperType | null>(null)
 
   useEffect(() => {
     setCurrentIndex(0)
@@ -22,15 +29,14 @@ const Flashcard = () => {
   const progress = vocabulary.length > 0 ? ((currentIndex + 1) / vocabulary.length) * 100 : 0
 
   const handleNext = () => {
-    if (currentIndex < vocabulary.length - 1) {
-      setCurrentIndex(currentIndex + 1)
-      setIsFlipped(false)
-    }
+  if (currentIndex < vocabulary.length - 1) {
+    swiperRef.current?.slideNext()
   }
+}
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1)
+      swiperRef.current?.slidePrev()
       setIsFlipped(false)
     }
   }
@@ -71,27 +77,46 @@ const Flashcard = () => {
               </div>
 
               <div className="flashcard-area">
-                <div
-                  className={`flashcard ${isFlipped ? 'flipped' : ''}`}
-                  onClick={() => setIsFlipped(!isFlipped)}
+                <Swiper
+                  effect="cards"
+                  grabCursor={true}
+                  modules={[EffectCards]}
+                  slidesPerView={1}
+                  onSwiper={(swiper) => {
+                    swiperRef.current = swiper
+                  }}
+                  onSlideChange={(swiper) => {
+                    setCurrentIndex(swiper.activeIndex)
+                    setIsFlipped(false)
+                  }}
+                  className="flashcard-swiper"
                 >
-                  <div className="flashcard-front">
-                    <span className="card-label">MẶT TRƯỚC</span>
-                    <div className="card-content">{currentCard.word}</div>
-                  </div>
+                  {vocabulary.map((card, index) => (
+                    <SwiperSlide key={card._id}>
+                      <div
+                        className={`flashcard ${isFlipped && index === currentIndex ? 'flipped' : ''}`}
+                        onClick={() => setIsFlipped(!isFlipped)}
+                      >
+                        <div className="flashcard-front">
+                          <span className="card-label">WORT</span>
+                          <div className="card-content">{card.word}</div>
+                        </div>
 
-                  <div className="flashcard-back">
-                    <span className="card-label">MẶT SAU</span>
-                    <div className="card-meaning">{currentCard.meaning}</div>
-                    <div className="card-example">
-                      {typeof currentCard.example === 'string'
-                        ? currentCard.example
-                        : currentCard.example
-                        ? `${currentCard.example.de || ''}${currentCard.example.de && currentCard.example.vi ? ' / ' : ''}${currentCard.example.vi || ''}`
-                        : 'Không có ví dụ'}
-                    </div>
-                  </div>
-                </div>
+                        <div className="flashcard-back">
+                          <span className="card-label">BEDEUTUNG</span>
+                          <div className="card-meaning">{card.meaning}</div>
+                          <div className="card-example">
+                            {typeof card.example === 'string'
+                              ? card.example
+                              : card.example
+                              ? `${card.example.de || ''}${card.example.de && card.example.vi ? ' / ' : ''}${card.example.vi || ''}`
+                              : 'Không có ví dụ'}
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
               </div>
 
               <div className="flashcard-navigation">
@@ -100,11 +125,11 @@ const Flashcard = () => {
                   onClick={handlePrev}
                   disabled={currentIndex === 0}
                 >
-                  ← Trước
+                  ← Zurück
                 </button>
 
                 <button className="learned-button" onClick={handleMarkLearned}>
-                  ✓ Đã học {learned.includes(currentCard._id) ? '(đã đánh dấu)' : ''}
+                  {learned.includes(currentCard._id) ? "✓ Gelernt" : "Als gelernt markieren"}
                 </button>
 
                 <button
@@ -112,7 +137,7 @@ const Flashcard = () => {
                   onClick={handleNext}
                   disabled={currentIndex === vocabulary.length - 1}
                 >
-                  Tiếp →
+                  Weiter →
                 </button>
               </div>
 

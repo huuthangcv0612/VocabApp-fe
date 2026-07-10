@@ -54,6 +54,9 @@
 .nav-link:hover {
   color: #ff6b02;
 }
+.nav-link.active {
+    color: #ff6b02;
+}
 
 .btn-start {
   background-color: #ff6b02;
