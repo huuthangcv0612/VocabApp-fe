@@ -11,6 +11,7 @@ import SpinWheel from './pages/SpinWheel'
 import InteractiveRoomPage from './pages/InteractiveRoomPage'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
   return (
@@ -20,14 +21,16 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/levels" element={<Levels />} />
-          <Route path="/levels/:levelId" element={<LevelDetail />} />
-          <Route path="/lektion/:lektionId" element={<Lektion />} />
-          <Route path="/lesson/:lektionId" element={<Lektion />} />
-          <Route path="/flashcard/:lektionId" element={<Flashcard />} />
-          <Route path="/quiz/:lektionId" element={<Quiz />} />
-          <Route path="/spinwheel/:lektionId" element={<SpinWheel />} />
-          <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/levels" element={<Levels />} />
+            <Route path="/levels/:levelId" element={<LevelDetail />} />
+            <Route path="/lektion/:lektionId" element={<Lektion />} />
+            <Route path="/lesson/:lektionId" element={<Lektion />} />
+            <Route path="/flashcard/:lektionId" element={<Flashcard />} />
+            <Route path="/quiz/:lektionId" element={<Quiz />} />
+            <Route path="/spinwheel/:lektionId" element={<SpinWheel />} />
+            <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

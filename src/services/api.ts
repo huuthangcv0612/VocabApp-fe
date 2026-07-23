@@ -1,6 +1,12 @@
 import axios from 'axios'
 import type { AuthUser } from '../types/auth'
 
+const clearExpiredAuth = () => {
+  localStorage.removeItem('vocabapp_token')
+  localStorage.removeItem('vocabapp_user')
+  delete api.defaults.headers.common.Authorization
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 const STORAGE_TOKEN_KEY = 'vocabapp_token'
 
@@ -34,6 +40,18 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      clearExpiredAuth()
+      window.dispatchEvent(new CustomEvent('auth:logout'))
+    }
+
+    return Promise.reject(error)
+  },
+)
 
 // Types for API responses
 export interface Level {

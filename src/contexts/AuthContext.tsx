@@ -37,6 +37,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthToken(token)
   }, [token])
 
+  useEffect(() => {
+    const handleLogout = () => {
+      setToken(null)
+      setUser(null)
+      clearAuthToken()
+    }
+
+    window.addEventListener('auth:logout', handleLogout)
+    return () => window.removeEventListener('auth:logout', handleLogout)
+  }, [])
+
   const login = async (email: string, password: string) => {
     console.log('AuthContext login called:', { email })
     const response = await authService.login(email, password)

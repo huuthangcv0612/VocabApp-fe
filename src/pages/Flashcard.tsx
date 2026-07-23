@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { SpeakerButton } from '../components/SpeakerButton'
 import { useVocabulary } from '../hooks/useApi'
 import '../styles/pages/flashcard.css'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -99,7 +100,10 @@ const Flashcard = () => {
                       >
                         <div className="flashcard-front">
                           <span className="card-label">WORT</span>
-                          <div className="card-content">{card.word}</div>
+                          <div className="card-content-row">
+                            <div className="card-content">{card.word}</div>
+                            <SpeakerButton word={card.word} />
+                          </div>
                         </div>
 
                         <div className="flashcard-back">
