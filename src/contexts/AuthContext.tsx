@@ -8,9 +8,14 @@ interface AuthContextValue {
   user: AuthUser | null
   token: string | null
   isAuthenticated: boolean
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string, passwordConfirm: string) => Promise<void>
   logout: () => void
+  verifyEmail: (token: string) => Promise<void>
+  forgotPassword: (email: string) => Promise<void>
+  resetPassword: (token: string, password: string, passwordConfirm: string) => Promise<void>
+  changePassword: (oldPassword: string, newPassword: string, confirmPassword: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -32,9 +37,35 @@ const getInitialUser = (): AuthUser | null => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(getInitialToken())
   const [user, setUser] = useState<AuthUser | null>(getInitialUser())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setAuthToken(token)
+  }, [token])
+
+  useEffect(() => {
+    const restoreSession = async () => {
+      if (!token) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const currentUser = await authService.getCurrentUser()
+        setUser(currentUser)
+        localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser))
+      } catch {
+        setToken(null)
+        setUser(null)
+        clearAuthToken()
+        localStorage.removeItem(STORAGE_TOKEN)
+        localStorage.removeItem(STORAGE_USER)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void restoreSession()
   }, [token])
 
   useEffect(() => {
@@ -61,13 +92,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const register = async (name: string, email: string, password: string, passwordConfirm: string) => {
     console.log('AuthContext register called:', { name, email })
-    const response = await authService.register(name, email, password, passwordConfirm)
-    console.log('AuthContext register response:', response)
-    setToken(response.token)
-    setUser(response.user)
-    localStorage.setItem(STORAGE_TOKEN, response.token)
-    localStorage.setItem(STORAGE_USER, JSON.stringify(response.user))
-    console.log('AuthContext register saved to storage')
+    await authService.register(name, email, password, passwordConfirm)
+    console.log('AuthContext register completed without auto-login')
   }
 
   const logout = () => {
@@ -78,16 +104,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearAuthToken()
   }
 
+  const verifyEmail = async (verifyToken: string) => {
+    await authService.verifyEmail(verifyToken)
+  }
+
+  const forgotPassword = async (email: string) => {
+    await authService.forgotPassword(email)
+  }
+
+  const resetPassword = async (resetToken: string, password: string, passwordConfirm: string) => {
+    await authService.resetPassword(resetToken, password, passwordConfirm)
+  }
+
+  const changePassword = async (oldPassword: string, newPassword: string, confirmPassword: string) => {
+    await authService.changePassword(oldPassword, newPassword, confirmPassword)
+  }
+
   const value = useMemo(
     () => ({
       user,
       token,
       isAuthenticated: Boolean(token),
+      loading,
       login,
       register,
       logout,
+      verifyEmail,
+      forgotPassword,
+      resetPassword,
+      changePassword,
     }),
-    [token, user],
+    [loading, token, user],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

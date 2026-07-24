@@ -6,20 +6,20 @@
 }
 
 .flashcard-main {
-  max-width: 900px;
+  max-width: 100vw;
   margin: 0 auto;
-  padding: 6rem 2rem 2rem;
+  padding: 1rem 2rem 2rem;
 }
 
 .back-button {
-  display: inline-flex;
+  display: inline-flex; 
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 2rem;
   color: #fbb81c;
   padding: 0.65rem 1rem;
   border: 1px solid rgba(251, 184, 28, 0.5);
-  border-radius: 0.5rem;
+  border-radius: 20px;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -40,6 +40,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .progress-text {
