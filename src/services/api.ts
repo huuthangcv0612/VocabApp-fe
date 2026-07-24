@@ -97,6 +97,21 @@ export interface ApiResponse<T> {
   error?: string
 }
 
+interface VocabularyListApiResponse {
+  success: boolean
+  message?: string
+  data?: {
+    vocabularies: Vocabulary[]
+    pagination?: {
+      page: number
+      limit: number
+      total: number
+      pages: number
+    }
+  }
+  error?: string
+}
+
 // API functions
 export const levelsApi = {
   getAll: async (): Promise<Level[]> => {
@@ -156,23 +171,13 @@ export const vocabularyApi = {
   },
 
   getByLektionId: async (lektionId: string): Promise<Vocabulary[]> => {
-    const response = await api.get('/vocabularies?limit=5000')
-    const responseData = response.data as {
-      success?: boolean
-      data?: {
-        vocabularies?: Vocabulary[]
-      } | Vocabulary[]
-      error?: string
+    const response = await api.get<VocabularyListApiResponse>(`/vocabularies?lektionId=${encodeURIComponent(lektionId)}`)
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Failed to fetch vocabulary for lektion')
     }
 
-    const allVocabularies: Vocabulary[] =
-      (responseData?.data as { vocabularies?: Vocabulary[] })?.vocabularies ||
-      (responseData?.data as Vocabulary[]) ||
-      (Array.isArray(responseData) ? responseData : [])
-
-    return allVocabularies.filter(
-      (vocab) => String(vocab.lektionId) === String(lektionId)
-    )
+    return response.data.data?.vocabularies ?? []
   },
 
   search: async (keyword: string): Promise<Vocabulary[]> => {
