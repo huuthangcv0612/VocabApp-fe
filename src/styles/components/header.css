@@ -76,6 +76,12 @@
   border: 1px solid #ff6b02;
 }
 
+.username {
+  color: #ff6b02;
+  font-weight: 600;
+  margin-right: 16px;
+}
+
 @media (max-width: 768px) {
   .header-container {
     flex-direction: column;

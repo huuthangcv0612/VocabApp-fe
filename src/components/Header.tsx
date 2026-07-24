@@ -8,7 +8,7 @@ type HeaderProps = {
 }
 
 const Header = ({ animate = false }: HeaderProps) => {
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -34,9 +34,9 @@ const Header = ({ animate = false }: HeaderProps) => {
 
         {isAuthenticated ? (
           <>
-            <NavLink to="/levels" className="btn-start">
-              Tiếp Tục Học
-            </NavLink>
+            <div>
+              Xin chào, <span className="username">{user?.name}</span>
+            </div>
             <button 
               onClick={handleLogout} 
               className="btn-start"
