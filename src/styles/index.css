@@ -1,3 +1,6 @@
+/* ===========================
+   Variables
+=========================== */
 :root {
   --color-primary: #11224E;
   --color-accent: #F87B1B;
@@ -8,17 +11,33 @@
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+}
+
+/* ===========================
+   Font
+=========================== */
+html, body {
+  font-family: var(--font-family);
+  color: var(--color-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-html, body {
+/* ===========================
+   Body
+=========================== */
+html,
+body {
   margin: 0;
   padding: 0;
+  width: 100%;
   height: 100%;
-  font-family: var(--font-family);
-  color: var(--color-primary);
-  background-color: #ffffff;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #EEEEEE;
 }
 
 #root {
@@ -27,6 +46,9 @@ html, body {
   text-align: auto;
 }
 
+/* ===========================
+   Global Reset
+=========================== */
 * {
   margin: 0;
   padding: 0;
@@ -57,18 +79,53 @@ button {
   }
 }
 
-
-html,
-body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-#root {
+/* ===========================
+   Container
+=========================== */
+.container {
   width: 100%;
+}
+
+/* ================= RESPONSIVE GLOBAL ================= */
+
+/* ===========================
+   TABLET
+=========================== */
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  h2 {
+    font-size: 30px;
+  }
+
+  .container {
+    padding: 0 24px;
+  }
+}
+
+/* ===========================
+   PHONE
+=========================== */
+@media screen and (max-width: 390px) {
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { FormInput } from '../../components/auth/FormInput'
+import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const Register = () => {
@@ -36,8 +38,8 @@ const Register = () => {
       return
     }
 
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.')
+    if (password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự.')
       setLoading(false)
       return
     }
@@ -50,13 +52,15 @@ const Register = () => {
 
     try {
       await register(trimmedName, trimmedEmail, password, passwordConfirm)
-      console.log('Register successful, navigating to home')
-      navigate('/', { replace: true })
+      toast.success('Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.')
+      console.log('Register successful, navigating to verify email pending state')
+      navigate('/verify-email/pending', { replace: true })
     } catch (err) {
       console.error('Register page catch error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Đăng ký thất bại'
       console.error('Setting error:', errorMessage)
       setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -71,52 +75,40 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-        <label className="auth-form__group">
-          <span className="auth-form__label">Họ tên</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            autoComplete="name"
-            className="auth-form__input"
-            required
-          />
-        </label>
-        <label className="auth-form__group">
-          <span className="auth-form__label">Email</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            className="auth-form__input"
-            required
-          />
-        </label>
-        <label className="auth-form__group">
-          <span className="auth-form__label">Mật khẩu</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="new-password"
-            minLength={6}
-            className="auth-form__input"
-            required
-          />
-        </label>
-        <label className="auth-form__group">
-          <span className="auth-form__label">Xác nhận mật khẩu</span>
-          <input
-            type="password"
-            value={passwordConfirm}
-            onChange={(e) => setPasswordConfirm(e.target.value)}
-            autoComplete="new-password"
-            minLength={6}
-            className="auth-form__input"
-            required
-          />
-        </label>
+        <FormInput
+          label="Họ tên"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoComplete="name"
+          required
+        />
+        <FormInput
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+        />
+        <FormInput
+          label="Mật khẩu"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
+          minLength={8}
+          required
+        />
+        <FormInput
+          label="Xác nhận mật khẩu"
+          type="password"
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          autoComplete="new-password"
+          minLength={8}
+          required
+        />
 
         {error && <p className="auth-form__error">{error}</p>}
 

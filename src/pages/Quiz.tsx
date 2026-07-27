@@ -2,6 +2,7 @@ import { useState, useMemo, type KeyboardEvent } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { SpeakerButton } from '../components/SpeakerButton'
 import { useVocabulary } from '../hooks/useApi'
 import '../styles/pages/quiz.css'
 
@@ -119,9 +120,12 @@ export default function Quiz() {
                 </div>
 
                 <div className="quiz-content">
-                  <h2 className="quiz-question">
-                    Nghĩa của từ <span className="highlight">"{currentQuestion.word}"</span> là gì?
-                  </h2>
+                  <div className="quiz-question-row">
+                    <h2 className="quiz-question">
+                      Nghĩa của từ <span className="highlight">"{currentQuestion.word}"</span> là gì?
+                    </h2>
+                    <SpeakerButton word={currentQuestion.word} />
+                  </div>
 
                   <div className="quiz-input-wrapper">
                     <input

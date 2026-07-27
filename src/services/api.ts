@@ -1,6 +1,12 @@
 import axios from 'axios'
 import type { AuthUser } from '../types/auth'
 
+const clearExpiredAuth = () => {
+  localStorage.removeItem('vocabapp_token')
+  localStorage.removeItem('vocabapp_user')
+  delete api.defaults.headers.common.Authorization
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
 const STORAGE_TOKEN_KEY = 'vocabapp_token'
 
@@ -34,6 +40,18 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      clearExpiredAuth()
+      window.dispatchEvent(new CustomEvent('auth:logout'))
+    }
+
+    return Promise.reject(error)
+  },
+)
 
 // Types for API responses
 export interface Level {
@@ -76,6 +94,21 @@ export interface ApiResponse<T> {
   success: boolean
   count?: number
   data: T[]
+  error?: string
+}
+
+interface VocabularyListApiResponse {
+  success: boolean
+  message?: string
+  data?: {
+    vocabularies: Vocabulary[]
+    pagination?: {
+      page: number
+      limit: number
+      total: number
+      pages: number
+    }
+  }
   error?: string
 }
 
@@ -138,23 +171,13 @@ export const vocabularyApi = {
   },
 
   getByLektionId: async (lektionId: string): Promise<Vocabulary[]> => {
-    const response = await api.get('/vocabularies?limit=5000')
-    const responseData = response.data as {
-      success?: boolean
-      data?: {
-        vocabularies?: Vocabulary[]
-      } | Vocabulary[]
-      error?: string
+    const response = await api.get<VocabularyListApiResponse>(`/vocabularies?lektionId=${encodeURIComponent(lektionId)}`)
+
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Failed to fetch vocabulary for lektion')
     }
 
-    const allVocabularies: Vocabulary[] =
-      (responseData?.data as { vocabularies?: Vocabulary[] })?.vocabularies ||
-      (responseData?.data as Vocabulary[]) ||
-      (Array.isArray(responseData) ? responseData : [])
-
-    return allVocabularies.filter(
-      (vocab) => String(vocab.lektionId) === String(lektionId)
-    )
+    return response.data.data?.vocabularies ?? []
   },
 
   search: async (keyword: string): Promise<Vocabulary[]> => {
@@ -247,13 +270,11 @@ export const authApi = {
     console.log('LOGIN RESPONSE:', response)
     console.log('LOGIN DATA:', response.data)
 
-    // Check if response indicates success: either HTTP 200/201 or success field is true
     const isSuccess = response.status === 200 || response.status === 201 || response.data.success === true
     if (!isSuccess) {
       throw new Error(response.data.error || response.data.message || 'Đăng nhập thất bại, vui lòng kiểm tra email và mật khẩu.')
     }
 
-    // Extract user data - might be in user or data field
     const user = response.data.user ?? response.data.data
     if (!user) {
       throw new Error('Đăng nhập thất bại: không nhận được dữ liệu user.')
@@ -263,6 +284,46 @@ export const authApi = {
       token: response.data.token || '',
       user,
     }
+  },
+
+  verifyEmail: async (token: string) => {
+    const response = await api.get<AuthResponse<null>>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+    if (!response.data.success) {
+      throw new Error(response.data.error || response.data.message || 'Xác thực email thất bại.')
+    }
+  },
+
+  forgotPassword: async (email: string) => {
+    const response = await api.post<AuthResponse<null>>('/auth/forgot-password', { email })
+    if (!response.data.success) {
+      throw new Error(response.data.error || response.data.message || 'Không thể gửi yêu cầu đặt lại mật khẩu.')
+    }
+  },
+
+  resetPassword: async (token: string, password: string, passwordConfirm: string) => {
+    const response = await api.post<AuthResponse<null>>('/auth/reset-password', { token, password, passwordConfirm })
+    if (!response.data.success) {
+      throw new Error(response.data.error || response.data.message || 'Không thể đặt lại mật khẩu.')
+    }
+  },
+
+  changePassword: async (oldPassword: string, newPassword: string, confirmPassword: string) => {
+    const response = await api.post<AuthResponse<null>>('/auth/change-password', {
+      oldPassword,
+      newPassword,
+      confirmPassword,
+    })
+    if (!response.data.success) {
+      throw new Error(response.data.error || response.data.message || 'Không thể đổi mật khẩu.')
+    }
+  },
+
+  getCurrentUser: async () => {
+    const response = await api.get<AuthResponse<AuthUser>>('/auth/me')
+    if (!response.data.success) {
+      throw new Error(response.data.error || response.data.message || 'Không thể lấy thông tin người dùng.')
+    }
+    return response.data
   },
 }
 

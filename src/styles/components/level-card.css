@@ -57,11 +57,11 @@
 }
 
 .card-button {
-  background-color: #003d82;
-  color: #ffffff;
+  background-color: #F87B1B;
+  color: #EEEEEE;
   padding: 1rem 1.5rem;
-  border: none;
-  border-radius: 0.5rem;
+  border: 1px solid #F87B1B;
+  border-radius: 7px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -73,8 +73,9 @@
 }
 
 .card-button:hover {
-  background-color: #ff6b02;
-  box-shadow: 0 4px 12px rgba(255, 107, 2, 0.3);
+  background-color: #FFFFFF;
+  border: 1px solid #F87B1B;
+  color:#F87B1B;
 }
 
 .button-icon {

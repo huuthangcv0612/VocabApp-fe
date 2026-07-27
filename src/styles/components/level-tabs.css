@@ -10,7 +10,7 @@
   padding: 0.75rem 2rem;
   background-color: transparent;
   color: #4a5568;
-  border: 2px solid #003d82;
+  border: 2px solid #F87B1B;
   border-radius: 2rem;
   font-size: 0.95rem;
   font-weight: 600;
@@ -24,10 +24,10 @@
 }
 
 .level-tab.active {
-  background-color: #003d82;
+  background-color: #F87B1B;
   color: #ffffff;
-  border-color: #003d82;
-  box-shadow: 0 4px 12px rgba(0, 61, 130, 0.3);
+  border-color: #F87B1B;
+  box-shadow: 0 4px 12px rgba(248, 123, 27, 0.3);
 }
 
 @media (max-width: 768px) {

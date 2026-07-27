@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { FormInput } from '../../components/auth/FormInput'
+import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const Login = () => {
@@ -33,8 +35,8 @@ const Login = () => {
       return
     }
 
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự.')
+    if (password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự.')
       setLoading(false)
       return
     }
@@ -42,6 +44,7 @@ const Login = () => {
     console.log('Login form submitted:', { email: trimmedEmail })
     try {
       await login(trimmedEmail, password)
+      toast.success('Đăng nhập thành công')
       console.log('Login successful, navigating to:', from)
       navigate(from, { replace: true })
     } catch (err) {
@@ -49,6 +52,7 @@ const Login = () => {
       const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại'
       console.error('Setting error:', errorMessage)
       setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -63,29 +67,23 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-        <label className="auth-form__group">
-          <span className="auth-form__label">Email</span>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            className="auth-form__input"
-            required
-          />
-        </label>
-        <label className="auth-form__group">
-          <span className="auth-form__label">Mật khẩu</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            minLength={6}
-            className="auth-form__input"
-            required
-          />
-        </label>
+        <FormInput
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          required
+        />
+        <FormInput
+          label="Mật khẩu"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
+          minLength={8}
+          required
+        />
 
         {error && <p className="auth-form__error">{error}</p>}
 
@@ -99,6 +97,10 @@ const Login = () => {
       </form>
 
       <p className="auth-form__footer">
+          <Link to="/forgot-password">Quên mật khẩu?</Link>
+        </p>
+
+        <p className="auth-form__footer">
           Chưa có tài khoản?{' '}
           <Link to="/register" className="font-semibold text-slate-900 hover:text-slate-700">
             Đăng ký ngay

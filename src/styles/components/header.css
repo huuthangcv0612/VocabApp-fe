@@ -15,7 +15,7 @@
 }
 
 .header-container {
-  max-width: 1200px;
+  width: 100vw;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -54,6 +54,9 @@
 .nav-link:hover {
   color: #ff6b02;
 }
+.nav-link.active {
+    color: #ff6b02;
+}
 
 .btn-start {
   background-color: #ff6b02;
@@ -71,6 +74,12 @@
 .btn-start:hover {
   background-color: #ff6b0200;
   border: 1px solid #ff6b02;
+}
+
+.username {
+  color: #ff6b02;
+  font-weight: 600;
+  margin-right: 16px;
 }
 
 @media (max-width: 768px) {

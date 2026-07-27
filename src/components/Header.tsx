@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { NavLink } from "react-router-dom";
 import { useNavigate } from 'react-router-dom'
 import '../styles/components/header.css'
 import useAuth from '../hooks/useAuth'
@@ -8,7 +8,7 @@ type HeaderProps = {
 }
 
 const Header = ({ animate = false }: HeaderProps) => {
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -19,24 +19,24 @@ const Header = ({ animate = false }: HeaderProps) => {
   return (
     <header className={`header ${animate ? 'header--animated' : ''}`}>
       <div className="header-container">
-        <Link to="/" className="logo">
+        <NavLink to="/" className="logo">
           <span className="logo-text">DeutschUp</span>
-        </Link>
-        
+        </NavLink>
+
         <nav className="nav-menu">
-          <Link to="/levels" className="nav-link">
+          <NavLink to="/levels" className="nav-link">
             Trình Độ
-          </Link>
-          <Link to="/classroom" className="nav-link">
+          </NavLink>
+          <NavLink to="/interactive-room" className="nav-link">
             Phòng Học Tương Tác
-          </Link>
+          </NavLink>
         </nav>
 
         {isAuthenticated ? (
           <>
-            <Link to="/levels" className="btn-start">
-              Tiếp Tục Học
-            </Link>
+            <div>
+              Xin chào, <span className="username">{user?.name}</span>
+            </div>
             <button 
               onClick={handleLogout} 
               className="btn-start"
@@ -47,12 +47,12 @@ const Header = ({ animate = false }: HeaderProps) => {
           </>
         ) : (
           <>
-            <Link to="/login" className="btn-start">
+            <NavLink to="/login" className="btn-start">
               Đăng Nhập
-            </Link>
-            <Link to="/register" className="btn-start" style={{ marginLeft: '1rem' }}>
+            </NavLink>
+            <NavLink to="/register" className="btn-start" style={{ marginLeft: '1rem' }}>
               Đăng Ký
-            </Link>
+            </NavLink>
           </>
         )}
       </div>
