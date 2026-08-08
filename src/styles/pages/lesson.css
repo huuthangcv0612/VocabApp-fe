@@ -1,11 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&display=swap');
+
 .lesson {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0f172a 0%, #1a202c 100%);
+  background: transparent;
 }
 
 .lesson-section {
-  padding: 4rem 2rem;
-  padding-top: 0;
+  padding: 3rem 2rem 4rem;
 }
 
 .lesson-container {
@@ -23,11 +24,11 @@
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(251, 184, 28, 0.15);
-  border: 1px solid rgba(251, 184, 28, 0.3);
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   padding: 0.75rem 1.5rem;
-  border-radius: 2rem;
-  backdrop-filter: blur(10px);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .badge-icon {
@@ -35,118 +36,174 @@
 }
 
 .badge-text {
-  color: #fbb81c;
-  font-size: 0.875rem;
-  font-weight: 600;
+  color: #2A63E8;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .lesson-title {
   font-size: 3.5rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 800;
+  color: #1E293B;
   text-align: center;
   margin: 0 0 1.5rem 0;
   line-height: 1.2;
+  font-family: 'Fredoka', 'Comic Neue', system-ui, sans-serif;
 }
 
 .lesson-title .highlight {
-  color: #fbb81c;
+  color: #D90000;
 }
 
 .lesson-description {
-  font-size: 1rem;
-  color: #b0b8c1;
+  font-size: 1.05rem;
+  color: #475569;
   text-align: center;
-  max-width: 700px;
+  max-width: 720px;
   margin: 0 auto 4rem;
   line-height: 1.7;
+  font-weight: 500;
 }
 
 .tools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 3rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.2rem;
+  margin-bottom: 3.5rem;
 }
 
 .tool-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 2rem;
+  position: relative;
+  background-color: #2A63E8; /* Blue card default */
+  border-radius: 2rem;
+  padding: 3rem 2rem 2.2rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  min-height: 320px;
-  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  align-items: center;
+  text-align: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 340px;
+  box-shadow: 0 10px 30px rgba(42, 99, 232, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  margin-top: 1.5rem;
+  border: none;
+}
+
+/* 2nd Card (Quiz) is Red */
+.tools-grid > :nth-child(2) {
+  background-color: #D90000;
+  box-shadow: 0 10px 30px rgba(217, 0, 0, 0.25);
 }
 
 .tool-card:hover {
-  transform: translateY(-6px);
-  border-color: rgba(251, 184, 28, 0.4);
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
 }
 
+/* Floating Top Icon Badge using SVG Assets */
 .tool-icon {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
+  width: 72px;
+  height: 52px;
+  border-radius: 9999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(251, 184, 28, 0.14);
-  color: #fbb81c;
-  font-size: 1.5rem;
+  background-color: #FFFFFF;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 32px 32px;
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  margin: 0;
+  z-index: 2;
+  font-size: 0; /* Hide raw emoji text */
+}
+
+/* Use SVG Assets for Card Icons */
+.tools-grid > :nth-child(1) .tool-icon {
+  background-image: url('../../assets/Icon-plane.svg');
+}
+
+.tools-grid > :nth-child(2) .tool-icon {
+  background-image: url('../../assets/Icon-book.svg');
+}
+
+.tools-grid > :nth-child(3) .tool-icon {
+  background-image: url('../../assets/Icon-pencil.svg');
 }
 
 .tool-label {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-family: 'Fredoka', 'Comic Neue', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 .tool-description {
-  color: #cbd5e1;
-  line-height: 1.75;
+  color: #FFFFFF;
+  opacity: 0.95;
+  line-height: 1.65;
+  font-size: 0.95rem;
   flex: 1;
+  margin: 0;
 }
 
 .tool-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.4rem;
-  background: linear-gradient(135deg, #fbb81c 0%, #ffb00f 100%);
-  color: #0f172a;
+  padding: 0.7rem 1.8rem;
+  background: #D90000; /* Red button on blue card */
+  color: #FFFFFF;
   text-decoration: none;
-  border-radius: 999px;
+  border-radius: 9999px;
   font-weight: 700;
-  transition: transform 0.2s ease;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 0.5rem;
+}
+
+/* White button on Red Card (Quiz) */
+.tools-grid > :nth-child(2) .tool-button {
+  background: #FFFFFF;
+  color: #D90000;
 }
 
 .tool-button:hover {
-  transform: scale(1.03);
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  opacity: 0.98;
 }
 
 .back-button {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #F87B1B;
+  color: #2A63E8;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 2rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 9999px;
   transition: all 0.3s ease;
   border: none;
-  background: none;
+  background: #FFFFFF;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .back-button:hover {
-  background-color: rgba(251, 184, 28, 0.1);
+  background-color: #F0F4FF;
   transform: translateX(-4px);
 }
 
@@ -162,8 +219,10 @@
 
   .tools-grid {
     grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 }
+
 
 @media (max-width: 768px) {
   .lesson-section {

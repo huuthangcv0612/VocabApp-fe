@@ -38,3 +38,11 @@ coverage
 # Vite generated files
 vite.config.js
 vite.config.d.ts
+
+# MongoDB installers
+src/assets/mongodb-compass-*.exe
+src/assets/mongosh-*.zip
+src/assets/mongosh-*.msi
+
+# TypeScript build info
+*.tsbuildinfo

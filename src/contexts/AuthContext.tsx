@@ -9,7 +9,7 @@ interface AuthContextValue {
   token: string | null
   isAuthenticated: boolean
   loading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<AuthUser>
   register: (name: string, email: string, password: string, passwordConfirm: string) => Promise<void>
   logout: () => void
   verifyEmail: (token: string) => Promise<void>
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('auth:logout', handleLogout)
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthUser> => {
     console.log('AuthContext login called:', { email })
     const response = await authService.login(email, password)
     console.log('AuthContext login response:', response)
@@ -88,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(STORAGE_TOKEN, response.token)
     localStorage.setItem(STORAGE_USER, JSON.stringify(response.user))
     console.log('AuthContext login saved to storage')
+    return response.user
   }
 
   const register = async (name: string, email: string, password: string, passwordConfirm: string) => {

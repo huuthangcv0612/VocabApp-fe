@@ -7,9 +7,9 @@ import { useLevels, useLektions } from '../hooks/useApi'
 import '../styles/pages/levels.css'
 
 const LEVEL_GROUPS = [
-  { key: 'A1', label: 'Trình Độ A1' },
-  { key: 'A2', label: 'Trình Độ A2' },
-  { key: 'B1', label: 'Trình Độ B1' },
+  { key: 'A1', label: 'Level A1' },
+  { key: 'A2', label: 'Level A2' },
+  { key: 'B1', label: 'Level B1' },
 ]
 
 const getIconByLevel = (levelName: string) => {
@@ -48,9 +48,9 @@ const Levels = () => {
 
       <section className="levels-section">
         <div className="levels-container">
-          <h1 className="levels-title">Chọn Cấp Độ Của Bạn</h1>
+          <h1 className="levels-title">Choose Your Level</h1>
           <p className="levels-description">
-            Bắt đầu hành trình chinh phục tiếng Đức từ những bước chân đầu tiên. Lựa chọn lộ trình phù hợp để thăng tiến trình độ ngôn ngữ của bạn.
+            Start your journey to mastering German from the very beginning. Choose the learning path that best suits your current level and helps you progress in your language-learning journey.
           </p>
 
           <div className="levels-tabs-wrapper">
@@ -62,10 +62,10 @@ const Levels = () => {
             />
           </div>
 
-          {levelsLoading && <p className="status-text">Đang tải cấp độ...</p>}
-          {levelsError && <p className="status-text error">Lỗi: {levelsError}</p>}
+          {levelsLoading && <p className="status-text">Loading levels...</p>}
+          {levelsError && <p className="status-text error">Error: {levelsError}</p>}
           {!levelsLoading && !levelsError && currentLevels.length === 0 && (
-            <p className="status-text">Không có cấp độ trong nhóm này.</p>
+            <p className="status-text">No levels available in this group.</p>
           )}
 
           <div className="levels-grid">
@@ -74,7 +74,7 @@ const Levels = () => {
                 key={level._id}
                 level={{
                   id: level._id,
-                  title: `Cấp Độ ${level.level_name}`,
+                  title: `Level ${level.level_name}`,
                   description: level.description,
                   lessonCount: lektionCounts[level._id] ?? 0,
                   icon: getIconByLevel(level.level_name),

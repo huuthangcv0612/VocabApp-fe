@@ -1,108 +1,141 @@
 import { Link } from 'react-router-dom'
 import '../styles/components/footer.css'
 
+import CloudIcon from '../assets/Cloud.svg'
+import FooterKid from '../assets/Footer-Kid.svg'
+import AirBalloonIcon from '../assets/Icon-AirBollon.svg'
+import SunIcon from '../assets/Icon-Sun.svg'
+import PlaneIcon from '../assets/Icon-plane.svg'
+
 const Footer = () => {
   return (
     <footer className="footer">
-      <div className="footer-content">
-        <div className="footer-container">
-          {/* Brand Section */}
-          <div className="footer-section brand">
-            <h3 className="footer-logo">DeutschUp</h3>
-            <p className="footer-description">
-              Khám phá tinh hoa ngôn ngữ và văn hóa Đức cùng lộ trình học tập hiện đại, giúp bạn làm chủ tương lai và vượt xa trên con đường sự nghiệp quốc tế.
-            </p>
-            <div className="social-links">
-              <a href="https://www.facebook.com/duhocbkt" className="social-icon" title="Facebook">
-                f
-              </a>
-              <a href="https://twitter.com" className="social-icon" title="Twitter">
-                𝕏
-              </a>
-              <a href="https://instagram.com" className="social-icon" title="Instagram">
-                📷
-              </a>
+      {/* Top Scalloped Wave Border */}
+      <div className="footer-wave"></div>
+
+      {/* Sky Blue Section */}
+      <div className="footer-sky-section">
+        {/* Floating Sky SVGs */}
+        <img src={CloudIcon} alt="" className="sky-deco deco-cloud-1" />
+        <img src={CloudIcon} alt="" className="sky-deco deco-cloud-2" />
+        <img src={CloudIcon} alt="" className="sky-deco deco-cloud-3" />
+        <img src={CloudIcon} alt="" className="sky-deco deco-cloud-4" />
+        <img src={CloudIcon} alt="" className="sky-deco deco-cloud-5" />
+
+        <img src={SunIcon} alt="Sun" className="sky-deco deco-sun" />
+        <img src={AirBalloonIcon} alt="Hot Air Balloon" className="sky-deco deco-balloon" />
+        <img src={PlaneIcon} alt="Paper Plane" className="sky-deco deco-plane" />
+
+        {/* White Inner Card */}
+        <div className="footer-card">
+          <div className="footer-card-top">
+            {/* Kid Illustration */}
+            <div className="footer-kid-wrapper">
+              <img src={FooterKid} alt="DeutschUp Kid" className="footer-kid-img" />
             </div>
-          </div>
 
-          {/* Navigation Section */}
-          <div className="footer-section">
-            <h4 className="footer-section-title">ĐIỀU HƯỚNG</h4>
-            <ul className="footer-links">
-              <li>
-                <Link to="/levels">Trình Độ</Link>
-              </li>
-              <li>
-                <Link to="/">Phòng Học Tương Tác AI</Link>
-              </li>
-            </ul>
-          </div>
+            {/* Nav Columns & Contact */}
+            <div className="footer-nav-content">
+              <div className="footer-nav-columns">
+                <div className="footer-col">
+                  <Link to="/" className="footer-link">Home</Link>
+                  <Link to="/" className="footer-link">About</Link>
+                  <Link to="/interactive-room" className="footer-link">Admissions</Link>
+                  <Link to="/levels" className="footer-link">Programs</Link>
+                </div>
 
-          {/* Support Section */}
-          <div className="footer-section">
-            <h4 className="footer-section-title">HỖ TRỢ HỌC VIÊN</h4>
-            <ul className="footer-links">
-              <li>
-                <a href="#faq">Câu hỏi thường gặp</a>
-              </li>
-              <li>
-                <a href="#roadmap">Lộ trình học tập</a>
-              </li>
-              <li>
-                <a href="#security">Chính sách bảo mật</a>
-              </li>
-              <li>
-                <a href="#services">Điều khoản dịch vụ</a>
-              </li>
-            </ul>
-          </div>
+                <div className="footer-col">
+                  <Link to="/levels" className="footer-link">Tuition</Link>
+                  <Link to="/interactive-room" className="footer-link">Parent Resources</Link>
+                  <Link to="/levels" className="footer-link">Teachers</Link>
+                  <Link to="/levels" className="footer-link">Gallery</Link>
+                </div>
 
-          {/* Contact Section */}
-          <div className="footer-section">
-            <h4 className="footer-section-title">LIÊN HỆ</h4>
-            <div className="contact-items">
-              <div className="contact-item">
-                <span className="contact-icon">📍</span>
-                <span className="contact-text">60B Nguyễn Huy Tưởng, Hà Nội</span>
+                <div className="footer-col">
+                  <a href="#faq" className="footer-link">FAQ</a>
+                  <a href="#careers" className="footer-link">Careers</a>
+                  <a href="#news" className="footer-link">News</a>
+                  <a href="#contact" className="footer-link">Contact</a>
+                </div>
               </div>
-              <div className="contact-item">
-                <span className="contact-icon">📞</span>
-                <a href="tel:0987654321" className="contact-text">0938.862.186</a>
-              </div>
-              <div className="contact-item">
-                <span className="contact-icon">🌐</span>
-                <a href="https://www.bkt.edu.vn/" className="contact-text" target="_blank" rel="noopener noreferrer">
-                  https://www.bkt.edu.vn/
+
+              {/* Social Icons & Email */}
+              <div className="footer-social-row">
+                <div className="social-icons">
+                  <a
+                    href="https://linkedin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn"
+                    title="LinkedIn"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                    </svg>
+                  </a>
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn"
+                    title="Instagram"
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#FFFFFF"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </a>
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="social-btn"
+                    title="Facebook"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF">
+                      <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H7.5v-3H10V9.5C10 7.01 11.49 5.6 13.78 5.6c1.1 0 2.25.2 2.25.2v2.47h-1.27c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.45 3h-2.33v6.8c4.56-.93 8-4.96 8-9.8z" />
+                    </svg>
+                  </a>
+                </div>
+
+                <a href="mailto:hello@deutschup.com" className="footer-email">
+                  huuthang.cv0612@gmail.com
                 </a>
               </div>
             </div>
           </div>
 
-          {/* Map Section */}
-          <div className="footer-section map-section">
-            <h4 className="footer-section-title">VỊ TRÍ</h4>
-            <div className="map-container">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.840665254526!2d105.80410577605198!3d20.999023180642922!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac97ec1852a7%3A0xc52e8c9935768f5f!2zNjBCIE5ndXnhu4VuIEh1eSBUxrDhu59uZywgVGhhbmggWHXDom4gVHJ1bmcsIFRoYW5oIFh1w6JuLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1775279272826!5m2!1svi!2s"
-                width="100%"
-                height="200"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="DeutschUp Location"
-              ></iframe>
+          {/* Card Bottom: DeutschUp Red Logo & Legal Links */}
+          <div className="footer-card-bottom">
+            <div className="footer-brand-logo">
+              DeutschUp
+            </div>
+
+            <div className="footer-bottom-meta">
+              <div className="footer-legal-links">
+                <a href="#terms">Term & Condition</a>
+                <a href="#privacy">Privacy Policy</a>
+              </div>
+              <div className="footer-copyright-text">
+                © 2026 DeutschUp
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Copyright Section */}
-      <div className="footer-copyright">
-        <p>© 2026 DeutschUp. TẤT CẢ QUYỀN ĐƯỢC BẢO LƯU. Version1.0.0</p>
       </div>
     </footer>
   )
 }
 
 export default Footer
+

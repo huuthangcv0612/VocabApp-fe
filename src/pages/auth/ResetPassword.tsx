@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
@@ -16,6 +16,12 @@ const ResetPassword = () => {
 
   const token = useMemo(() => searchParams.get('token') ?? '', [searchParams])
 
+  useEffect(() => {
+    if (!token) {
+      setError('Link đặt lại mật khẩu không hợp lệ.')
+    }
+  }, [token])
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
@@ -32,7 +38,7 @@ const ResetPassword = () => {
     }
 
     if (password !== passwordConfirm) {
-      setError('Mật khẩu và xác nhận mật khẩu phải trùng khớp.')
+      setError('Mật khẩu xác nhận không khớp.')
       return
     }
 
@@ -44,7 +50,13 @@ const ResetPassword = () => {
       setSuccess('Mật khẩu đã được thay đổi. Bạn có thể đăng nhập lại ngay.')
       setTimeout(() => navigate('/login', { replace: true }), 1200)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Không thể đặt lại mật khẩu.'
+      const rawMessage = err instanceof Error ? err.message : 'Không thể đặt lại mật khẩu.'
+      let errorMessage = rawMessage
+      if (rawMessage.toLowerCase().includes('expired')) {
+        errorMessage = 'Link đặt lại mật khẩu đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu lại.'
+      } else if (rawMessage.includes('Invalid or expired reset token') || rawMessage.toLowerCase().includes('invalid')) {
+        errorMessage = 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng yêu cầu đặt lại mật khẩu lại.'
+      }
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -69,6 +81,7 @@ const ResetPassword = () => {
             autoComplete="new-password"
             minLength={8}
             required
+            disabled={!token}
           />
           <FormInput
             label="Xác nhận mật khẩu"
@@ -78,12 +91,13 @@ const ResetPassword = () => {
             autoComplete="new-password"
             minLength={8}
             required
+            disabled={!token}
           />
 
           {error ? <p className="auth-form__error">{error}</p> : null}
           {success ? <p className="auth-form__error" style={{ background: '#dcfce7', color: '#166534' }}>{success}</p> : null}
 
-          <button type="submit" disabled={loading} className="auth-form__submit">
+          <button type="submit" disabled={loading || !token} className="auth-form__submit">
             {loading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
           </button>
         </form>

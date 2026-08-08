@@ -20,16 +20,16 @@ const LevelDetail = () => {
         <div className="levels-container">
           <Link to="/levels" className="back-button">
             <span className="back-icon">←</span>
-            Quay Lại chọn cấp độ
+            Return to Levels
           </Link>
 
           <h1 className="levels-title">{levelTitle}</h1>
           <p className="levels-description">
-            Chọn bài học phù hợp trong cấp độ này và tiếp tục hành trình học từ vựng tiếng Đức.
+            Choose the lessons that fit your level and continue your journey in learning German vocabulary.
           </p>
 
-          {loading && <p className="status-text">Đang tải bài học...</p>}
-          {error && <p className="status-text error">Lỗi: {error}</p>}
+          {loading && <p className="status-text">Loading lessons...</p>}
+          {error && <p className="status-text error">Error: {error}</p>}
 
           <div className="levels-grid">
             {lektions.map((lektion) => {
@@ -42,9 +42,9 @@ const LevelDetail = () => {
                 <div key={lektion._id} className="level-card">
                   <div className="card-icon">📘</div>
                   <h3 className="card-title">{displayTitle}</h3>
-                  <p className="card-description">{count} từ vựng </p>
+                  <p className="card-description">{count} vocabulary words </p>
                   <Link to={`/lektion/${lektion._id}`} className="card-button">
-                    Xem bài học
+                    View Lesson
                   </Link>
                 </div>
               )

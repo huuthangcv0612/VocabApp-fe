@@ -2,8 +2,11 @@
    Variables
 =========================== */
 :root {
-  --color-primary: #11224E;
-  --color-accent: #F87B1B;
+  --color-primary: #D90000;
+  --color-secondary: #2A63E8;
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --color-accent: #FFF2B7;
   --color-light: #EEEEEE;
   --color-dark: #080616;
   --color-gray: #4a5568;
@@ -37,7 +40,7 @@ body {
 body {
   min-width: 320px;
   min-height: 100vh;
-  background-color: #EEEEEE;
+  background-color: var(--color-accent);
 }
 
 #root {
@@ -69,22 +72,33 @@ button {
   font-family: inherit;
   cursor: pointer;
   border: none;
-  background: none;
+  background: var(--color-primary);
+  padding: 18px 13px;
+  border-radius: 999px;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--color-primary);
-    background-color: #ffffff;
+    background-color: var(--color-accent);
   }
 }
 
 /* ===========================
    Container
 =========================== */
-.container {
+.container,
+[class*="-container"] {
   width: 100%;
+  background: transparent;
+  background-color: transparent;
 }
+
+/* Ngoại lệ giữ màu đỏ capsule cho Header */
+.header-container {
+  background-color: #D90000;
+}
+
 
 /* ================= RESPONSIVE GLOBAL ================= */
 

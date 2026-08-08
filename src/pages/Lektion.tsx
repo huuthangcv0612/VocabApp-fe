@@ -21,57 +21,57 @@ const Lektion = () => {
           <div className="badge-section">
             <div className="badge">
               <span className="badge-icon">📚</span>
-              <span className="badge-text">Chọn Chế Độ Học</span>
+              <span className="badge-text">Choose Learning Mode</span>
             </div>
           </div>
 
           <h1 className="lesson-title">
-            Công Cụ Học Tập <span className="highlight">Đột Phá</span>
+            Learning Tools <span className="highlight">Breakthrough</span>
           </h1>
 
           <p className="lesson-description">
-            Hệ thống bài tập tương tác đa dạng giúp bạn ghi nhớ từ vựng và ngữ pháp tiếng Đức một cách tự nhiên, hiệu quả và không bao giờ nhàm chán.
+            A diverse range of interactive exercises helps you memorize German vocabulary and grammar naturally, effectively, and never boring.
           </p>
 
           <div className="tools-grid">
             <div className="tool-card">
               <div className="tool-icon">🃏</div>
-              <div className="tool-label">Ôn Tập Flashcard</div>
+              <div className="tool-label">Flashcard</div>
               <p className="tool-description">
-                Học từ vựng hiệu quả với thẻ ghi nhớ 2 mặt. Mặt trước tiếng Đức, mặt sau giải nghĩa tiếng Việt kèm ví dụ minh họa sinh động.
+                Learn vocabulary effectively with double-sided flashcards. Front side in German, back side with Vietnamese translation and illustrative examples.
               </p>
               <Link to={`/flashcard/${lektionId}`} className="tool-button">
-                Bắt Đầu Flashcard
+                Start Flashcard
               </Link>
             </div>
 
             <div className="tool-card">
               <div className="tool-icon">📝</div>
-              <div className="tool-label">Kiểm Tra Nhanh (Quiz)</div>
+              <div className="tool-label">Quiz</div>
               <p className="tool-description">
-                Đánh giá ngay lập tức mức độ ghi nhớ với hệ thống nhập liệu. Phản hồi đúng/sai tức thì với hiệu ứng trực quan giúp khắc sâu trí nhớ.
+                Get instant feedback on your memory with our input system. Immediate correct/incorrect feedback with visual effects to reinforce learning.
               </p>
               <Link to={`/quiz/${lektionId}`} className="tool-button">
-                Bắt Đầu Quiz
+                Start Quiz
               </Link>
             </div>
 
             <div className="tool-card">
               <div className="tool-icon">🎯</div>
-              <div className="tool-label">Vòng Quay Từ Vựng</div>
+              <div className="tool-label">Spin Wheel</div>
               <p className="tool-description">
-                Thử thách phản xạ với vòng quay ngẫu nhiên. Khi vòng quay dừng lại ở một từ, bạn sẽ thử hành đặt câu thực tế với từ đó.
+                Test your reflexes with the random spin wheel. When the wheel stops on a word, you will practice forming real sentences with that word.
               </p>
               <Link to={`/spinwheel/${lektionId}`} className="tool-button">
-                Bắt Đầu Vòng Quay
+                Start Spin Wheel
               </Link>
             </div>
           </div>
 
-          {loading && <p className="status-text">Đang tải từ vựng...</p>}
-          {error && <p className="status-text error">Lỗi: {error}</p>}
+          {loading && <p className="status-text">Loading vocabulary...</p>}
+          {error && <p className="status-text error">Error: {error}</p>}
           {!loading && !error && vocabulary.length === 0 && (
-            <p className="status-text">Chưa có từ vựng cho bài học này.</p>
+            <p className="status-text">No vocabulary available for this lesson.</p>
           )}
         </div>
       </section>
