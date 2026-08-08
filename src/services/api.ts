@@ -158,6 +158,20 @@ export const lektionsApi = {
 
 export const vocabularyApi = {
   getAll: async (): Promise<Vocabulary[]> => {
+    try {
+      const response = await api.get<any>('/vocabularies')
+      if (response.data.success) {
+        if (Array.isArray(response.data.data)) {
+          return response.data.data
+        }
+        if (response.data.data?.vocabularies && Array.isArray(response.data.data.vocabularies)) {
+          return response.data.data.vocabularies
+        }
+      }
+    } catch {
+      // Fallback to legacy endpoint if /vocabularies is unavailable
+    }
+
     const response = await api.get<ApiResponse<Vocabulary>>('/vocabulary')
     if (!response.data.success) {
       throw new Error(response.data.error || 'Failed to fetch vocabulary')
@@ -301,7 +315,12 @@ export const authApi = {
   },
 
   resetPassword: async (token: string, password: string, passwordConfirm: string) => {
-    const response = await api.post<AuthResponse<null>>('/auth/reset-password', { token, password, passwordConfirm })
+    const response = await api.post<AuthResponse<null>>('/auth/reset-password', {
+      token,
+      password,
+      confirmPassword: passwordConfirm,
+      passwordConfirm,
+    })
     if (!response.data.success) {
       throw new Error(response.data.error || response.data.message || 'Không thể đặt lại mật khẩu.')
     }

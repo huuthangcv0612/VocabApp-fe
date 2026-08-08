@@ -1,42 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&display=swap');
+
 .level-card {
-  background-color: #ffffff;
-  border-radius: 1rem;
-  padding: 2rem;
+  position: relative;
+  background-color: #2A63E8; /* Blue card default */
+  border-radius: 2rem;
+  padding: 3rem 2rem 2rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(42, 99, 232, 0.25);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-top: 1.5rem; /* Space for floating top icon */
+  border: none;
+}
+
+/* Alternate Red Card for middle / even cards */
+.levels-grid > :nth-child(even) .level-card,
+.level-card:nth-child(even) {
+  background-color: #D90000;
+  box-shadow: 0 10px 30px rgba(217, 0, 0, 0.25);
 }
 
 .level-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 61, 130, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
 }
 
+/* Floating Top Icon Badge */
 .card-icon {
-  font-size: 3rem;
+  font-size: 2.2rem;
   line-height: 1;
-  width: 80px;
-  height: 80px;
-  background-color: #f5f7fa;
-  border-radius: 1rem;
+  width: 72px;
+  height: 52px;
+  background-color: #FFFFFF;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  margin: 0;
+  z-index: 2;
 }
 
 .card-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #003d82;
-  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  font-family: 'Fredoka', 'Comic Neue', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 .card-description {
-  font-size: 0.9rem;
-  color: #4a5568;
+  font-size: 0.95rem;
+  color: #FFFFFF;
+  opacity: 0.95;
   line-height: 1.6;
   margin: 0;
   flex-grow: 1;
@@ -47,53 +74,65 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-size: 0.95rem;
-  color: #003d82;
-  font-weight: 600;
+  font-size: 1.15rem;
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 .vocabulary-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
+/* Card Action Pill Button */
 .card-button {
-  background-color: #F87B1B;
-  color: #EEEEEE;
-  padding: 1rem 1.5rem;
-  border: 1px solid #F87B1B;
-  border-radius: 7px;
+  background-color: #D90000; /* Red button on blue card */
+  color: #FFFFFF;
+  padding: 0.7rem 1.8rem;
+  border: none;
+  border-radius: 9999px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
+  transition: all 0.25s ease;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* White button on Red Card */
+.levels-grid > :nth-child(even) .card-button,
+.level-card:nth-child(even) .card-button {
+  background-color: #FFFFFF;
+  color: #D90000;
 }
 
 .card-button:hover {
-  background-color: #FFFFFF;
-  border: 1px solid #F87B1B;
-  color:#F87B1B;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  opacity: 0.95;
 }
 
 .button-icon {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
   .level-card {
-    padding: 1.5rem;
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
   }
 
   .card-title {
-    font-size: 1.1rem;
+    font-size: 1.35rem;
   }
 
   .card-icon {
-    width: 70px;
-    height: 70px;
-    font-size: 2.5rem;
+    width: 64px;
+    height: 46px;
+    font-size: 1.8rem;
+    top: -23px;
   }
 }
+

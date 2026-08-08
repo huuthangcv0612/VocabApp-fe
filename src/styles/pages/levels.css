@@ -1,7 +1,7 @@
 .levels {
   padding-top: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #e9eff9 0%, #ffffff 60%);
+  background: transparent;
 }
 
 .levels-section {

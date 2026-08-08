@@ -10,16 +10,20 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login, isAuthenticated } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: Location })?.from?.pathname || '/'
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate(from, { replace: true })
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') {
+        navigate('/admin', { replace: true })
+      } else {
+        navigate(from, { replace: true })
+      }
     }
-  }, [from, isAuthenticated, navigate])
+  }, [from, isAuthenticated, user, navigate])
 
   const validateEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
@@ -43,10 +47,16 @@ const Login = () => {
 
     console.log('Login form submitted:', { email: trimmedEmail })
     try {
-      await login(trimmedEmail, password)
+      const loggedUser = await login(trimmedEmail, password)
       toast.success('Đăng nhập thành công')
-      console.log('Login successful, navigating to:', from)
-      navigate(from, { replace: true })
+
+      if (loggedUser?.role === 'admin') {
+        console.log('Admin login successful, navigating to /admin')
+        navigate('/admin', { replace: true })
+      } else {
+        console.log('User login successful, navigating to:', from)
+        navigate(from, { replace: true })
+      }
     } catch (err) {
       console.error('Login page catch error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại'
