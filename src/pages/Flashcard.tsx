@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { SpeakerButton } from '../components/SpeakerButton'
 import { useVocabulary } from '../hooks/useApi'
+import { progressApi } from '../services/api'
 import '../styles/pages/flashcard.css'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { EffectCards } from 'swiper/modules'
@@ -18,22 +20,26 @@ const Flashcard = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [learned, setLearned] = useState<string[]>([])
+  const [isCompleted, setIsCompleted] = useState(false)
   const swiperRef = useRef<SwiperType | null>(null)
 
   useEffect(() => {
     setCurrentIndex(0)
     setIsFlipped(false)
     setLearned([])
+    setIsCompleted(false)
   }, [lektionId])
 
   const currentCard = vocabulary[currentIndex]
-  const progress = vocabulary.length > 0 ? ((currentIndex + 1) / vocabulary.length) * 100 : 0
+  const learnedCount = learned.length
+  const totalCount = vocabulary.length
+  const calculatedPercentage = totalCount > 0 ? Math.round((learnedCount / totalCount) * 100) : 0
 
   const handleNext = () => {
-  if (currentIndex < vocabulary.length - 1) {
-    swiperRef.current?.slideNext()
+    if (currentIndex < vocabulary.length - 1) {
+      swiperRef.current?.slideNext()
+    }
   }
-}
 
   const handlePrev = () => {
     if (currentIndex > 0) {
@@ -42,11 +48,34 @@ const Flashcard = () => {
     }
   }
 
-  const handleMarkLearned = () => {
-    if (!currentCard) return
-    if (!learned.includes(currentCard._id)) {
-      setLearned([...learned, currentCard._id])
+  const handleMarkLearned = async () => {
+    if (!currentCard || !lektionId) return
+    const cardId = currentCard._id
+    
+    let updatedLearned = learned
+    if (!learned.includes(cardId)) {
+      updatedLearned = [...learned, cardId]
+      setLearned(updatedLearned)
+
+      // Step 4: POST /api/progress/lektion/:lektionId/learn-word
+      try {
+        await progressApi.learnWord(lektionId, cardId)
+      } catch (err) {
+        console.error('Error learning word:', err)
+      }
     }
+
+    // Step 5: Check if all words learned
+    if (updatedLearned.length >= totalCount && totalCount > 0 && !isCompleted) {
+      setIsCompleted(true)
+      try {
+        await progressApi.completeLektion(lektionId)
+        toast.success('Chúc mừng! Bạn đã hoàn thành Lektion này! 🎉')
+      } catch (err) {
+        console.error('Error completing lektion:', err)
+      }
+    }
+
     handleNext()
   }
 
@@ -56,7 +85,7 @@ const Flashcard = () => {
 
       <main className="flashcard-main">
         <Link to={`/lektion/${lektionId}`} className="back-button">
-          ← Quay lại
+          ← Quay lại bài học
         </Link>
 
         <div className="flashcard-container">
@@ -68,12 +97,19 @@ const Flashcard = () => {
 
           {vocabulary.length > 0 && currentCard && (
             <>
+              {/* Bước 4: Progress Indicator */}
               <div className="progress-section">
-                <div className="progress-text">
-                  Thẻ {currentIndex + 1} / {vocabulary.length}
+                <div className="progress-text" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>
+                    Thẻ {currentIndex + 1} / {vocabulary.length} ({learnedCount} / {vocabulary.length} đã học)
+                  </span>
+                  <span>{calculatedPercentage}%</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${progress}%` }} />
+                  <div
+                    className={`progress-fill ${calculatedPercentage === 100 ? 'completed' : ''}`}
+                    style={{ width: `${calculatedPercentage}%` }}
+                  />
                 </div>
               </div>
 
@@ -145,8 +181,11 @@ const Flashcard = () => {
                 </button>
               </div>
 
-              <div className="learned-count">
-                Đã ôn: {learned.length} / {vocabulary.length}
+              <div className="learned-count" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
+                <span>Đã ôn: {learned.length} / {vocabulary.length}</span>
+                {isCompleted && (
+                  <span style={{ color: '#00C853', fontWeight: 'bold' }}>✓ Hoàn thành 100%</span>
+                )}
               </div>
             </>
           )}

@@ -1,5 +1,17 @@
-import { useState, useEffect } from 'react'
-import { levelsApi, lektionsApi, vocabularyApi, Level, Lektion, Vocabulary } from '../services/api'
+import { useState, useEffect, useCallback } from 'react'
+import {
+  levelsApi,
+  topicsApi,
+  lektionsApi,
+  vocabularyApi,
+  progressApi,
+  Level,
+  Topic,
+  Lektion,
+  LektionWithProgress,
+  Vocabulary,
+  ProgressOverview,
+} from '../services/api'
 
 export const useLevels = () => {
   const [levels, setLevels] = useState<Level[]>([])
@@ -32,6 +44,70 @@ export const useLevels = () => {
     loading,
     error,
     refetch: fetchLevels,
+  }
+}
+
+export const useTopics = (levelId?: string) => {
+  const [topics, setTopics] = useState<Topic[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchTopics = useCallback(async (id?: string) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await topicsApi.getAll(id)
+      setTopics(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch topics')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTopics(levelId)
+  }, [levelId, fetchTopics])
+
+  return {
+    topics,
+    loading,
+    error,
+    refetch: () => fetchTopics(levelId),
+  }
+}
+
+export const useTopicLektions = (topicId?: string, levelId?: string) => {
+  const [lektions, setLektions] = useState<LektionWithProgress[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchLektions = useCallback(async (tId?: string, lId?: string) => {
+    if (!tId) {
+      setLektions([])
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await topicsApi.getLektionsByTopic(tId, lId)
+      setLektions(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch lektions for topic')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchLektions(topicId, levelId)
+  }, [topicId, levelId, fetchLektions])
+
+  return {
+    lektions,
+    loading,
+    error,
+    refetch: () => fetchLektions(topicId, levelId),
   }
 }
 
@@ -127,3 +203,33 @@ export const useVocabularySearch = () => {
     search,
   }
 }
+
+export const useProgressOverview = () => {
+  const [overview, setOverview] = useState<ProgressOverview | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchOverview = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await progressApi.getOverview()
+      setOverview(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch progress overview')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchOverview()
+  }, [fetchOverview])
+
+  return {
+    overview,
+    loading,
+    error,
+    refetch: fetchOverview,
+  }
+}

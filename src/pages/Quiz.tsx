@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { SpeakerButton } from '../components/SpeakerButton'
 import { useVocabulary } from '../hooks/useApi'
+import { progressApi } from '../services/api'
 import '../styles/pages/quiz.css'
 
 interface QuizQuestion {
@@ -38,7 +39,7 @@ export default function Quiz() {
       .trim()
       .replace(/\s+/g, ' ')
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!currentQuestion) return
 
     const submittedAnswer = normalizeText(answer)
@@ -54,6 +55,13 @@ export default function Quiz() {
     } else if (isCorrect) {
       setFeedback('correct')
       setScore((prev) => prev + 1)
+      if (lektionId) {
+        try {
+          await progressApi.learnWord(lektionId, currentQuestion.id)
+        } catch (err) {
+          console.error('Error recording word progress:', err)
+        }
+      }
     } else {
       setFeedback('incorrect')
     }
@@ -61,7 +69,7 @@ export default function Quiz() {
     setAnswered(true)
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentIndex < shuffledQuestions.length - 1) {
       setCurrentIndex((prev) => prev + 1)
       setAnswer('')
@@ -69,6 +77,13 @@ export default function Quiz() {
       setAnswered(false)
     } else {
       setCompleted(true)
+      if (lektionId && score >= Math.ceil(shuffledQuestions.length * 0.7)) {
+        try {
+          await progressApi.completeLektion(lektionId)
+        } catch (err) {
+          console.error('Error completing lektion:', err)
+        }
+      }
     }
   }
 

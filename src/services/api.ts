@@ -63,15 +63,61 @@ export interface Level {
   updatedAt?: string
 }
 
-export interface Lektion {
+export interface Topic {
   _id: string
-  level_id: Level | string
-  lektion_name: string
-  description: string
-  order: number
-  vocabularyCount?: number
+  topic_name: string
+  description?: string
+  icon?: string
+  order?: number
   createdAt?: string
   updatedAt?: string
+}
+
+export interface LektionProgress {
+  status: 'not_started' | 'in_progress' | 'completed'
+  percentage: number
+  learnedWordsCount: number
+}
+
+export interface Lektion {
+  _id: string
+  level_id?: Level | string
+  lektion_name: string
+  description?: string
+  order?: number
+  topic?: string | Topic
+  level?: string | Level
+  vocabularyCount?: number
+  progress?: LektionProgress
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface LektionWithProgress extends Lektion {
+  progress?: LektionProgress
+}
+
+export interface LevelProgressItem {
+  levelId: string
+  levelName: string
+  percentage: number
+  learnedCount?: number
+  totalCount?: number
+}
+
+export interface TopicProgressItem {
+  topicId: string
+  topicName: string
+  percentage: number
+  learnedCount?: number
+  totalCount?: number
+}
+
+export interface ProgressOverview {
+  totalLearnedWords: number
+  totalWords: number
+  levelProgress: LevelProgressItem[]
+  topicProgress: TopicProgressItem[]
 }
 
 export interface VocabularyExample {
@@ -115,21 +161,86 @@ interface VocabularyListApiResponse {
 // API functions
 export const levelsApi = {
   getAll: async (): Promise<Level[]> => {
-    const response = await api.get<ApiResponse<Level>>('/levels')
-    if (!response.data.success) {
-      throw new Error(response.data.error || 'Failed to fetch levels')
+    try {
+      const response = await api.get<any>('/levels')
+      console.log('GET /levels response:', response.data)
+      const resData = response.data
+
+      if (Array.isArray(resData)) return resData
+      if (Array.isArray(resData?.data)) return resData.data
+      if (Array.isArray(resData?.levels)) return resData.levels
+      if (Array.isArray(resData?.data?.levels)) return resData.data.levels
+      if (Array.isArray(resData?.data?.docs)) return resData.data.docs
+
+      if (resData && typeof resData === 'object') {
+        for (const key of Object.keys(resData)) {
+          if (Array.isArray(resData[key])) {
+            return resData[key]
+          }
+        }
+      }
+
+      return []
+    } catch (err) {
+      console.error('Failed to fetch levels:', err)
+      throw err
     }
-    return response.data.data
   },
 
   getById: async (id: string): Promise<Level> => {
-    const response = await api.get<Level>(`/levels/${id}`)
-    return response.data
+    const response = await api.get<any>(`/levels/${id}`)
+    return response.data?.data || response.data
   },
 
   getByName: async (name: string): Promise<Level> => {
-    const response = await api.get<Level>(`/levels/name/${name}`)
-    return response.data
+    const response = await api.get<any>(`/levels/name/${name}`)
+    return response.data?.data || response.data
+  },
+}
+
+export const topicsApi = {
+  getAll: async (levelId?: string): Promise<Topic[]> => {
+    try {
+      const url = levelId ? `/topics?levelId=${encodeURIComponent(levelId)}` : '/topics'
+      const response = await api.get<any>(url)
+      if (response.data?.success) {
+        return Array.isArray(response.data.data) ? response.data.data : response.data.data?.topics || []
+      }
+      if (Array.isArray(response.data)) return response.data
+      return response.data?.topics || response.data?.data || []
+    } catch (err) {
+      console.error('Failed to fetch topics:', err)
+      return []
+    }
+  },
+
+  getByLevelId: async (levelId: string): Promise<Topic[]> => {
+    return topicsApi.getAll(levelId)
+  },
+
+  getLektionsByTopic: async (topicId: string, levelId?: string): Promise<LektionWithProgress[]> => {
+    try {
+      const queryParams = new URLSearchParams()
+      if (levelId) queryParams.append('levelId', levelId)
+      const queryString = queryParams.toString() ? `?${queryParams.toString()}` : ''
+
+      const response = await api.get<any>(`/topics/${topicId}/lektions${queryString}`)
+      if (response.data?.success) {
+        return Array.isArray(response.data.data) ? response.data.data : response.data.data?.lektions || []
+      }
+      if (Array.isArray(response.data)) return response.data
+    } catch {
+      // Fallback endpoint
+      try {
+        const response = await api.get<any>(`/lektions?topicId=${topicId}${levelId ? `&levelId=${levelId}` : ''}`)
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          return response.data.data
+        }
+      } catch (err) {
+        console.error('Failed to fetch lektions by topic:', err)
+      }
+    }
+    return []
   },
 }
 
@@ -142,8 +253,11 @@ export const lektionsApi = {
     return response.data.data
   },
 
-  getById: async (id: string): Promise<Lektion> => {
-    const response = await api.get<Lektion>(`/lektions/${id}`)
+  getById: async (id: string): Promise<LektionWithProgress> => {
+    const response = await api.get<any>(`/lektions/${id}`)
+    if (response.data?.success && response.data?.data) {
+      return response.data.data
+    }
     return response.data
   },
 
@@ -185,6 +299,19 @@ export const vocabularyApi = {
   },
 
   getByLektionId: async (lektionId: string): Promise<Vocabulary[]> => {
+    try {
+      const response = await api.get<any>(`/vocabularies/lektion/${lektionId}`)
+      if (response.data?.success) {
+        if (Array.isArray(response.data.data)) return response.data.data
+        if (response.data.data?.vocabularies && Array.isArray(response.data.data.vocabularies)) {
+          return response.data.data.vocabularies
+        }
+      }
+      if (Array.isArray(response.data)) return response.data
+    } catch {
+      // Fallback
+    }
+
     const response = await api.get<VocabularyListApiResponse>(`/vocabularies?lektionId=${encodeURIComponent(lektionId)}`)
 
     if (!response.data.success) {
@@ -233,6 +360,41 @@ export const vocabularyApi = {
     }
 
     return feedback
+  },
+}
+
+export const progressApi = {
+  learnWord: async (lektionId: string, vocabularyId: string): Promise<{ success: boolean; progress?: LektionProgress }> => {
+    try {
+      const response = await api.post(`/progress/lektion/${lektionId}/learn-word`, { vocabularyId })
+      return response.data
+    } catch (err) {
+      console.error('Error recording learn-word progress:', err)
+      return { success: false }
+    }
+  },
+
+  completeLektion: async (lektionId: string): Promise<{ success: boolean; progress?: LektionProgress }> => {
+    try {
+      const response = await api.post(`/progress/lektion/${lektionId}/complete`)
+      return response.data
+    } catch (err) {
+      console.error('Error marking lektion complete:', err)
+      return { success: false }
+    }
+  },
+
+  getOverview: async (): Promise<ProgressOverview | null> => {
+    try {
+      const response = await api.get<any>('/progress')
+      if (response.data?.success) {
+        return response.data.data
+      }
+      return response.data
+    } catch (err) {
+      console.error('Error fetching progress overview:', err)
+      return null
+    }
   },
 }
 

@@ -5,6 +5,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import Home from './pages/Home'
 import Levels from './pages/Levels'
 import LevelDetail from './pages/LevelDetail'
+import TopicsPage from './pages/TopicsPage'
+import ProgressPage from './pages/ProgressPage'
 import Lektion from './pages/Lektion'
 import Flashcard from './pages/Flashcard'
 import Quiz from './pages/Quiz'
@@ -25,11 +27,14 @@ import AdminTests from './pages/admin/AdminTests'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminResults from './pages/admin/AdminResults'
 
+import { ErrorBoundary } from './components/ErrorBoundary'
+
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -43,7 +48,11 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/levels" element={<Levels />} />
             <Route path="/learn" element={<Levels />} />
+            <Route path="/topics" element={<TopicsPage />} />
+            <Route path="/topics/:levelId" element={<TopicsPage />} />
             <Route path="/levels/:levelId" element={<LevelDetail />} />
+            <Route path="/levels/:levelId/topics/:topicId" element={<LevelDetail />} />
+            <Route path="/progress" element={<ProgressPage />} />
             <Route path="/lektion/:lektionId" element={<Lektion />} />
             <Route path="/lesson/:lektionId" element={<Lektion />} />
             <Route path="/flashcard/:lektionId" element={<Flashcard />} />
@@ -68,6 +77,7 @@ function App() {
         </Routes>
       </Router>
     </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

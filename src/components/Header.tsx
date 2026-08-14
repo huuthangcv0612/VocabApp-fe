@@ -37,6 +37,12 @@ const Header = ({ animate = false }: HeaderProps) => {
           <NavLink to="/levels" className="nav-link">
             Level
           </NavLink>
+          <NavLink to="/topics" className="nav-link">
+            Chủ đề
+          </NavLink>
+          <NavLink to="/progress" className="nav-link">
+            Tiến độ
+          </NavLink>
           <NavLink to="/interactive-room" className="nav-link">
             Interactive Classroom
           </NavLink>
