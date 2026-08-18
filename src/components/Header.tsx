@@ -36,22 +36,19 @@ const Header = ({ animate = false }: HeaderProps) => {
 
         <nav className="nav-menu">
           <NavLink to="/levels" className="nav-link">
-            Bắt đầu học
-          </NavLink>
-          <NavLink to="/topics" className="nav-link">
-            Chủ đề
+            Start Learning
           </NavLink>
           <NavLink to="/progress" className="nav-link">
-            Tiến độ
+            Progress
           </NavLink>
           <NavLink to="/pricing" className="nav-link">
-            Gói học
+            Pricing
           </NavLink>
           <NavLink to="/test" className="nav-link">
-            Luyện thi
+            Practice Tests
           </NavLink>
           <NavLink to="/interactive-room" className="nav-link">
-            Lớp học tương tác
+            Interactive Classes
           </NavLink>
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" style={{ color: '#FFF2B7', fontWeight: 800 }}>
@@ -95,22 +92,19 @@ const Header = ({ animate = false }: HeaderProps) => {
       {isMobileMenuOpen && (
         <div className="mobile-menu open">
           <NavLink to="/levels" className="nav-link" onClick={closeMobileMenu}>
-            Bắt đầu học
-          </NavLink>
-          <NavLink to="/topics" className="nav-link" onClick={closeMobileMenu}>
-            Chủ đề
+            Start Learning
           </NavLink>
           <NavLink to="/progress" className="nav-link" onClick={closeMobileMenu}>
-            Tiến độ
+            Progress
           </NavLink>
           <NavLink to="/pricing" className="nav-link" onClick={closeMobileMenu}>
-            Gói học
+            Pricing
           </NavLink>
           <NavLink to="/test" className="nav-link" onClick={closeMobileMenu}>
-            Luyện thi
+            Practice Tests
           </NavLink>
           <NavLink to="/interactive-room" className="nav-link" onClick={closeMobileMenu}>
-            Lớp học tương tác
+            Interactive Classes
           </NavLink>
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" onClick={closeMobileMenu} style={{ color: '#FFF2B7', fontWeight: 800 }}>
