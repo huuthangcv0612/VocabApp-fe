@@ -136,7 +136,7 @@ const TopicsPage = () => {
           {/* Topic Cards Grid */}
           <div className="topics-cards-grid">
             {effectiveTopics.map((topic: Topic) => {
-              const topicName = topic?.topic_name || (topic as any)?.name || 'Chủ đề'
+              const topicName = topic?.topic_name || topic?.name || 'Chủ đề'
               const icon = getTopicIcon(topicName, topic?.icon)
 
               return (

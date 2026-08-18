@@ -11,4 +11,5 @@ export interface AuthResponse<T = any> {
   user?: T
   data?: T
   error?: string
+  message?: string
 }

@@ -1,3 +1,10 @@
+export * from './level'
+export * from './topic'
+export * from './unit'
+export * from './vocabulary'
+export * from './exercise'
+export * from './lesson'
+
 export interface AdminStatistics {
   totalQuestions: number
   totalTests: number
@@ -95,3 +102,12 @@ export interface UserAdminItem {
   isVerified?: boolean
   createdAt?: string
 }
+
+export interface PaginationMeta {
+  page: number
+  limit: number
+  total: number
+  pages: number
+}
+
+export type VocabularyAdminItem = import('./vocabulary').VocabularyItem

@@ -57,6 +57,7 @@ api.interceptors.response.use(
 export interface Level {
   _id: string
   level_name: string
+  name?: string
   description: string
   order: number
   createdAt?: string
@@ -66,6 +67,7 @@ export interface Level {
 export interface Topic {
   _id: string
   topic_name: string
+  name?: string
   description?: string
   icon?: string
   order?: number

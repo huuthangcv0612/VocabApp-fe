@@ -36,7 +36,7 @@ const Header = ({ animate = false }: HeaderProps) => {
 
         <nav className="nav-menu">
           <NavLink to="/levels" className="nav-link">
-            Level
+            Bắt đầu học
           </NavLink>
           <NavLink to="/topics" className="nav-link">
             Chủ đề
@@ -44,8 +44,14 @@ const Header = ({ animate = false }: HeaderProps) => {
           <NavLink to="/progress" className="nav-link">
             Tiến độ
           </NavLink>
+          <NavLink to="/pricing" className="nav-link">
+            Gói học
+          </NavLink>
+          <NavLink to="/test" className="nav-link">
+            Luyện thi
+          </NavLink>
           <NavLink to="/interactive-room" className="nav-link">
-            Interactive Classroom
+            Lớp học tương tác
           </NavLink>
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" style={{ color: '#FFF2B7', fontWeight: 800 }}>
@@ -89,11 +95,28 @@ const Header = ({ animate = false }: HeaderProps) => {
       {isMobileMenuOpen && (
         <div className="mobile-menu open">
           <NavLink to="/levels" className="nav-link" onClick={closeMobileMenu}>
-            Level
+            Bắt đầu học
+          </NavLink>
+          <NavLink to="/topics" className="nav-link" onClick={closeMobileMenu}>
+            Chủ đề
+          </NavLink>
+          <NavLink to="/progress" className="nav-link" onClick={closeMobileMenu}>
+            Tiến độ
+          </NavLink>
+          <NavLink to="/pricing" className="nav-link" onClick={closeMobileMenu}>
+            Gói học
+          </NavLink>
+          <NavLink to="/test" className="nav-link" onClick={closeMobileMenu}>
+            Luyện thi
           </NavLink>
           <NavLink to="/interactive-room" className="nav-link" onClick={closeMobileMenu}>
-            Interactive classroom
+            Lớp học tương tác
           </NavLink>
+          {user?.role === 'admin' && (
+            <NavLink to="/admin" className="nav-link" onClick={closeMobileMenu} style={{ color: '#FFF2B7', fontWeight: 800 }}>
+              ⚙️ Admin Dashboard
+            </NavLink>
+          )}
 
           {isAuthenticated ? (
             <button

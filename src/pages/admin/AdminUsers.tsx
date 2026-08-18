@@ -12,7 +12,7 @@ export const AdminUsers = () => {
     try {
       setLoading(true)
       const data = await adminService.getUsers()
-      setUsers(data.users)
+      setUsers(Array.isArray(data) ? data : (data as { users?: UserAdminItem[] }).users || [])
     } catch (err: any) {
       setError(err.message || 'Không thể tải danh sách người dùng.')
     } finally {

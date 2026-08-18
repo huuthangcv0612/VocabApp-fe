@@ -99,7 +99,7 @@ const Levels = () => {
               {safeLevels.map((level, index) => {
                 const isBlue = index % 4 === 0 || index % 4 === 3
                 const numberStr = String(index + 1).padStart(2, '0') + '.'
-                const levelName = level.level_name || (level as any).name || `A${index + 1}`
+                const levelName = level.level_name || level.name || `A${index + 1}`
 
                 return (
                   <div

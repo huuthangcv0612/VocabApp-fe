@@ -21,7 +21,21 @@ import ResetPassword from './pages/auth/ResetPassword'
 import ChangePassword from './pages/auth/ChangePassword'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/admin/AdminRoute'
+import UnitPage from './pages/UnitPage'
+import LessonLearnPage from './pages/LessonLearnPage'
+import PricingPage from './pages/PricingPage'
+import SubscriptionPage from './pages/SubscriptionPage'
+import PaymentPage from './pages/PaymentPage'
+import PaymentResultPage from './pages/PaymentResultPage'
+
 import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminLevels from './pages/admin/AdminLevels'
+import AdminTopics from './pages/admin/AdminTopics'
+import AdminUnits from './pages/admin/AdminUnits'
+import AdminLessons from './pages/admin/AdminLessons'
+import AdminLessonBuilder from './pages/admin/AdminLessonBuilder'
+import AdminVocabularies from './pages/admin/AdminVocabularies'
+import AdminExercises from './pages/admin/AdminExercises'
 import AdminQuestions from './pages/admin/AdminQuestions'
 import AdminTests from './pages/admin/AdminTests'
 import AdminUsers from './pages/admin/AdminUsers'
@@ -53,6 +67,12 @@ function App() {
             <Route path="/levels/:levelId" element={<LevelDetail />} />
             <Route path="/levels/:levelId/topics/:topicId" element={<LevelDetail />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/payment/:planId" element={<PaymentPage />} />
+            <Route path="/payment/result" element={<PaymentResultPage />} />
+            <Route path="/unit/:unitId" element={<UnitPage />} />
+            <Route path="/learn/lesson/:lessonId" element={<LessonLearnPage />} />
             <Route path="/lektion/:lektionId" element={<Lektion />} />
             <Route path="/lesson/:lektionId" element={<Lektion />} />
             <Route path="/flashcard/:lektionId" element={<Flashcard />} />
@@ -68,6 +88,13 @@ function App() {
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/levels" element={<AdminLevels />} />
+            <Route path="/admin/topics" element={<AdminTopics />} />
+            <Route path="/admin/units" element={<AdminUnits />} />
+            <Route path="/admin/lessons" element={<AdminLessons />} />
+            <Route path="/admin/lessons/:lessonId" element={<AdminLessonBuilder />} />
+            <Route path="/admin/vocabularies" element={<AdminVocabularies />} />
+            <Route path="/admin/exercises" element={<AdminExercises />} />
             <Route path="/admin/questions" element={<AdminQuestions />} />
             <Route path="/admin/questions/new" element={<AdminQuestions autoOpenNewModal={true} />} />
             <Route path="/admin/tests" element={<AdminTests />} />

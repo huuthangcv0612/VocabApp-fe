@@ -1,53 +1,54 @@
 import api from './api'
+import { levelApi } from './levelApi'
+import { topicApi } from './topicApi'
+import { unitApi } from './unitApi'
+import { lessonApi } from './lessonApi'
+import { vocabularyApi } from './vocabularyApi'
+import { exerciseApi } from './exerciseApi'
+
 import type {
   AdminStatistics,
   QuestionItem,
   QuestionQuery,
   QuestionsResponseData,
-  TestConfigPayload,
   TestItem,
+  TestConfigPayload,
   UserAdminItem,
+  LevelItem,
+  TopicItem,
+  UnitItem,
+  LessonItem,
+  VocabularyAdminItem,
+  PaginationMeta,
+  LessonDetailData,
+  LessonExercise,
 } from '../types/admin'
-import type { TestSubmissionResultData } from '../types/test'
 
 export const adminService = {
-  // 1. Statistics
+  // 1. Dashboard Statistics
   getStatistics: async (): Promise<AdminStatistics> => {
     try {
-      const response = await api.get<{ success: boolean; data: AdminStatistics }>('/admin/statistics')
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
+      const response = await api.get<{ success: boolean; data: AdminStatistics }>('/admin/stats')
+      if (response.data?.data) return response.data.data
     } catch (err) {
-      console.warn('Fallback to default admin stats:', err)
+      console.warn('Fallback admin stats:', err)
     }
 
-    // Mock fallback if backend API is not yet populated
     return {
-      totalQuestions: 532,
-      totalTests: 12,
-      totalUsers: 1284,
-      totalResults: 856,
+      totalQuestions: 120,
+      totalTests: 15,
+      totalUsers: 45,
+      totalResults: 88,
       totalVocabularies: 350,
-      questionsByLevel: {
-        A1: 120,
-        A2: 90,
-        B1: 70,
-        B2: 110,
-        C1: 80,
-        C2: 62,
-      },
+      questionsByLevel: { A1: 45, A2: 35, B1: 25, B2: 15 },
       recentUsers: [
-        { _id: 'u1', name: 'Max Mustermann', email: 'max@example.com', role: 'user', createdAt: '2026-08-08T09:30:00.000Z' },
-        { _id: 'u2', name: 'Anna Schmidt', email: 'anna@example.com', role: 'user', createdAt: '2026-08-08T08:15:00.000Z' },
-        { _id: 'u3', name: 'Lukas Weber', email: 'lukas@example.com', role: 'user', createdAt: '2026-08-07T14:20:00.000Z' },
-        { _id: 'u4', name: 'Sophie Becker', email: 'sophie@example.com', role: 'admin', createdAt: '2026-08-06T11:45:00.000Z' },
-        { _id: 'u5', name: 'Leon Fischer', email: 'leon@example.com', role: 'user', createdAt: '2026-08-05T16:10:00.000Z' },
+        { _id: 'u1', name: 'Anna Schmidt', email: 'anna@example.com', role: 'user', createdAt: '2026-08-10' },
+        { _id: 'u2', name: 'Lukas Weber', email: 'lukas@example.com', role: 'user', createdAt: '2026-08-11' },
       ],
     }
   },
 
-  // 2. Question Bank
+  // 2. Question Bank CRUD
   getQuestions: async (query: QuestionQuery = {}): Promise<QuestionsResponseData> => {
     try {
       const params = new URLSearchParams()
@@ -60,194 +61,173 @@ export const adminService = {
       if (query.limit) params.append('limit', String(query.limit))
 
       const response = await api.get<{ success: boolean; data: QuestionsResponseData }>(`/questions?${params.toString()}`)
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
+      if (response.data?.data) return response.data.data
     } catch (err) {
-      console.warn('Fallback to mock questions list:', err)
+      console.warn('Fallback questions API:', err)
     }
 
-    // Mock fallback questions
     return {
-      questions: [
-        {
-          _id: 'q1',
-          level: 'A1',
-          topic: 'Begrüßung',
-          type: 'multiple_choice',
-          question: 'Wie heißt du?',
-          options: [
-            { text: 'Ich heiße Anna.', isCorrect: true },
-            { text: 'Ich bin 20 Jahre.', isCorrect: false },
-            { text: 'Ich komme aus Deutschland.', isCorrect: false },
-            { text: 'Ich wohne in Berlin.', isCorrect: false },
-          ],
-          explanation: 'Die richtige Antwort ist: Ich heiße Anna.',
-          difficulty: 'easy',
-          skill: 'grammar',
-          status: 'active',
-          createdAt: new Date().toISOString(),
-        },
-        {
-          _id: 'q2',
-          level: 'A1',
-          topic: 'Einkaufen',
-          type: 'multiple_choice',
-          question: 'Wie viel _____ der Apfel?',
-          options: [
-            { text: 'kostet', isCorrect: true },
-            { text: 'kaufen', isCorrect: false },
-            { text: 'trinken', isCorrect: false },
-            { text: 'essen', isCorrect: false },
-          ],
-          explanation: 'Động từ "kosten" ở ngôi thứ 3 số ít chia thành "kostet".',
-          difficulty: 'easy',
-          skill: 'vocabulary',
-          status: 'active',
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      pagination: {
-        page: query.page || 1,
-        limit: query.limit || 20,
-        total: 2,
-        pages: 1,
-      },
+      questions: [],
+      pagination: { page: query.page || 1, limit: query.limit || 10, total: 0, pages: 1 },
     }
   },
 
-  createQuestion: async (payload: Omit<QuestionItem, '_id' | 'createdAt'>): Promise<QuestionItem> => {
+  createQuestion: async (payload: Partial<QuestionItem>): Promise<QuestionItem> => {
     const response = await api.post<{ success: boolean; data: QuestionItem }>('/questions', payload)
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-    return { ...payload, _id: `q_${Date.now()}`, createdAt: new Date().toISOString() }
+    return response.data?.data || (response.data as unknown as QuestionItem)
   },
 
   updateQuestion: async (id: string, payload: Partial<QuestionItem>): Promise<QuestionItem> => {
     const response = await api.put<{ success: boolean; data: QuestionItem }>(`/questions/${id}`, payload)
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-    return { _id: id, ...payload } as QuestionItem
+    return response.data?.data || (response.data as unknown as QuestionItem)
   },
 
   deleteQuestion: async (id: string): Promise<void> => {
     await api.delete(`/questions/${id}`)
   },
 
-  // 3. Test Configuration
-  createTest: async (payload: TestConfigPayload): Promise<TestItem> => {
-    const response = await api.post<{ success: boolean; data: TestItem }>('/tests', payload)
-    if (response.data.success && response.data.data) {
-      return response.data.data
-    }
-    return { ...payload, _id: `t_${Date.now()}`, createdAt: new Date().toISOString() }
-  },
-
+  // 3. Test Config CRUD
   getTests: async (): Promise<TestItem[]> => {
     try {
       const response = await api.get<{ success: boolean; data: TestItem[] }>('/tests')
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
+      if (response.data?.data) return response.data.data
     } catch (err) {
       console.warn('Fallback tests list:', err)
     }
 
-    return [
-      {
-        _id: 't1',
-        name: 'Quick Test A1',
-        level: 'A1',
-        totalQuestions: 30,
-        config: { vocabulary: 10, grammar: 10, reading: 10, listening: 0 },
-        difficultyRatio: { easy: 40, medium: 40, hard: 20 },
-        timeLimit: 30,
-        passingScore: 70,
-        status: 'active',
-        createdAt: '2026-08-08T10:00:00.000Z',
-      },
-      {
-        _id: 't2',
-        name: 'Full Assessment A2',
-        level: 'A2',
-        totalQuestions: 40,
-        config: { vocabulary: 15, grammar: 15, reading: 10, listening: 0 },
-        difficultyRatio: { easy: 30, medium: 50, hard: 20 },
-        timeLimit: 45,
-        passingScore: 75,
-        status: 'active',
-        createdAt: '2026-08-07T12:00:00.000Z',
-      },
-    ]
+    return []
   },
 
-  // 4. Users Management
-  getUsers: async (page = 1, limit = 20): Promise<{ users: UserAdminItem[]; pagination: { page: number; limit: number; total: number; pages: number } }> => {
+  createTest: async (payload: TestConfigPayload): Promise<TestItem> => {
+    const response = await api.post<{ success: boolean; data: TestItem }>('/tests', payload)
+    return response.data?.data || (response.data as unknown as TestItem)
+  },
+
+  updateTest: async (id: string, payload: Partial<TestConfigPayload>): Promise<TestItem> => {
+    const response = await api.put<{ success: boolean; data: TestItem }>(`/tests/${id}`, payload)
+    return response.data?.data || (response.data as unknown as TestItem)
+  },
+
+  deleteTest: async (id: string): Promise<void> => {
+    await api.delete(`/tests/${id}`)
+  },
+
+  // 4. User Management
+  getUsers: async (): Promise<UserAdminItem[]> => {
     try {
-      const response = await api.get<{ success: boolean; data: { users: UserAdminItem[]; pagination: { page: number; limit: number; total: number; pages: number } } }>(
-        `/admin/users?page=${page}&limit=${limit}`,
-      )
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
+      const response = await api.get<{ success: boolean; data: UserAdminItem[] }>('/users')
+      if (response.data?.data) return response.data.data
     } catch (err) {
       console.warn('Fallback users list:', err)
     }
 
-    return {
-      users: [
-        { _id: 'u1', name: 'Max Mustermann', email: 'max@example.com', role: 'user', status: 'active', isVerified: true, createdAt: '2026-08-08T09:30:00.000Z' },
-        { _id: 'u2', name: 'Anna Schmidt', email: 'anna@example.com', role: 'user', status: 'active', isVerified: true, createdAt: '2026-08-08T08:15:00.000Z' },
-        { _id: 'u3', name: 'Admin DeutschUp', email: 'admin@deutschup.com', role: 'admin', status: 'active', isVerified: true, createdAt: '2026-08-01T00:00:00.000Z' },
-      ],
-      pagination: { page: 1, limit: 20, total: 3, pages: 1 },
-    }
+    return []
   },
 
-  updateUserRole: async (userId: string, role: 'user' | 'admin'): Promise<void> => {
-    await api.put(`/admin/users/${userId}/role`, { role })
+  updateUserStatus: async (id: string, status: string): Promise<UserAdminItem> => {
+    const response = await api.patch<{ success: boolean; data: UserAdminItem }>(`/users/${id}/status`, { status })
+    return response.data?.data || (response.data as unknown as UserAdminItem)
   },
 
-  toggleUserStatus: async (userId: string): Promise<void> => {
-    await api.patch(`/admin/users/${userId}/toggle-status`)
+  deleteUser: async (id: string): Promise<void> => {
+    await api.delete(`/users/${id}`)
   },
 
-  // 5. Test Results History
-  getAllResults: async (page = 1, limit = 20): Promise<{ results: TestSubmissionResultData[]; pagination: { page: number; limit: number; total: number; pages: number } }> => {
+  // 5. Test Results
+  getResults: async (): Promise<{ results: any[]; pagination: PaginationMeta }> => {
     try {
-      const response = await api.get<{ success: boolean; data: { results: TestSubmissionResultData[]; pagination: { page: number; limit: number; total: number; pages: number } } }>(
-        `/test-results?page=${page}&limit=${limit}`,
-      )
-      if (response.data.success && response.data.data) {
-        return response.data.data
-      }
+      const response = await api.get<{ success: boolean; data: { results: any[]; pagination: PaginationMeta } }>('/test-results')
+      if (response.data?.data) return response.data.data
     } catch (err) {
       console.warn('Fallback test results:', err)
     }
 
     return {
-      results: [
-        {
-          _id: 'r1',
-          testName: 'Quick Test A1',
-          score: 24,
-          total: 30,
-          percentage: 80,
-          evaluatedLevel: 'A1',
-          skillBreakdown: {
-            vocabulary: { correct: 9, total: 10, percentage: 90 },
-            grammar: { correct: 6, total: 10, percentage: 60 },
-            reading: { correct: 9, total: 10, percentage: 90 },
-          },
-          weaknesses: ['grammar'],
-          answers: [],
-          createdAt: '2026-08-08T10:00:00.000Z',
-          userId: { _id: 'u1', name: 'Max Mustermann', email: 'max@example.com' },
-        },
-      ],
-      pagination: { page: 1, limit: 20, total: 1, pages: 1 },
+      results: [],
+      pagination: { page: 1, limit: 20, total: 0, pages: 1 },
     }
   },
+  getAllResults: async (): Promise<{ results: any[]; pagination: PaginationMeta }> => adminService.getResults(),
+
+  // 4. User Management Aliases
+  updateUserRole: async (id: string, role: string): Promise<UserAdminItem> => adminService.updateUserStatus(id, role),
+  toggleUserStatus: async (id: string, currentStatus?: string): Promise<UserAdminItem> =>
+    adminService.updateUserStatus(id, currentStatus === 'active' ? 'inactive' : 'active'),
+
+  // 6. Level CRUD (Delegates to levelApi)
+  getLevels: async (): Promise<LevelItem[]> => levelApi.getAll(),
+  createLevel: async (payload: Partial<LevelItem>): Promise<LevelItem> => levelApi.create(payload as any),
+  updateLevel: async (id: string, payload: Partial<LevelItem>): Promise<LevelItem> => levelApi.update(id, payload),
+  deleteLevel: async (id: string): Promise<void> => levelApi.delete(id),
+
+  // 7. Topic CRUD (Delegates to topicApi)
+  getTopics: async (levelId?: string): Promise<TopicItem[]> => topicApi.getAll({ levelId }),
+  createTopic: async (payload: Partial<TopicItem>): Promise<TopicItem> => topicApi.create(payload as any),
+  updateTopic: async (id: string, payload: Partial<TopicItem>): Promise<TopicItem> => topicApi.update(id, payload),
+  deleteTopic: async (id: string): Promise<void> => topicApi.delete(id),
+
+  // 8. Unit CRUD (Delegates to unitApi)
+  getUnits: async (topicId?: string): Promise<UnitItem[]> => unitApi.getAll({ topicId }),
+  createUnit: async (payload: Partial<UnitItem>): Promise<UnitItem> => unitApi.create(payload as any),
+  updateUnit: async (id: string, payload: Partial<UnitItem>): Promise<UnitItem> => unitApi.update(id, payload),
+  deleteUnit: async (id: string): Promise<void> => unitApi.delete(id),
+
+  // 9. Lesson CRUD (Delegates to lessonApi)
+  getLessons: async (unitId?: string, topicId?: string): Promise<LessonItem[]> => lessonApi.getAll({ unitId, topicId }),
+  createLesson: async (payload: Partial<LessonItem>): Promise<LessonItem> => lessonApi.create(payload),
+  updateLesson: async (id: string, payload: Partial<LessonItem>): Promise<LessonItem> => lessonApi.update(id, payload),
+  deleteLesson: async (id: string): Promise<void> => lessonApi.delete(id),
+
+  // 10. Vocabulary CRUD (Delegates to vocabularyApi)
+  getVocabularies: async (
+    query: { q?: string; level?: string; page?: number; limit?: number; lektionId?: string } = {},
+  ): Promise<{ vocabularies: VocabularyAdminItem[]; pagination: PaginationMeta }> => vocabularyApi.getAll(query),
+  createVocabulary: async (payload: Partial<VocabularyAdminItem>): Promise<VocabularyAdminItem> => vocabularyApi.create(payload as any),
+  updateVocabulary: async (id: string, payload: Partial<VocabularyAdminItem>): Promise<VocabularyAdminItem> => vocabularyApi.update(id, payload as any),
+  deleteVocabulary: async (id: string): Promise<void> => vocabularyApi.delete(id),
+
+  // 11. Lesson Builder Services
+  getLessonDetail: async (lessonId: string): Promise<LessonDetailData> => lessonApi.getById(lessonId),
+
+  addVocabularyToLesson: async (
+    lessonId: string,
+    vocabularyId: string,
+    order: number,
+    is_new = true,
+  ): Promise<any> => {
+    try {
+      const response = await api.post<{ success: boolean; data: any }>(`/lektions/${lessonId}/vocabularies`, {
+        vocabularyId,
+        order,
+        is_new,
+      })
+      return response.data?.data || response.data
+    } catch (err) {
+      return await api.put(`/vocabularies/${vocabularyId}`, { lektionId: lessonId })
+    }
+  },
+
+  removeVocabularyFromLesson: async (lessonId: string, vocabularyId: string): Promise<void> => {
+    try {
+      await api.delete(`/lektions/${lessonId}/vocabularies/${vocabularyId}`)
+    } catch (err) {
+      await api.put(`/vocabularies/${vocabularyId}`, { lektionId: null })
+    }
+  },
+
+  updateLessonVocabulary: async (
+    lessonId: string,
+    vocabularyId: string,
+    payload: { order?: number; is_new?: boolean },
+  ): Promise<void> => {
+    try {
+      await api.put(`/lektions/${lessonId}/vocabularies/${vocabularyId}`, payload)
+    } catch (err) {
+      console.warn('Fallback update lesson vocabulary:', err)
+    }
+  },
+
+  createLessonExercise: async (lessonId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.create(lessonId, payload),
+  updateLessonExercise: async (exerciseId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.update(exerciseId, payload),
+  deleteLessonExercise: async (exerciseId: string): Promise<void> => exerciseApi.delete(exerciseId),
 }
