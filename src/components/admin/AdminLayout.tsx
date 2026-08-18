@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import '../../styles/pages/admin.css'
+import DeutschUpLogo from '../../assets/DEUTSCHUP.svg'
 
 interface AdminLayoutProps {
   title: string
@@ -22,7 +23,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ title, children }) => 
       {/* Sidebar */}
       <aside className="admin-sidebar">
         <div className="admin-brand">
-          <span className="admin-brand-logo">DeutschUp</span>
+          <img src={DeutschUpLogo} alt="DeutschUp" className="admin-brand-logo-img" />
           <span className="admin-brand-badge">ADMIN</span>
         </div>
 

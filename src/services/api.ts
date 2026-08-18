@@ -386,11 +386,138 @@ export const progressApi = {
 
   getOverview: async (): Promise<ProgressOverview | null> => {
     try {
-      const response = await api.get<any>('/progress')
-      if (response.data?.success) {
-        return response.data.data
+      let resData: any = null
+      try {
+        const response = await api.get<any>('/progress')
+        resData = response.data?.data || response.data?.overview || response.data
+      } catch {
+        try {
+          const response = await api.get<any>('/progress/overview')
+          resData = response.data?.data || response.data
+        } catch {
+          resData = null
+        }
       }
-      return response.data
+
+      let totalLearnedWords = 0
+      let totalWords = 0
+      let levelProgress: LevelProgressItem[] = []
+      let topicProgress: TopicProgressItem[] = []
+
+      if (resData && typeof resData === 'object') {
+        totalLearnedWords = Number(
+          resData.totalLearnedWords ?? resData.totalLearned ?? resData.learnedWordsCount ?? resData.learnedCount ?? 0,
+        )
+        totalWords = Number(
+          resData.totalWords ?? resData.totalVocabulary ?? resData.totalCount ?? resData.total ?? 0,
+        )
+
+        const rawLevels = resData.levelProgress || resData.levels || resData.levelStats || []
+        if (Array.isArray(rawLevels) && rawLevels.length > 0) {
+          levelProgress = rawLevels.map((item: any) => {
+            const lId = String(item.levelId || item._id || item.id || item.level_name || item.levelName || 'Standard')
+            const lName = String(item.levelName || item.level_name || item.name || lId)
+            const pct = Math.round(Number(item.percentage ?? item.percent ?? item.progress ?? 0))
+            const lCount = Number(item.learnedCount ?? item.learnedWordsCount ?? item.learned ?? 0)
+            const tCount = Number(item.totalCount ?? item.totalWords ?? item.total ?? 0)
+            return { levelId: lId, levelName: lName, percentage: pct, learnedCount: lCount, totalCount: tCount }
+          })
+        }
+
+        const rawTopics = resData.topicProgress || resData.topics || resData.topicStats || []
+        if (Array.isArray(rawTopics) && rawTopics.length > 0) {
+          topicProgress = rawTopics.map((item: any) => {
+            const tId = String(item.topicId || item._id || item.id || item.topic_name || item.topicName || 'General')
+            const tName = String(item.topicName || item.topic_name || item.name || tId)
+            const pct = Math.round(Number(item.percentage ?? item.percent ?? item.progress ?? 0))
+            const lCount = Number(item.learnedCount ?? item.learnedWordsCount ?? item.learned ?? 0)
+            const tCount = Number(item.totalCount ?? item.totalWords ?? item.total ?? 0)
+            return { topicId: tId, topicName: tName, percentage: pct, learnedCount: lCount, totalCount: tCount }
+          })
+        }
+      }
+
+      // If totalWords is 0 or level/topic breakdown is empty, aggregate progress from lektions list
+      if (totalWords === 0 || (levelProgress.length === 0 && topicProgress.length === 0)) {
+        try {
+          const lektionsRes = await api.get<any>('/lektions')
+          const lektionsList: any[] = Array.isArray(lektionsRes.data?.data)
+            ? lektionsRes.data.data
+            : Array.isArray(lektionsRes.data)
+            ? lektionsRes.data
+            : []
+
+          if (lektionsList.length > 0) {
+            let calcTotalLearned = 0
+            let calcTotalWords = 0
+            const levelMap = new Map<string, { name: string; learned: number; total: number }>()
+            const topicMap = new Map<string, { name: string; learned: number; total: number }>()
+
+            lektionsList.forEach((lek: any) => {
+              const lekWords =
+                Number(lek.vocabularyCount || (Array.isArray(lek.vocabularies) ? lek.vocabularies.length : 0)) || 10
+              const progressObj = lek.progress || {}
+              const lekLearned =
+                Number(
+                  progressObj.learnedWordsCount ??
+                    progressObj.learnedCount ??
+                    (progressObj.status === 'completed' ? lekWords : 0),
+                ) || 0
+
+              calcTotalWords += lekWords
+              calcTotalLearned += lekLearned
+
+              const levelObj = lek.level || lek.levelId || 'A1.1'
+              const levelIdKey = typeof levelObj === 'object' ? (levelObj._id || levelObj.level_name) : String(levelObj)
+              const levelNameVal = typeof levelObj === 'object' ? levelObj.level_name : levelIdKey
+              const currLevel = levelMap.get(levelIdKey) || { name: levelNameVal, learned: 0, total: 0 }
+              currLevel.learned += lekLearned
+              currLevel.total += lekWords
+              levelMap.set(levelIdKey, currLevel)
+
+              const topicObj = lek.topic || lek.topicId || 'General'
+              const topicIdKey = typeof topicObj === 'object' ? (topicObj._id || topicObj.topic_name) : String(topicObj)
+              const topicNameVal = typeof topicObj === 'object' ? topicObj.topic_name : topicIdKey
+              const currTopic = topicMap.get(topicIdKey) || { name: topicNameVal, learned: 0, total: 0 }
+              currTopic.learned += lekLearned
+              currTopic.total += lekWords
+              topicMap.set(topicIdKey, currTopic)
+            })
+
+            if (totalWords === 0) totalWords = calcTotalWords
+            if (totalLearnedWords === 0) totalLearnedWords = calcTotalLearned
+
+            if (levelProgress.length === 0) {
+              levelProgress = Array.from(levelMap.entries()).map(([id, val]) => ({
+                levelId: id,
+                levelName: val.name,
+                percentage: val.total > 0 ? Math.round((val.learned / val.total) * 100) : 0,
+                learnedCount: val.learned,
+                totalCount: val.total,
+              }))
+            }
+
+            if (topicProgress.length === 0) {
+              topicProgress = Array.from(topicMap.entries()).map(([id, val]) => ({
+                topicId: id,
+                topicName: val.name,
+                percentage: val.total > 0 ? Math.round((val.learned / val.total) * 100) : 0,
+                learnedCount: val.learned,
+                totalCount: val.total,
+              }))
+            }
+          }
+        } catch {
+          // Ignore fallback errors
+        }
+      }
+
+      return {
+        totalLearnedWords,
+        totalWords,
+        levelProgress,
+        topicProgress,
+      }
     } catch (err) {
       console.error('Error fetching progress overview:', err)
       return null

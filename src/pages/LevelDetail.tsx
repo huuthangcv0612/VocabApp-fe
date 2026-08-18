@@ -1,45 +1,19 @@
 import { useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useTopics, useTopicLektions, useLektions, useLevels } from '../hooks/useApi'
 import type { Topic, LektionWithProgress } from '../services/api'
+import CloudIcon from '../assets/Cloud.svg'
+import GirlIcon from '../assets/Girl 1.svg'
 import '../styles/pages/levels.css'
-import '../styles/components/topic-card.css'
-
-const TOPIC_ICONS: Record<string, string> = {
-  Familie: '👨‍👩‍👧',
-  Gesundheit: '🏥',
-  Arbeit: '💼',
-  Alltag: '🏠',
-  Einkaufen: '🛍️',
-  Reisen: '✈️',
-  Wohnen: '🛋️',
-  Essen: '🍕',
-  Lernen: '📚',
-  Freizeit: '⚽',
-  Kultur: '🎭',
-  Natur: '🌿',
-}
-
-const getTopicIcon = (topicName?: string, icon?: string): string => {
-  if (icon) return icon
-  if (!topicName || typeof topicName !== 'string') return '📘'
-  const lowerName = topicName.toLowerCase()
-  for (const key of Object.keys(TOPIC_ICONS)) {
-    if (lowerName.includes(key.toLowerCase())) {
-      return TOPIC_ICONS[key]
-    }
-  }
-  return '📘'
-}
 
 const LevelDetail = () => {
   const { levelId, topicId } = useParams<{ levelId: string; topicId?: string }>()
   const navigate = useNavigate()
   const { levels } = useLevels()
-  const { topics, loading: topicsLoading, error: topicsError } = useTopics(levelId)
-  const { lektions: allLektions, loading: allLektionsLoading } = useLektions(levelId)
+  const { topics } = useTopics(levelId)
+  const { lektions: allLektions } = useLektions(levelId)
 
   // Find level object
   const level = levels.find((item) => item._id === levelId || item.level_name === levelId)
@@ -68,7 +42,7 @@ const LevelDetail = () => {
 
   // Selected topic resolution
   const activeTopic = useMemo(() => {
-    if (!topicId) return null
+    if (!topicId) return effectiveTopics[0] || null
     return effectiveTopics.find((t) => t._id === topicId || t.topic_name === topicId) || {
       _id: topicId,
       topic_name: topicId,
@@ -84,125 +58,92 @@ const LevelDetail = () => {
   // Fallback for lektions if API returned empty
   const displayLektions: LektionWithProgress[] = useMemo(() => {
     if (topicLektions.length > 0) return topicLektions
-    if (!activeTopic) return []
-    return allLektions.filter((l) => {
+    if (!activeTopic) return allLektions
+    const filtered = allLektions.filter((l) => {
       if (typeof l.topic === 'string') return l.topic === activeTopic._id || l.topic === activeTopic.topic_name
       if (l.topic && typeof l.topic === 'object') return l.topic._id === activeTopic._id || l.topic.topic_name === activeTopic.topic_name
       return false
     })
+    return filtered.length > 0 ? filtered : allLektions
   }, [topicLektions, allLektions, activeTopic])
 
   return (
-    <div className="levels">
+    <div className="lektion-page">
       <Header />
 
-      <section className="levels-section">
-        <div className="levels-container">
-          {/* Header & Breadcrumb */}
-          <div className="topic-header-bar">
-            {activeTopic ? (
-              <button className="back-link" onClick={() => navigate(`/levels/${levelId}`)}>
-                ← Các chủ đề ({levelName})
-              </button>
-            ) : (
-              <Link to="/levels" className="back-link">
-                ← Chọn Trình Độ khác
-              </Link>
-            )}
+      {/* Section 1: Hero Banner (CHOOSE LEKTION) */}
+      <section className="lektion-hero-section">
+        {/* Floating Clouds */}
+        <img src={CloudIcon} alt="" className="hero-cloud cloud-1" />
+        <img src={CloudIcon} alt="" className="hero-cloud cloud-2" />
+        <img src={CloudIcon} alt="" className="hero-cloud cloud-3" />
+
+        <div className="lektion-hero-container">
+          <div className="lektion-hero-title-wrapper">
+            <h1 className="lektion-hero-title">
+              CHOOSE<br />LEKTION
+            </h1>
           </div>
 
-          {!activeTopic ? (
-            /* BƯỚC 1: HỌC THEO CHỦ ĐỀ (TOPIC LIST) */
-            <>
-              <h1 className="levels-title">Các chủ đề — {levelName}</h1>
-              <p className="levels-description">
-                Chọn một chủ đề bên dưới để khám phá danh sách bài học (Lektion) và bắt đầu quá trình tích lũy từ vựng của bạn.
-              </p>
-
-              {topicsLoading && <p className="status-text">Đang tải danh sách chủ đề...</p>}
-              {topicsError && <p className="status-text error">Lỗi: {topicsError}</p>}
-
-              {!topicsLoading && effectiveTopics.length === 0 && !allLektionsLoading && (
-                <p className="status-text">Chưa có chủ đề nào trong cấp độ này.</p>
-              )}
-
-              <div className="levels-grid">
-                {effectiveTopics.map((t) => (
-                  <div
-                    key={t._id}
-                    className="topic-card"
-                    onClick={() => navigate(`/levels/${levelId}/topics/${t._id}`)}
-                  >
-                    <div className="topic-card-icon">{getTopicIcon(t.topic_name, t.icon)}</div>
-                    <h3 className="topic-card-title">{t.topic_name}</h3>
-                    <p className="topic-card-description">{t.description || `Các bài học thuộc chủ đề ${t.topic_name}`}</p>
-                    <div className="topic-card-action">
-                      Xem bài học ➔
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            /* BƯỚC 2: DANH SÁCH LEKTION THEO TOPIC */
-            <>
-              <h1 className="levels-title">
-                {getTopicIcon(activeTopic.topic_name, activeTopic.icon)} {activeTopic.topic_name}
-              </h1>
-              <p className="levels-description">Trình độ {levelName} — Chọn bài học để bắt đầu ôn luyện từ vựng.</p>
-
-              {lektionsLoading && <p className="status-text">Đang tải danh sách bài học...</p>}
-              {lektionsError && <p className="status-text error">Lỗi: {lektionsError}</p>}
-
-              {!lektionsLoading && displayLektions.length === 0 && (
-                <p className="status-text">Không có bài học nào trong chủ đề này.</p>
-              )}
-
-              <div className="levels-grid">
-                {displayLektions.map((lektion) => {
-                  const displayTitle = lektion.lektion_name.includes('-')
-                    ? lektion.lektion_name.split('-').pop()?.trim() || lektion.lektion_name
-                    : lektion.lektion_name
-                  const count = typeof lektion.vocabularyCount === 'number' ? lektion.vocabularyCount : 0
-                  const progress = lektion.progress || { status: 'not_started', percentage: 0, learnedWordsCount: 0 }
-                  const isCompleted = progress.status === 'completed' || progress.percentage === 100
-
-                  return (
-                    <div key={lektion._id} className="lektion-card">
-                      <div className="lektion-card-header">
-                        <h3 className="lektion-card-title">{displayTitle}</h3>
-                        <span className="lektion-card-words">📖 {count} từ</span>
-                      </div>
-
-                      <div className="lektion-progress-section">
-                        <div className="lektion-progress-info">
-                          <span>Tiến độ</span>
-                          <span>{progress.percentage}%</span>
-                        </div>
-                        <div className="lektion-progress-bar-bg">
-                          <div
-                            className={`lektion-progress-bar-fill ${isCompleted ? 'completed' : ''}`}
-                            style={{ width: `${progress.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="lektion-card-footer">
-                        <div className={`lektion-status ${isCompleted ? 'completed' : progress.status}`}>
-                          {isCompleted ? '✓ Hoàn thành' : progress.status === 'in_progress' ? '⏳ Đang học' : '░ Chưa học'}
-                        </div>
-
-                        <Link to={`/lektion/${lektion._id}`} className={`lektion-start-btn ${isCompleted ? 'completed' : ''}`}>
-                          {isCompleted ? 'Ôn lại ↺' : 'Bắt đầu học →'}
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </>
-          )}
+          <div className="lektion-hero-girl-wrapper">
+            <img src={GirlIcon} alt="Girl on surfboard" className="lektion-hero-girl-img" />
+          </div>
         </div>
+
+        {/* Bottom Scalloped Wave */}
+        <div className="lektion-hero-wave"></div>
+      </section>
+
+      {/* Section 2: WHAT LEKTION YOU LIKE ? Selection Grid */}
+      <section className="lektion-selection-section">
+        <div className="lektion-container">
+          <h2 className="lektion-section-title">WHAT LEKTION YOU LIKE ?</h2>
+
+          {lektionsLoading && <p className="status-text white-text">Đang tải danh sách bài học...</p>}
+          {lektionsError && <p className="status-text error">Lỗi: {lektionsError}</p>}
+
+          {!lektionsLoading && displayLektions.length === 0 && (
+            <p className="status-text white-text">
+              Chưa có bài học nào trong chủ đề này ({activeTopic?.topic_name || levelName}).
+            </p>
+          )}
+
+          {/* Lektion Cards Grid */}
+          <div className="lektion-cards-grid">
+            {displayLektions.map((lektion) => {
+              const displayTitle = lektion.lektion_name.includes('-')
+                ? lektion.lektion_name.split('-').pop()?.trim() || lektion.lektion_name
+                : lektion.lektion_name
+              const count = typeof lektion.vocabularyCount === 'number' ? lektion.vocabularyCount : 0
+              const progress = lektion.progress || { status: 'not_started', percentage: 0, learnedWordsCount: 0 }
+              const isCompleted = progress.status === 'completed' || progress.percentage === 100
+
+              return (
+                <div
+                  key={lektion._id}
+                  className="lektion-card-item"
+                  onClick={() => navigate(`/lektion/${lektion._id}`)}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="lektion-card-image-wrapper">
+                    <span className="lektion-card-icon-lg">📚</span>
+                  </div>
+
+                  <div className="lektion-card-content">
+                    <h3 className="lektion-card-name">{displayTitle}</h3>
+                    <p className="lektion-card-desc">
+                      📖 {count} từ vựng • {isCompleted ? '✓ Hoàn thành' : progress.percentage > 0 ? `⏳ Đang học (${progress.percentage}%)` : '░ Chưa học'}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Bottom Scalloped Wave before Footer */}
+        <div className="lektion-bottom-wave"></div>
       </section>
 
       <Footer />

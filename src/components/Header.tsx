@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import '../styles/components/header.css'
 import useAuth from '../hooks/useAuth'
 import HamburgerIcon from '../assets/Hamberger.svg'
+import DeutschUpLogo from '../assets/DEUTSCHUP.svg'
 
 type HeaderProps = {
   animate?: boolean
@@ -30,7 +31,7 @@ const Header = ({ animate = false }: HeaderProps) => {
     <header className={`header ${animate ? 'header--animated' : ''}`}>
       <div className="header-container">
         <NavLink to="/" className="logo" onClick={closeMobileMenu}>
-          <span className="logo-text">DeutschUp</span>
+          <img src={DeutschUpLogo} alt="DeutschUp" className="logo-img" />
         </NavLink>
 
         <nav className="nav-menu">

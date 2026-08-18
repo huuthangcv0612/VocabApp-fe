@@ -32,6 +32,12 @@
   margin-bottom: 20px;
 }
 
+.admin-brand-logo-img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
 .admin-brand-logo {
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
