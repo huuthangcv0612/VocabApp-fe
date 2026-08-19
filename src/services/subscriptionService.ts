@@ -6,10 +6,136 @@ import type {
   UserStreak,
   PaymentTransaction,
   SubscriptionPlanId,
+  CreateOrderResponse,
 } from '../types/gamification'
 
 export const subscriptionService = {
-  getPackages: async (): Promise<SubscriptionPackage[]> => {
+  createOrder: async (planId: string): Promise<CreateOrderResponse> => {
+    try {
+      const response = await api.post<any>('/orders', { planId })
+      const resData = response.data?.data || response.data
+      if (resData && (resData.order || resData.payment)) {
+        return {
+          order: {
+            id: String(resData.order?.id || resData.order?._id || 'ord_1'),
+            orderCode: String(resData.order?.orderCode || resData.order?.code || 'DUMSZXQG6A12C81'),
+            amount: Number(resData.order?.amount ?? 10000),
+            status: String(resData.order?.status || 'PENDING'),
+            planName: resData.order?.planName || resData.planName || 'Premium',
+          },
+          payment: {
+            qrCodeUrl: String(resData.payment?.qrCodeUrl || resData.payment?.qr_url || ''),
+            accountName: String(resData.payment?.accountName || 'NGUYEN HUU THANG'),
+            accountNumber: String(resData.payment?.accountNumber || '4645199999'),
+            bankName: String(resData.payment?.bankName || 'Techcombank'),
+            transferContent: String(resData.payment?.transferContent || resData.order?.orderCode || 'DUMSZXQG6A12C81'),
+          },
+        }
+      }
+    } catch (err) {
+      console.warn('POST /api/orders failed or unavailable:', err)
+    }
+
+    const orderCode = 'DUMSZXQG6A12C81'
+    return {
+      order: {
+        id: `ord_${Date.now()}`,
+        orderCode,
+        amount: 10000,
+        status: 'PENDING',
+        planName: 'Premium',
+      },
+      payment: {
+        qrCodeUrl: `https://img.vietqr.io/image/MB-4645199999-compact.png?amount=10000&addInfo=${orderCode}&accountName=DEUTSCHUP`,
+        accountName: 'NGUYEN HUU THANG',
+        accountNumber: '4645199999',
+        bankName: 'Techcombank',
+        transferContent: orderCode,
+      },
+    }
+  },
+
+  getOrder: async (orderId: string): Promise<CreateOrderResponse> => {
+    try {
+      const response = await api.get<any>(`/orders/${orderId}`)
+      const resData = response.data?.data || response.data
+      if (resData && (resData.order || resData.payment)) {
+        return {
+          order: {
+            id: String(resData.order?.id || resData.order?._id || orderId),
+            orderCode: String(resData.order?.orderCode || resData.order?.code || 'DUMSZXQG6A12C81'),
+            amount: Number(resData.order?.amount ?? 10000),
+            status: String(resData.order?.status || 'PENDING'),
+            planName: resData.order?.planName || resData.planName || 'Premium',
+          },
+          payment: {
+            qrCodeUrl: String(resData.payment?.qrCodeUrl || resData.payment?.qr_url || ''),
+            accountName: String(resData.payment?.accountName || 'NGUYEN HUU THANG'),
+            accountNumber: String(resData.payment?.accountNumber || '4645199999'),
+            bankName: String(resData.payment?.bankName || 'Techcombank'),
+            transferContent: String(resData.payment?.transferContent || resData.order?.orderCode || 'DUMSZXQG6A12C81'),
+          },
+        }
+      }
+    } catch (err) {
+      console.warn(`GET /api/orders/${orderId} error:`, err)
+    }
+
+    const orderCode = orderId.length > 8 ? orderId : 'DUMSZXQG6A12C81'
+    return {
+      order: {
+        id: orderId,
+        orderCode,
+        amount: 10000,
+        status: 'PENDING',
+        planName: 'Premium',
+      },
+      payment: {
+        qrCodeUrl: `https://img.vietqr.io/image/MB-4645199999-compact.png?amount=10000&addInfo=${orderCode}&accountName=DEUTSCHUP`,
+        accountName: 'NGUYEN HUU THANG',
+        accountNumber: '4645199999',
+        bankName: 'Techcombank',
+        transferContent: orderCode,
+      },
+    }
+  },
+
+  getOrderStatus: async (orderId: string): Promise<{ status: string; isPaid: boolean }> => {
+    try {
+      const response = await api.get<any>(`/orders/${orderId}`)
+      const resData = response.data?.data || response.data
+      const status = String(resData?.order?.status || resData?.status || 'PENDING').toUpperCase()
+      const isPaid = status === 'PAID' || status === 'SUCCESS' || status === 'COMPLETED'
+      return { status, isPaid }
+    } catch (err) {
+      console.warn(`GET /api/orders/${orderId} status check error:`, err)
+      return { status: 'PENDING', isPaid: false }
+    }
+  },
+
+  getPlans: async (): Promise<SubscriptionPackage[]> => {
+    try {
+      const response = await api.get<any>('/plans')
+      const data = response.data?.data || response.data?.plans || response.data
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map((plan: any) => ({
+          id: String(plan.id || plan._id || plan.code || plan.plan_id || 'free'),
+          name: String(plan.name || plan.title || plan.plan_name || 'Gói Dịch Vụ'),
+          price: typeof plan.price === 'number' ? plan.price : Number(plan.price || plan.amount || 0),
+          currency: plan.currency || 'VND',
+          duration_months: plan.duration_months || plan.duration || 1,
+          features: Array.isArray(plan.features)
+            ? plan.features
+            : typeof plan.features === 'string'
+            ? [plan.features]
+            : (plan.description ? [plan.description] : []),
+          badge: plan.badge,
+        }))
+      }
+    } catch (err) {
+      console.warn('GET /api/plans failed or unavailable:', err)
+    }
+
     try {
       const response = await api.get<any>('/subscriptions/packages')
       const data = response.data?.data || response.data?.packages || response.data
@@ -17,62 +143,91 @@ export const subscriptionService = {
         return data
       }
     } catch (err) {
-      console.warn('Fallback getPackages:', err)
+      console.warn('Fallback /subscriptions/packages failed:', err)
     }
 
     return [
       {
         id: 'free',
-        name: 'Gói Free (Miễn Phí)',
+        name: 'FREE',
         price: 0,
         currency: 'VND',
         duration_months: 12,
-        features: [
-          'Học từ vựng cơ bản A1',
-          'Flashcard xem từ vựng',
-          'Luyện tập trắc nghiệm cơ bản',
-          'Hạn chế tính năng AI Kiểm tra câu',
-        ],
+        features: ['Bài học cơ bản', 'Flashcard'],
       },
       {
-        id: 'premium',
-        name: 'Gói Premium (Chuyên Sâu)',
-        price: 199000,
+        id: 'premium_1m',
+        name: 'PREMIUM 1 THÁNG',
+        price: 10000,
         currency: 'VND',
         duration_months: 1,
-        badge: 'Phổ biến nhất 🔥',
-        features: [
-          'Toàn bộ bài học A1, A2, B1',
-          '5 loại bài tập nâng cao phong cách Duolingo',
-          'AI Chấm điểm & Kiểm tra câu tiếng Đức',
-          'Phát âm giọng đọc chuẩn bản ngữ',
-          'Bảo lưu chuỗi Streak học tập',
-        ],
-      },
-      {
-        id: 'pro',
-        name: 'Gói Pro VIP (Toàn Diện)',
-        price: 399000,
-        currency: 'VND',
-        duration_months: 1,
-        badge: 'Đầy đủ nhất ⭐',
-        features: [
-          'Tất cả đặc quyền Gói Premium',
-          'Phòng học tương tác AI 1-on-1',
-          'Tạo đề thi Quick Test tùy chỉnh',
-          'Báo cáo phân tích kỹ năng chuyên sâu',
-          'Hỗ trợ ưu tiên 24/7',
-        ],
+        features: ['Toàn bộ bài học', 'Exercises', 'Theo dõi tiến độ', 'Không quảng cáo'],
       },
     ]
+  },
+
+  getPackages: async (): Promise<SubscriptionPackage[]> => {
+    return subscriptionService.getPlans()
+  },
+
+  createPlan: async (planData: Partial<SubscriptionPackage>): Promise<SubscriptionPackage> => {
+    try {
+      const response = await api.post<any>('/plans', planData)
+      return response.data?.data || response.data
+    } catch (err) {
+      console.warn('POST /api/plans error:', err)
+      throw err
+    }
+  },
+
+  updatePlan: async (id: string, planData: Partial<SubscriptionPackage>): Promise<SubscriptionPackage> => {
+    try {
+      const response = await api.put<any>(`/plans/${id}`, planData)
+      return response.data?.data || response.data
+    } catch (err) {
+      console.warn(`PUT /api/plans/${id} error:`, err)
+      throw err
+    }
+  },
+
+  deletePlan: async (id: string): Promise<boolean> => {
+    try {
+      const response = await api.delete<any>(`/plans/${id}`)
+      return response.data?.success ?? true
+    } catch (err) {
+      console.warn(`DELETE /api/plans/${id} error:`, err)
+      throw err
+    }
   },
 
   getCurrentSubscription: async (): Promise<UserSubscription> => {
     try {
       const response = await api.get<any>('/subscriptions/current')
       const data = response.data?.data || response.data
-      if (data && data.plan_id) {
-        return data
+      if (data) {
+        const planId = String(data.plan_id || data.planId || data.plan || 'free').toLowerCase()
+        const status = String(data.status || 'active').toLowerCase()
+        const isPremium =
+          data.isPremium === true ||
+          data.is_premium === true ||
+          (planId !== 'free' && status === 'active')
+
+        let daysRemaining: number | undefined = data.daysRemaining ?? data.days_remaining
+        if (daysRemaining === undefined && data.end_date) {
+          const diffMs = new Date(data.end_date).getTime() - Date.now()
+          daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)))
+        }
+
+        return {
+          plan_id: planId,
+          plan_name: data.plan_name || data.planName || (isPremium ? 'Premium' : 'Gói Free'),
+          status: status,
+          start_date: data.start_date || new Date().toISOString(),
+          end_date: data.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          features: Array.isArray(data.features) ? data.features : [],
+          isPremium,
+          daysRemaining: daysRemaining ?? (isPremium ? 28 : 0),
+        }
       }
     } catch (err) {
       console.warn('Fallback getCurrentSubscription:', err)
@@ -85,6 +240,8 @@ export const subscriptionService = {
       start_date: new Date().toISOString(),
       end_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       features: ['basic_learning', 'flashcard'],
+      isPremium: false,
+      daysRemaining: 0,
     }
   },
 

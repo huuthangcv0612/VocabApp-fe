@@ -40,6 +40,7 @@ import AdminQuestions from './pages/admin/AdminQuestions'
 import AdminTests from './pages/admin/AdminTests'
 import AdminUsers from './pages/admin/AdminUsers'
 import AdminResults from './pages/admin/AdminResults'
+import AdminPlans from './pages/admin/AdminPlans'
 
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -70,6 +71,7 @@ function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/payment/:planId" element={<PaymentPage />} />
+            <Route path="/payment/order/:orderId" element={<PaymentPage />} />
             <Route path="/payment/result" element={<PaymentResultPage />} />
             <Route path="/unit/:unitId" element={<UnitPage />} />
             <Route path="/learn/lesson/:lessonId" element={<LessonLearnPage />} />
@@ -100,6 +102,7 @@ function App() {
             <Route path="/admin/tests" element={<AdminTests />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/results" element={<AdminResults />} />
+            <Route path="/admin/plans" element={<AdminPlans />} />
           </Route>
         </Routes>
       </Router>

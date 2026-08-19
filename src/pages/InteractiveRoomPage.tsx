@@ -1,69 +1,52 @@
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { PremiumFeatureCard } from '../components/PremiumFeatureCard'
+import { useSubscription } from '../hooks/useSubscription'
 import '../styles/pages/interactive-room.css'
 
 type ModeItem = {
   title: string
   icon: string
   description: string
-  buttonLabel: string
   path: string
+  isPremiumOnly?: boolean
 }
 
 const MODE_ITEMS: ModeItem[] = [
   {
-    title: 'AI Hội Thoại',
-    icon: '🤖',
-    description:
-      'Luyện hội thoại tiếng Đức theo tình huống thực tế. AI sẽ đóng vai người đối thoại và sửa lỗi cho bạn.',
-    buttonLabel: 'Bắt Đầu Hội Thoại',
-    path: '/interactive-room/conversation',
-  },
-  {
-    title: 'Sửa Ngữ Pháp',
+    title: 'AI Grammar',
     icon: '✍️',
-    description:
-      'Nhập câu tiếng Đức của bạn, AI sẽ kiểm tra ngữ pháp, giải thích lỗi sai và gợi ý câu đúng.',
-    buttonLabel: 'Kiểm Tra Ngữ Pháp',
+    description: 'Sửa lỗi ngữ pháp và chấm điểm câu tiếng Đức bằng AI.',
     path: '/interactive-room/grammar-check',
+    isPremiumOnly: true,
   },
   {
-    title: 'Luyện Đặt Câu',
-    icon: '💬',
-    description:
-      'AI đưa ra từ vựng hoặc chủ đề, bạn đặt câu tiếng Đức và nhận phản hồi chi tiết.',
-    buttonLabel: 'Luyện Đặt Câu',
-    path: '/interactive-room/sentence-practice',
+    title: 'Lesson Nâng Cao',
+    icon: '📚',
+    description: 'Truy cập toàn bộ kho bài học chuyên sâu A1-B1.',
+    path: '/levels',
+    isPremiumOnly: true,
   },
   {
-    title: 'Role-play Tình Huống',
-    icon: '🎭',
-    description:
-      'Thực hành các tình huống như gọi món, hỏi đường, giới thiệu bản thân, phỏng vấn…',
-    buttonLabel: 'Bắt Đầu Role-play',
-    path: '/interactive-room/role-play',
+    title: 'Exercise Nâng Cao',
+    icon: '✍️',
+    description: 'Luyện tập trắc nghiệm và bài tập tương tác cao cấp.',
+    path: '/lektion/1',
+    isPremiumOnly: true,
   },
   {
-    title: 'AI Quiz Thông Minh',
-    icon: '🧠',
-    description:
-      'AI tự tạo câu hỏi dựa trên từ vựng trong Lektion hiện tại để kiểm tra khả năng ghi nhớ.',
-    buttonLabel: 'Làm Quiz AI',
-    path: '/interactive-room/ai-quiz',
-  },
-  {
-    title: 'Luyện Phát Âm',
-    icon: '🔊',
-    description:
-      'Nghe phát âm tiếng Đức chuẩn và luyện đọc theo từng từ hoặc câu mẫu.',
-    buttonLabel: 'Luyện Phát Âm',
-    path: '/interactive-room/pronunciation',
+    title: 'Progress Chuyên Sâu',
+    icon: '📊',
+    description: 'Báo cáo phân tích chi tiết kỹ năng và ghi nhớ từ vựng.',
+    path: '/progress',
+    isPremiumOnly: false,
   },
 ]
 
 const InteractiveRoomPage = () => {
   const navigate = useNavigate()
+  const { isPremium } = useSubscription()
 
   return (
     <div className="interactive-room">
@@ -76,40 +59,38 @@ const InteractiveRoomPage = () => {
               className="interactive-room-back"
               onClick={() => navigate('/levels')}
             >
-              ← Chọn Lektion
+              ← Danh sách bài học
             </button>
             <div className="interactive-room-badge">
               <span className="interactive-room-badge-icon">🤖</span>
-              <span>Phòng Học Tương Tác</span>
+              <span>Tính Năng & Premium</span>
             </div>
             <h1 className="interactive-room-title">
-              Học Tiếng Đức Cùng <span>AI</span>
+              Học Tiếng Đức Cùng <span>AI & Premium</span>
             </h1>
             <p className="interactive-room-subtitle">
-              Luyện tập giao tiếp, ngữ pháp và phản xạ tiếng Đức với các chế độ học thông minh.
+              Mở khóa các tính năng AI Grammar, Bài học chuyên sâu và Luyện tập nâng cao.
             </p>
           </div>
 
-          <div className="interactive-room-grid">
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '24px',
+              marginTop: '32px',
+            }}
+          >
             {MODE_ITEMS.map((mode) => (
-              <article key={mode.title} className="interactive-room-card">
-                <div className="interactive-room-card-tag">coming soon</div>
-                <div className="interactive-room-card-icon">{mode.icon}</div>
-                <div className="interactive-room-card-body">
-                  <h2>{mode.title}</h2>
-                  <p>{mode.description}</p>
-                </div>
-                <button
-                  type="button"
-                  className="interactive-room-card-button"
-                  onClick={() => {
-                    console.log('Navigate to', mode.path)
-                    navigate(mode.path)
-                  }}
-                >
-                  {mode.buttonLabel}
-                </button>
-              </article>
+              <PremiumFeatureCard
+                key={mode.title}
+                title={mode.title}
+                description={mode.description}
+                isPremium={isPremium}
+                isLocked={mode.isPremiumOnly ? !isPremium : false}
+                onStart={() => navigate(mode.path)}
+                buttonLabel="Bắt đầu"
+              />
             ))}
           </div>
         </div>

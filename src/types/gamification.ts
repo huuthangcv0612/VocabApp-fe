@@ -22,22 +22,24 @@ export interface AchievementItem {
 }
 
 export interface SubscriptionPackage {
-  id: SubscriptionPlanId
+  id: SubscriptionPlanId | string
   name: string
   price: number
-  currency: 'VND' | 'USD'
-  duration_months: number
+  currency?: 'VND' | 'USD' | string
+  duration_months?: number
   features: string[]
   badge?: string
 }
 
 export interface UserSubscription {
-  plan_id: SubscriptionPlanId
+  plan_id: SubscriptionPlanId | string
   plan_name: string
-  status: SubscriptionStatus
+  status: SubscriptionStatus | string
   start_date: string
   end_date: string
   features: string[]
+  isPremium?: boolean
+  daysRemaining?: number
 }
 
 export interface PaymentTransaction {
@@ -52,4 +54,25 @@ export interface PaymentTransaction {
   qr_url?: string
   created_at: string
   verified_at?: string
+}
+
+export interface OrderInfo {
+  id: string
+  orderCode: string
+  amount: number
+  status: string
+  planName?: string
+}
+
+export interface PaymentDetails {
+  qrCodeUrl: string
+  accountName: string
+  accountNumber: string
+  bankName?: string
+  transferContent: string
+}
+
+export interface CreateOrderResponse {
+  order: OrderInfo
+  payment: PaymentDetails
 }

@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import '../styles/components/header.css'
 import useAuth from '../hooks/useAuth'
 import HamburgerIcon from '../assets/Hamberger.svg'
 import DeutschUpLogo from '../assets/DEUTSCHUP.svg'
+import { subscriptionService } from '../services/subscriptionService'
+import type { UserSubscription } from '../types/gamification'
 
 type HeaderProps = {
   animate?: boolean
@@ -13,6 +15,25 @@ const Header = ({ animate = false }: HeaderProps) => {
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+    if (isAuthenticated) {
+      subscriptionService
+        .getCurrentSubscription()
+        .then((data) => {
+          if (isMounted) setSubscription(data)
+        })
+        .catch(() => {})
+    } else {
+      setSubscription(null)
+    }
+
+    return () => {
+      isMounted = false
+    }
+  }, [isAuthenticated])
 
   const handleLogout = () => {
     logout()
@@ -26,6 +47,8 @@ const Header = ({ animate = false }: HeaderProps) => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false)
   }
+
+  const isPremium = subscription?.isPremium || (subscription?.plan_id && subscription.plan_id !== 'free')
 
   return (
     <header className={`header ${animate ? 'header--animated' : ''}`}>
@@ -41,9 +64,28 @@ const Header = ({ animate = false }: HeaderProps) => {
           <NavLink to="/progress" className="nav-link">
             Progress
           </NavLink>
-          <NavLink to="/pricing" className="nav-link">
-            Pricing
-          </NavLink>
+
+          {/* Subscription Status Link */}
+          {isPremium ? (
+            <NavLink
+              to="/subscription"
+              className="nav-link nav-premium-badge"
+              style={{
+                color: '#FFF2B7',
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              👑 Premium {subscription?.daysRemaining ? `(Còn ${subscription.daysRemaining} ngày)` : ''}
+            </NavLink>
+          ) : (
+            <NavLink to="/pricing" className="nav-link">
+              Nâng cấp
+            </NavLink>
+          )}
+
           <NavLink to="/test" className="nav-link">
             Practice Tests
           </NavLink>
@@ -97,9 +139,22 @@ const Header = ({ animate = false }: HeaderProps) => {
           <NavLink to="/progress" className="nav-link" onClick={closeMobileMenu}>
             Progress
           </NavLink>
-          <NavLink to="/pricing" className="nav-link" onClick={closeMobileMenu}>
-            Pricing
-          </NavLink>
+
+          {isPremium ? (
+            <NavLink
+              to="/subscription"
+              className="nav-link"
+              onClick={closeMobileMenu}
+              style={{ color: '#FFF2B7', fontWeight: 800 }}
+            >
+              👑 Premium {subscription?.daysRemaining ? `(Còn ${subscription.daysRemaining} ngày)` : ''}
+            </NavLink>
+          ) : (
+            <NavLink to="/pricing" className="nav-link" onClick={closeMobileMenu}>
+              Nâng cấp
+            </NavLink>
+          )}
+
           <NavLink to="/test" className="nav-link" onClick={closeMobileMenu}>
             Practice Tests
           </NavLink>

@@ -36,6 +36,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ title, breadcrumbs, ch
   ]
 
   const systemNavItems = [
+    { to: '/admin/plans', label: 'Subscription Plans', icon: '💳' },
     { to: '/admin/questions', label: 'Question Bank', icon: '❓' },
     { to: '/admin/tests', label: 'Tests Config', icon: '📝' },
     { to: '/admin/users', label: 'User Management', icon: '👥' },

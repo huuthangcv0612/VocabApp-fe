@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { subscriptionService } from '../services/subscriptionService'
 import type { SubscriptionPackage, UserSubscription } from '../types/gamification'
 import CloudIcon from '../assets/Cloud.svg'
-import '../styles/pages/progress.css'
+import '../styles/pages/pricing.css'
 
 export const PricingPage: React.FC = () => {
   const navigate = useNavigate()
 
-  const [packages, setPackages] = useState<SubscriptionPackage[]>([])
+  const [plans, setPlans] = useState<SubscriptionPackage[]>([])
   const [currentSub, setCurrentSub] = useState<UserSubscription | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -18,14 +18,14 @@ export const PricingPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const [pkgList, sub] = await Promise.all([
-          subscriptionService.getPackages(),
+        const [planList, sub] = await Promise.all([
+          subscriptionService.getPlans(),
           subscriptionService.getCurrentSubscription(),
         ])
-        setPackages(pkgList)
+        setPlans(planList)
         setCurrentSub(sub)
       } catch (err) {
-        console.warn('Error loading pricing data:', err)
+        console.warn('Error fetching pricing plans:', err)
       } finally {
         setLoading(false)
       }
@@ -34,132 +34,94 @@ export const PricingPage: React.FC = () => {
   }, [])
 
   const formatPrice = (price: number) => {
-    if (price === 0) return 'Miễn Phí'
-    return `${price.toLocaleString('vi-VN')} VNĐ / tháng`
+    if (price === 0) return '0đ'
+    return `${price.toLocaleString('vi-VN')}đ`
+  }
+
+  const isCurrentPlan = (plan: SubscriptionPackage) => {
+    if (plan.badge === 'isCurrent' || (plan as any).isCurrent !== undefined) {
+      return Boolean((plan as any).isCurrent)
+    }
+    if (currentSub?.plan_id) {
+      return currentSub.plan_id.toLowerCase() === plan.id.toLowerCase()
+    }
+    return plan.id.toLowerCase() === 'free' || plan.price === 0
+  }
+
+  const handleUpgrade = async (plan: SubscriptionPackage) => {
+    try {
+      const orderRes = await subscriptionService.createOrder(plan.id)
+      const orderId = orderRes.order.id || orderRes.order.orderCode
+      navigate(`/payment/${orderId}`, { state: orderRes })
+    } catch (err) {
+      navigate(`/payment/${plan.id}`)
+    }
   }
 
   return (
-    <div className="progress-page">
+    <div className="pricing-page">
       <Header />
 
-      {/* Hero Banner Section */}
-      <section className="progress-hero-section">
-        <img src={CloudIcon} alt="" className="hero-cloud cloud-1" />
-        <img src={CloudIcon} alt="" className="hero-cloud cloud-2" />
+      {/* Hero Banner */}
+      <section className="pricing-hero-section">
+        <img
+          src={CloudIcon}
+          alt=""
+          className="hero-cloud cloud-1"
+          style={{ position: 'absolute', top: '20px', left: '5%', opacity: 0.5, width: '120px' }}
+        />
+        <img
+          src={CloudIcon}
+          alt=""
+          className="hero-cloud cloud-2"
+          style={{ position: 'absolute', bottom: '20px', right: '5%', opacity: 0.5, width: '140px' }}
+        />
 
-        <div className="progress-hero-container">
-          <div className="progress-hero-content">
-            <Link to="/subscription" className="back-link">
-              ← Quản lý gói hiện tại
-            </Link>
-
-            <h1 className="progress-hero-title">BẢNG GIÁ GÓI DỊCH VỤ</h1>
-            <p className="progress-hero-subtitle">
-              Lựa chọn gói học tập phù hợp để mở khóa 100% tính năng AI, bài tập tương tác và tăng tốc khả năng tiếng Đức.
-            </p>
-          </div>
+        <div className="pricing-hero-container">
+          <h1 className="pricing-hero-title">BẢNG GIÁ GÓI DỊCH VỤ</h1>
+          <p className="pricing-hero-subtitle">
+            Lựa chọn gói học tập phù hợp để tăng tốc khả năng tiếng Đức của bạn.
+          </p>
         </div>
-
-        <div className="progress-hero-wave"></div>
       </section>
 
       {/* Main Pricing Cards Grid */}
-      <main className="progress-main-section" style={{ padding: '40px 20px 80px 20px' }}>
-        <div className="progress-container">
+      <main className="pricing-main-section">
+        <div className="pricing-container">
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
               <p>Đang tải các gói dịch vụ...</p>
             </div>
           ) : (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '24px',
-                alignItems: 'stretch',
-              }}
-            >
-              {packages.map((pkg) => {
-                const isCurrent = currentSub?.plan_id === pkg.id
-                const isPopular = pkg.id === 'premium'
-                const isPro = pkg.id === 'pro'
-
+            <div className="pricing-grid">
+              {plans.map((plan) => {
+                const active = isCurrentPlan(plan)
                 return (
                   <div
-                    key={pkg.id}
-                    className="admin-card"
-                    style={{
-                      padding: '36px 28px',
-                      borderRadius: '24px',
-                      border: isPopular
-                        ? '3px solid #2a63e8'
-                        : isPro
-                        ? '3px solid #8b5cf6'
-                        : '1px solid #cbd5e1',
-                      position: 'relative',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      boxShadow: isPopular ? '0 12px 30px rgba(42,99,232,0.15)' : 'none',
-                    }}
+                    key={plan.id}
+                    className={`pricing-card ${active ? 'is-current' : 'is-highlighted'}`}
                   >
-                    {pkg.badge && (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          top: '-14px',
-                          right: '24px',
-                          backgroundColor: isPopular ? '#2a63e8' : '#8b5cf6',
-                          color: '#fff',
-                          padding: '4px 14px',
-                          borderRadius: '999px',
-                          fontSize: '0.78rem',
-                          fontWeight: 800,
-                        }}
-                      >
-                        {pkg.badge}
-                      </div>
-                    )}
-
                     <div>
-                      <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                        {pkg.name}
-                      </h3>
+                      <h2 className="plan-title">{plan.name}</h2>
+                      <div className="plan-price">{formatPrice(plan.price)}</div>
 
-                      <div style={{ fontSize: '1.8rem', fontWeight: 800, color: isPopular ? '#2a63e8' : isPro ? '#8b5cf6' : '#0f172a', margin: '16px 0 24px 0' }}>
-                        {formatPrice(pkg.price)}
-                      </div>
-
-                      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '20px', marginBottom: '24px' }}>
-                        <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '12px' }}>
-                          ĐẶC QUYỀN GÓI:
-                        </div>
-                        <ul style={{ paddingLeft: 0, listStyle: 'none', margin: 0, display: 'grid', gap: '12px' }}>
-                          {pkg.features.map((feat, idx) => (
-                            <li key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '0.92rem', color: '#334155' }}>
-                              <span style={{ color: '#16a34a', fontWeight: 800 }}>✓</span>
-                              <span>{feat}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      <ul className="plan-features-list">
+                        {plan.features.map((feature, idx) => (
+                          <li key={idx} className="plan-feature-item">
+                            <span className="check-icon">✓</span>
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
 
                     <button
-                      className="tool-button"
-                      disabled={isCurrent}
-                      onClick={() => navigate(`/payment/${pkg.id}`)}
-                      style={{
-                        width: '100%',
-                        padding: '14px',
-                        borderRadius: '9999px',
-                        fontSize: '1rem',
-                        fontWeight: 700,
-                        backgroundColor: isCurrent ? '#94a3b8' : isPopular ? '#2a63e8' : isPro ? '#8b5cf6' : '#475569',
-                      }}
+                      className={`plan-action-button ${active ? 'btn-current' : 'btn-upgrade'}`}
+                      disabled={active}
+                      onClick={() => !active && handleUpgrade(plan)}
                     >
-                      {isCurrent ? 'Gói Hiện Tại Của Bạn' : pkg.price === 0 ? 'Dùng Gói Miễn Phí' : 'Nâng Cấp Gói Này ▶'}
+                      {active ? 'Gói hiện tại' : 'Nâng cấp ngay'}
                     </button>
                   </div>
                 )
