@@ -180,7 +180,7 @@ export const QuickTestPage = () => {
                   <span className="percentage">{result.percentage}%</span>
                   <span className="label">{result.score} / {result.total} ĐÚNG</span>
                 </div>
-                <h2 style={{ fontFamily: 'Fredoka', fontSize: '1.8rem', color: '#0f172a', margin: '0 0 8px 0' }}>
+                <h2 style={{ fontFamily: "'Oswald', sans-serif", fontSize: '1.8rem', color: '#0f172a', margin: '0 0 8px 0' }}>
                   KẾT QUẢ ĐÁNH GIÁ: CẤP ĐỘ {result.evaluatedLevel}
                 </h2>
                 <p style={{ color: '#64748b' }}>Hệ thống đã tự động chấm điểm và phân tích năng lực tiếng Đức của bạn.</p>

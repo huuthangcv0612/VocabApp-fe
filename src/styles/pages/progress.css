@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Varela+Round&display=swap');
 
 .progress-page {
   min-height: 100vh;
@@ -49,7 +49,7 @@
 }
 
 .progress-hero-title {
-  font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+  font-family: 'Oswald', sans-serif;
   font-size: clamp(2.8rem, 6vw, 4.5rem);
   font-weight: 800;
   color: #D90000;
@@ -150,7 +150,7 @@
 }
 
 .stat-card-label {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Varela Round', sans-serif;
   font-size: 0.88rem;
   font-weight: 800;
   color: #64748b;
@@ -159,7 +159,7 @@
 }
 
 .stat-card-value {
-  font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+  font-family: 'Oswald', sans-serif;
   font-size: 2.5rem;
   font-weight: 800;
   color: #0f172a;
@@ -227,7 +227,7 @@
 }
 
 .breakdown-title {
-  font-family: 'Fredoka', 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Oswald', sans-serif;
   font-size: 1.35rem;
   font-weight: 800;
   color: #0f172a;

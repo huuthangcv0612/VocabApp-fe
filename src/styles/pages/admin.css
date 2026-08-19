@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Varela+Round&display=swap');
 
 .admin-layout {
   display: flex;
   min-height: 100vh;
   background-color: #f8fafc;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Varela Round', sans-serif;
   color: #0f172a;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .admin-brand-logo {
-  font-family: 'Fredoka', sans-serif;
+  font-family: 'Oswald', sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
   color: #d90000;
