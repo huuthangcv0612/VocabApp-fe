@@ -27,7 +27,9 @@ const describeArc = (x: number, y: number, radius: number, startAngle: number, e
   return [`M ${x} ${y}`, `L ${start.x} ${start.y}`, `A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`, 'Z'].join(' ')
 }
 
-const SpinWheel = () => {
+const SEGMENT_COLORS = ['#1e7f34', '#fbbf24', '#ef4444']
+
+export const SpinWheel = () => {
   const { lektionId } = useParams<{ lektionId: string }>()
   const { vocabulary, loading, error } = useVocabulary(lektionId)
   const [rotating, setRotating] = useState(false)
@@ -40,7 +42,7 @@ const SpinWheel = () => {
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const wheelRef = useRef<SVGSVGElement | null>(null)
 
-  const segmentColors = ['#1e7f34', '#fbbf24', '#ef4444']
+  const segmentColors = SEGMENT_COLORS
   const angle = vocabulary.length > 0 ? 360 / vocabulary.length : 0
 
   const playSpinSound = () => {
@@ -200,19 +202,22 @@ const SpinWheel = () => {
 
                   try {
                     console.log('Calling OpenAI feedback API with:', { word: result, sentence })
-                    const feedback = await vocabularyApi.getSentenceFeedback(result!, sentence)
+                    const feedback = await vocabularyApi.getSentenceFeedback(sentence)
                     console.log('Received feedback:', feedback)
                     setGrammarFeedback(feedback)
-                  } catch (error: any) {
+                  } catch (error: unknown) {
                     console.error('Error getting feedback:', error)
                     let errorMessage = 'Không thể nhận xét câu này. Vui lòng thử lại.'
 
-                    if (error.response?.status === 404) {
-                      errorMessage = 'Tính năng nhận xét AI chưa được kích hoạt. Vui lòng liên hệ quản trị viên.'
-                    } else if (error.response?.status >= 500) {
-                      errorMessage = 'Lỗi máy chủ. Vui lòng thử lại sau.'
-                    } else if (error.code === 'NETWORK_ERROR' || error.message?.includes('timeout')) {
-                      errorMessage = 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng.'
+                    if (typeof error === 'object' && error !== null) {
+                      const errObj = error as { response?: { status?: number }; code?: string; message?: string }
+                      if (errObj.response?.status === 404) {
+                        errorMessage = 'Tính năng nhận xét AI chưa được kích hoạt. Vui lòng liên hệ quản trị viên.'
+                      } else if (errObj.response?.status && errObj.response.status >= 500) {
+                        errorMessage = 'Lỗi máy chủ. Vui lòng thử lại sau.'
+                      } else if (errObj.code === 'NETWORK_ERROR' || errObj.message?.includes('timeout')) {
+                        errorMessage = 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng.'
+                      }
                     }
 
                     setGrammarFeedback(errorMessage)

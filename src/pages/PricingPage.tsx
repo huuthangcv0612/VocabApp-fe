@@ -39,9 +39,6 @@ export const PricingPage: React.FC = () => {
   }
 
   const isCurrentPlan = (plan: SubscriptionPackage) => {
-    if (plan.badge === 'isCurrent' || (plan as any).isCurrent !== undefined) {
-      return Boolean((plan as any).isCurrent)
-    }
     if (currentSub?.plan_id) {
       return currentSub.plan_id.toLowerCase() === plan.id.toLowerCase()
     }

@@ -34,6 +34,6 @@ export interface LessonExercise {
   question: string
   content?: ExerciseContentPayload
   answer?: ExerciseAnswerPayload
-  options?: Array<{ text: string; isCorrect: boolean }>
+  options?: Array<{ text: string; isCorrect?: boolean }>
   explanation?: string
 }

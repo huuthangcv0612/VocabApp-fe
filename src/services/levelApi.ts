@@ -4,52 +4,32 @@ import type { LevelItem, LevelPayload } from '../types/level'
 
 export const levelApi = {
   getAll: async (): Promise<LevelItem[]> => {
-    try {
-      const response = await api.get<ApiResponse<LevelItem[]> | LevelItem[]>('/levels')
-      const resData = response.data
-
-      if (Array.isArray(resData)) return resData
-      if ('data' in resData && Array.isArray(resData.data)) return resData.data
-      return []
-    } catch (err) {
-      console.error('Failed to fetch levels:', err)
-      throw err
-    }
+    const response = await api.get<ApiResponse<LevelItem[]>>('/levels')
+    if (Array.isArray(response.data.data)) return response.data.data
+    return []
   },
 
   getById: async (id: string): Promise<LevelItem> => {
-    const response = await api.get<ApiResponse<LevelItem> | LevelItem>(`/levels/${id}`)
-    if ('data' in response.data && response.data.data) {
-      return (response.data as ApiResponse<LevelItem>).data
-    }
-    return response.data as LevelItem
+    const response = await api.get<ApiResponse<LevelItem>>(`/levels/${encodeURIComponent(id)}`)
+    return response.data.data
   },
 
   getByName: async (name: string): Promise<LevelItem> => {
-    const response = await api.get<ApiResponse<LevelItem> | LevelItem>(`/levels/name/${name}`)
-    if ('data' in response.data && response.data.data) {
-      return (response.data as ApiResponse<LevelItem>).data
-    }
-    return response.data as LevelItem
+    const response = await api.get<ApiResponse<LevelItem>>(`/levels/name/${encodeURIComponent(name)}`)
+    return response.data.data
   },
 
   create: async (payload: LevelPayload): Promise<LevelItem> => {
-    const response = await api.post<ApiResponse<LevelItem> | LevelItem>('/levels', payload)
-    if ('data' in response.data && response.data.data) {
-      return (response.data as ApiResponse<LevelItem>).data
-    }
-    return response.data as LevelItem
+    const response = await api.post<ApiResponse<LevelItem>>('/admin/levels', payload)
+    return response.data.data
   },
 
   update: async (id: string, payload: Partial<LevelPayload>): Promise<LevelItem> => {
-    const response = await api.put<ApiResponse<LevelItem> | LevelItem>(`/levels/${id}`, payload)
-    if ('data' in response.data && response.data.data) {
-      return (response.data as ApiResponse<LevelItem>).data
-    }
-    return response.data as LevelItem
+    const response = await api.put<ApiResponse<LevelItem>>(`/admin/levels/${encodeURIComponent(id)}`, payload)
+    return response.data.data
   },
 
   delete: async (id: string): Promise<void> => {
-    await api.delete(`/levels/${id}`)
+    await api.delete(`/admin/levels/${encodeURIComponent(id)}`)
   },
 }

@@ -4,7 +4,8 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
 import { progressService } from '../services/progressService'
-import type { LessonDetailData, LessonPreviewVocabulary, LessonExercise } from '../types/admin'
+import type { LessonDetailData, LessonPreviewVocabulary } from '../types/lesson'
+import type { LessonExercise } from '../types/exercise'
 import type { LessonLearningStep } from '../types/student'
 import { toast } from 'react-hot-toast'
 import '../styles/pages/lesson.css'
@@ -54,8 +55,9 @@ export const LessonLearnPage: React.FC = () => {
         setError(null)
         const data = await studentLearningService.getLessonLearningData(activeLessonId)
         setLessonData(data)
-      } catch (err: any) {
-        setError(err.message || 'Không thể tải bài học.')
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Không thể tải bài học.'
+        setError(msg)
       } finally {
         setLoading(false)
       }
@@ -91,13 +93,8 @@ export const LessonLearnPage: React.FC = () => {
   }
 
   // --- STEP 1: LESSON INTRO ACTIONS ---
-  const handleStartLesson = async () => {
+  const handleStartLesson = () => {
     if (!lessonData || !activeLessonId) return
-    try {
-      await progressService.startLessonProgress(activeLessonId)
-    } catch (err) {
-      console.warn('Failed startLessonProgress:', err)
-    }
 
     if (lessonData.vocabularies.length > 0) {
       setStep('vocab_preview')
@@ -110,21 +107,11 @@ export const LessonLearnPage: React.FC = () => {
     }
   }
 
-  // --- STEP 2: VOCAB PREVIEW ACTIONS ---
-  useEffect(() => {
-    if (step === 'vocab_preview' && lessonData && lessonData.vocabularies[vocabIndex]) {
-      const v = lessonData.vocabularies[vocabIndex]
-      const vId = v.vocabularyId || v._id
-      progressService.recordVocabularyView(vId).catch((err) => console.warn('Record view error:', err))
-    }
-  }, [vocabIndex, step, lessonData])
-
   const handleNextVocab = () => {
     if (!lessonData) return
     if (vocabIndex < lessonData.vocabularies.length - 1) {
       setVocabIndex((prev) => prev + 1)
     } else {
-      // Reached last vocab -> start exercises
       if (lessonData.exercises.length > 0) {
         setStep('exercise')
         setExerciseIndex(0)
@@ -175,38 +162,33 @@ export const LessonLearnPage: React.FC = () => {
       const res = await studentLearningService.submitExerciseAnswer({
         lessonId: activeLessonId,
         exerciseId: currentEx._id,
-        userAnswer: finalAnswer,
+        answer: finalAnswer,
       })
+
+      const isCorrect = res.is_correct ?? res.correct ?? false
+      const xpEarned = res.xp_earned ?? res.xp ?? 5
+      const explanation = res.explanation || res.feedback || (isCorrect ? 'Chính xác!' : 'Chưa chính xác.')
 
       setSubmissionResult({
         submitted: true,
-        correct: res.correct,
-        feedback: res.feedback,
-        xp: res.xp,
+        correct: isCorrect,
+        feedback: explanation,
+        xp: xpEarned,
       })
 
-      const newCorrectCount = res.correct ? correctCount + 1 : correctCount
-      if (res.correct) {
-        setCorrectCount(newCorrectCount)
-        setTotalXpEarned((prev) => prev + (res.xp || 5))
+      if (isCorrect) {
+        setCorrectCount((prev) => prev + 1)
+        setTotalXpEarned((prev) => prev + xpEarned)
       }
 
-      // Record Vocabulary Answer attempt (Evaluates mastery based on exercise interaction)
-      if (currentEx.vocabularyId) {
-        progressService.recordVocabularyAnswer(currentEx.vocabularyId, res.correct).catch((err) => {
-          console.warn('Record vocab answer error:', err)
+      if (currentEx.vocabularyId && activeLessonId) {
+        progressService.markWordLearned(activeLessonId, currentEx.vocabularyId, isCorrect).catch((err) => {
+          console.warn('Mark word learned error:', err)
         })
       }
-
-      // Update Lesson Progress percentage
-      const totalExercises = lessonData.exercises.length
-      const completedExercisesCount = exerciseIndex + 1
-      const pct = Math.round((completedExercisesCount / totalExercises) * 100)
-      progressService.updateLessonProgress(activeLessonId, pct, newCorrectCount, completedExercisesCount).catch((err) => {
-        console.warn('Update lesson progress error:', err)
-      })
-    } catch (err: any) {
-      toast.error(err.message || 'Gửi câu trả lời thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Gửi câu trả lời thất bại.'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -217,10 +199,8 @@ export const LessonLearnPage: React.FC = () => {
     if (exerciseIndex < lessonData.exercises.length - 1) {
       setExerciseIndex((prev) => prev + 1)
     } else {
-      // Completed all exercises!
       if (activeLessonId) {
-        await studentLearningService.completeLesson(activeLessonId)
-        await progressService.completeLessonProgress(activeLessonId, totalXpEarned)
+        await progressService.completeLektion(activeLessonId).catch(() => null)
       }
       setStep('complete')
     }
@@ -232,7 +212,7 @@ export const LessonLearnPage: React.FC = () => {
         <Header />
         <div style={{ textAlign: 'center', padding: '80px 20px', minHeight: '60vh' }}>
           <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-          <p style={{ fontWeight: 600, color: '#475569' }}>Đang tải bài học Duolingo Style...</p>
+          <p style={{ fontWeight: 600, color: '#475569' }}>Đang tải bài học...</p>
         </div>
         <Footer />
       </div>
@@ -264,9 +244,6 @@ export const LessonLearnPage: React.FC = () => {
       <Header />
 
       <main style={{ flex: 1, padding: '30px 20px', maxWidth: '760px', margin: '0 auto', width: '100%' }}>
-        {/* ========================================================= */}
-        {/* STEP 1: LESSON INTRODUCTION */}
-        {/* ========================================================= */}
         {step === 'intro' && (
           <div className="admin-card" style={{ padding: '40px', borderRadius: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎓</div>
@@ -316,12 +293,8 @@ export const LessonLearnPage: React.FC = () => {
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* STEP 2: VOCABULARY PREVIEW (FLASHCARD MODE) */}
-        {/* ========================================================= */}
         {step === 'vocab_preview' && currentVocab && (
           <div>
-            {/* Top Bar Navigation */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.9rem' }}>
                 📖 VOCABULARY PREVIEW: <strong>{vocabIndex + 1} / {vocabularies.length}</strong>
@@ -341,7 +314,6 @@ export const LessonLearnPage: React.FC = () => {
               )}
             </div>
 
-            {/* Flashcard Card */}
             <div
               className="admin-card"
               style={{
@@ -386,7 +358,6 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Controls */}
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', marginTop: '24px' }}>
                 <button
                   className="btn-admin-secondary"
@@ -409,12 +380,8 @@ export const LessonLearnPage: React.FC = () => {
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* STEP 3: EXERCISE MODE (DUOLINGO STYLE) */}
-        {/* ========================================================= */}
         {step === 'exercise' && currentExercise && (
           <div>
-            {/* Duolingo Style Progress Bar */}
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '8px' }}>
                 <span>EXERCISE {exerciseIndex + 1} / {exercises.length}</span>
@@ -433,14 +400,11 @@ export const LessonLearnPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Main Exercise Card */}
             <div className="admin-card" style={{ padding: '32px', borderRadius: '24px', position: 'relative' }}>
               <span className="badge-pill badge-a1" style={{ marginBottom: '16px' }}>
                 {currentExercise.type}
               </span>
 
-              {/* Dynamic Exercise UI Rendering */}
-              {/* TYPE 1 & TYPE 2: MULTIPLE CHOICE & LISTENING */}
               {(currentExercise.type === 'multiple_choice' || currentExercise.type === 'listening') && (
                 <div>
                   {currentExercise.type === 'listening' && (
@@ -487,7 +451,6 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
-              {/* TYPE 3: TRANSLATION */}
               {currentExercise.type === 'translation' && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
@@ -508,7 +471,6 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
-              {/* TYPE 4: FILL BLANK */}
               {currentExercise.type === 'fill_blank' && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
@@ -529,14 +491,12 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
-              {/* TYPE 5: SENTENCE ARRANGEMENT */}
               {currentExercise.type === 'sentence_arrangement' && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
                     🧩 Chạm các từ bên dưới để ghép thành câu hoàn chỉnh:
                   </h3>
 
-                  {/* Target Sentence Area */}
                   <div
                     style={{
                       minHeight: '60px',
@@ -567,7 +527,6 @@ export const LessonLearnPage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Available Word Pool */}
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                     {availableWords.map((w, idx) => (
                       <button
@@ -584,7 +543,6 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Check Answer Button (Before submission) */}
               {!submissionResult && (
                 <div style={{ marginTop: '32px' }}>
                   <button
@@ -599,7 +557,6 @@ export const LessonLearnPage: React.FC = () => {
               )}
             </div>
 
-            {/* Result & Feedback Banner */}
             {submissionResult && (
               <div
                 style={{
@@ -643,9 +600,6 @@ export const LessonLearnPage: React.FC = () => {
           </div>
         )}
 
-        {/* ========================================================= */}
-        {/* STEP 4: LESSON COMPLETE SUMMARY */}
-        {/* ========================================================= */}
         {step === 'complete' && (
           <div className="admin-card" style={{ padding: '40px', borderRadius: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '4rem', marginBottom: '12px' }}>🏆</div>

@@ -2,13 +2,27 @@ export type LessonProgressStatus = 'not_started' | 'in_progress' | 'completed'
 
 export type VocabularyMasteryState = 'new' | 'learning' | 'review' | 'mastered'
 
+export interface UserProgressData {
+  lektionProgresses: Array<{
+    lektionId: string
+    status: LessonProgressStatus
+    progress: number
+    learnedWordsCount: number
+    updatedAt?: string
+  }>
+  stats: {
+    completedLektionsCount: number
+    totalLearnedWordsCount: number
+  }
+}
+
 export interface LessonProgressItem {
   _id: string
   user: string
   lesson: string
   status: LessonProgressStatus
-  progress: number // percentage 0 - 100
-  score: number // total correct answers
+  progress: number
+  score: number
   total_exercises: number
   completed_exercises: number
   xp_earned: number

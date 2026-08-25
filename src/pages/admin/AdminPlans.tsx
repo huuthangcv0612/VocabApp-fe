@@ -53,8 +53,9 @@ export const AdminPlans: React.FC = () => {
       setError(null)
       const data = await subscriptionService.getPlans()
       setPlans(data)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách Gói dịch vụ từ server.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Gói dịch vụ từ server.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -84,7 +85,7 @@ export const AdminPlans: React.FC = () => {
       id: String(item.id),
       name: item.name,
       price: item.price,
-      duration_days: (item as any).duration_days || days,
+      duration_days: days,
       features: item.features || [],
       customFeatureText: '',
     })
@@ -131,7 +132,6 @@ export const AdminPlans: React.FC = () => {
         duration_months: Math.ceil(formData.duration_days / 30),
         features: formData.features,
       }
-      ;(payload as any).duration_days = formData.duration_days
 
       if (editingItem) {
         // Update via PUT /api/plans/:id
@@ -141,10 +141,9 @@ export const AdminPlans: React.FC = () => {
         )
         toast.success(`Đã cập nhật gói ${formData.name}! Giá mới sẽ tự động cập nhật trên FE.`)
       } else {
-        // Create via POST /api/plans
         const created = await subscriptionService.createPlan(payload)
         const newItem: SubscriptionPackage = {
-          id: created.id || payload.id || `plan_${Date.now()}`,
+          id: created._id || `plan_${Date.now()}`,
           name: created.name || formData.name,
           price: created.price ?? formData.price,
           currency: 'VND',
@@ -155,8 +154,9 @@ export const AdminPlans: React.FC = () => {
         toast.success(`Đã tạo gói mới ${formData.name}!`)
       }
       setIsModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại!')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại!'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -170,8 +170,9 @@ export const AdminPlans: React.FC = () => {
       setPlans((prev) => prev.filter((item) => item.id !== deleteTarget.id))
       toast.success(`Đã xóa gói ${deleteTarget.name}!`)
       setDeleteTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Không thể xóa gói!')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể xóa gói!'
+      toast.error(msg)
     } finally {
       setIsDeleting(false)
     }
@@ -235,7 +236,7 @@ export const AdminPlans: React.FC = () => {
             </thead>
             <tbody>
               {plans.map((item) => {
-                const days = (item as any).duration_days || (item.duration_months ? item.duration_months * 30 : 30)
+                const days = item.duration_months ? item.duration_months * 30 : 30
                 return (
                   <tr key={item.id}>
                     <td>

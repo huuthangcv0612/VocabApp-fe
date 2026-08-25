@@ -1,66 +1,40 @@
 import api from './api'
 import type { ApiResponse } from '../types/api'
 import type { LessonExercise } from '../types/exercise'
+import type { ExerciseSubmitResponse } from '../types/student'
 
 export const exerciseApi = {
   create: async (lessonId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => {
-    try {
-      const response = await api.post<ApiResponse<LessonExercise> | LessonExercise>(`/lektions/${lessonId}/exercises`, payload)
-      if ('data' in response.data && response.data.data) {
-        return (response.data as ApiResponse<LessonExercise>).data
-      }
-      return response.data as LessonExercise
-    } catch (err) {
-      const response = await api.post<ApiResponse<LessonExercise> | LessonExercise>('/questions', { ...payload, lektionId: lessonId })
-      if ('data' in response.data && response.data.data) {
-        return (response.data as ApiResponse<LessonExercise>).data
-      }
-      return response.data as LessonExercise
-    }
+    const response = await api.post<ApiResponse<LessonExercise>>('/admin/exercises', {
+      ...payload,
+      lessonId,
+    })
+    return response.data.data
   },
 
   update: async (exerciseId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => {
-    try {
-      const response = await api.put<ApiResponse<LessonExercise> | LessonExercise>(`/exercises/${exerciseId}`, payload)
-      if ('data' in response.data && response.data.data) {
-        return (response.data as ApiResponse<LessonExercise>).data
-      }
-      return response.data as LessonExercise
-    } catch (err) {
-      const response = await api.put<ApiResponse<LessonExercise> | LessonExercise>(`/questions/${exerciseId}`, payload)
-      if ('data' in response.data && response.data.data) {
-        return (response.data as ApiResponse<LessonExercise>).data
-      }
-      return response.data as LessonExercise
-    }
+    const response = await api.put<ApiResponse<LessonExercise>>(`/admin/exercises/${encodeURIComponent(exerciseId)}`, payload)
+    return response.data.data
   },
 
   delete: async (exerciseId: string): Promise<void> => {
-    try {
-      await api.delete(`/exercises/${exerciseId}`)
-    } catch (err) {
-      await api.delete(`/questions/${exerciseId}`)
-    }
+    await api.delete(`/admin/exercises/${encodeURIComponent(exerciseId)}`)
   },
 
-  submitAnswer: async (lessonId: string, exerciseId: string, userAnswer: string | number | string[]): Promise<{ correct: boolean; feedback: string; xp: number; correctAnswer?: string }> => {
-    try {
-      const response = await api.post<ApiResponse<{ correct: boolean; feedback: string; xp: number; correctAnswer?: string }>>(`/lektions/${lessonId}/exercises/${exerciseId}/submit`, { userAnswer })
-      if (response.data?.success && response.data?.data) {
-        return response.data.data
-      }
-    } catch (err) {
-      console.warn('POST /submit fallback handling:', err)
-    }
+  submitAnswer: async (lessonId: string, exerciseId: string, answer: string | number | string[]): Promise<ExerciseSubmitResponse> => {
+    const response = await api.post<ApiResponse<{ exercise_id?: string; is_correct: boolean; xp_earned: number; explanation: string }>>(
+      `/lessons/${encodeURIComponent(lessonId)}/exercises/${encodeURIComponent(exerciseId)}/submit`,
+      { answer },
+    )
 
-    const answerStr = String(userAnswer).trim().toLowerCase()
-    const isSuccess = answerStr.length > 0
+    const resData = response.data.data
     return {
-      correct: isSuccess,
-      feedback: isSuccess
-        ? 'Chính xác! Bạn đã hoàn thành câu hỏi. 🎉'
-        : 'Chưa chính xác. Hãy nhập đáp án đầy đủ.',
-      xp: isSuccess ? 5 : 0,
+      is_correct: resData.is_correct,
+      xp_earned: resData.xp_earned,
+      explanation: resData.explanation,
+      correct: resData.is_correct,
+      feedback: resData.explanation,
+      xp: resData.xp_earned,
     }
   },
 }

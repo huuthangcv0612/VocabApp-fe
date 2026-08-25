@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
 import { progressService } from '../services/progressService'
 import type { UnitLearningData } from '../types/student'
-import type { LessonProgressItem } from '../types/progress'
+import type { UserProgressData } from '../types/progress'
 import '../styles/pages/lesson.css'
 
 export const UnitPage: React.FC = () => {
@@ -13,7 +13,7 @@ export const UnitPage: React.FC = () => {
   const navigate = useNavigate()
 
   const [unitData, setUnitData] = useState<UnitLearningData | null>(null)
-  const [lessonProgresses, setLessonProgresses] = useState<Record<string, LessonProgressItem>>({})
+  const [lessonProgressMap, setLessonProgressMap] = useState<Record<string, { status: string; progress: number }>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -23,20 +23,23 @@ export const UnitPage: React.FC = () => {
       try {
         setLoading(true)
         setError(null)
-        const [data, progressList] = await Promise.all([
+        const [data, userProgress] = await Promise.all([
           studentLearningService.getUnitLessons(unitId),
-          progressService.getLessonProgressList(),
+          progressService.getUserProgressOverview().catch(() => null as UserProgressData | null),
         ])
 
-        const progressMap: Record<string, LessonProgressItem> = {}
-        progressList.forEach((p) => {
-          progressMap[p.lesson] = p
-        })
+        const map: Record<string, { status: string; progress: number }> = {}
+        if (userProgress && Array.isArray(userProgress.lektionProgresses)) {
+          userProgress.lektionProgresses.forEach((p) => {
+            map[p.lektionId] = { status: p.status, progress: p.progress }
+          })
+        }
 
         setUnitData(data)
-        setLessonProgresses(progressMap)
-      } catch (err: any) {
-        setError(err.message || 'Không thể tải thông tin Unit.')
+        setLessonProgressMap(map)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Không thể tải thông tin Unit.'
+        setError(msg)
       } finally {
         setLoading(false)
       }
@@ -86,7 +89,7 @@ export const UnitPage: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
                 {unitData.lessons.map((les, idx) => {
-                  const pItem = lessonProgresses[les._id]
+                  const pItem = lessonProgressMap[les._id]
                   const realStatus = pItem ? pItem.status : les.status
                   const progressPct = pItem ? pItem.progress : (realStatus === 'completed' ? 100 : 0)
 

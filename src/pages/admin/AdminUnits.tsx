@@ -49,8 +49,9 @@ export const AdminUnits: React.FC = () => {
       ])
       setUnits(unitList)
       setTopics(topicList)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách Units từ server.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Units từ server.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -154,8 +155,9 @@ export const AdminUnits: React.FC = () => {
         toast.success(`Đã thêm Unit "${formData.name}" thành công!`)
       }
       setIsModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -169,8 +171,9 @@ export const AdminUnits: React.FC = () => {
       setUnits((prev) => prev.filter((item) => item._id !== deleteTarget._id))
       toast.success(`Đã xóa Unit "${deleteTarget.name || deleteTarget.unit_name}"!`)
       setDeleteTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Xóa Unit thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Xóa Unit thất bại.'
+      toast.error(msg)
     } finally {
       setIsDeleting(false)
     }

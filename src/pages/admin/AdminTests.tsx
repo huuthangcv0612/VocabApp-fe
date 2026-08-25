@@ -34,8 +34,9 @@ export const AdminTests = () => {
       setLoading(true)
       const data = await adminService.getTests()
       setTests(data)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách đề test.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách đề test.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -51,8 +52,9 @@ export const AdminTests = () => {
       await adminService.createTest(formData)
       setIsModalOpen(false)
       fetchTests()
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi tạo đề test.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi tạo đề test.'
+      alert(msg)
     }
   }
 

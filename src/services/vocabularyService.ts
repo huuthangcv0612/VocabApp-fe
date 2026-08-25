@@ -1,14 +1,8 @@
-import api, { ApiResponse } from './api'
-import type { Vocabulary } from './api'
+import { vocabularyApi } from './vocabularyApi'
 
 export const vocabularyService = {
   getVocabularyList: async () => {
-    const response = await api.get<ApiResponse<Vocabulary>>('/vocabulary')
-
-    if (!response.data.success) {
-      throw new Error(response.data.error || 'Không thể tải danh sách từ vựng')
-    }
-
-    return response.data.data
+    const result = await vocabularyApi.getAll()
+    return result.vocabularies
   },
 }

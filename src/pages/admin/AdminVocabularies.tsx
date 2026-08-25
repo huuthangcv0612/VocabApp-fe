@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import AdminEmptyState from '../../components/admin/AdminEmptyState'
 import AdminLoadingState from '../../components/admin/AdminLoadingState'
@@ -64,7 +64,7 @@ export const AdminVocabularies: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<VocabularyAdminItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const fetchVocabularies = async (page = 1) => {
+  const fetchVocabularies = useCallback(async (page = 1) => {
     try {
       setLoading(true)
       setError(null)
@@ -80,16 +80,17 @@ export const AdminVocabularies: React.FC = () => {
       setVocabularies(vocabRes.vocabularies)
       setPagination(vocabRes.pagination)
       setLessons(lessonList)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách từ vựng từ server.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách từ vựng từ server.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
-  }
+  }, [search, selectedLevelFilter])
 
   useEffect(() => {
     fetchVocabularies(1)
-  }, [selectedLevelFilter])
+  }, [fetchVocabularies])
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -196,8 +197,9 @@ export const AdminVocabularies: React.FC = () => {
         toast.success(`Đã thêm từ vựng "${formData.word}" thành công!`)
       }
       setIsModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -211,8 +213,9 @@ export const AdminVocabularies: React.FC = () => {
       setVocabularies((prev) => prev.filter((v) => v._id !== deleteTarget._id))
       toast.success(`Đã xóa từ vựng "${deleteTarget.word}"!`)
       setDeleteTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Xóa từ vựng thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Xóa từ vựng thất bại.'
+      toast.error(msg)
     } finally {
       setIsDeleting(false)
     }

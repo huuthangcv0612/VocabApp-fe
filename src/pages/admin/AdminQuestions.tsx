@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import { adminService } from '../../services/adminService'
 import type {
@@ -62,22 +62,23 @@ export const AdminQuestions = ({ autoOpenNewModal = false }: AdminQuestionsProps
     status: 'active',
   })
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     try {
       setLoading(true)
       const data = await adminService.getQuestions(filters)
       setQuestions(data.questions)
       setPagination(data.pagination)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách câu hỏi.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách câu hỏi.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
 
   useEffect(() => {
     fetchQuestions()
-  }, [filters])
+  }, [fetchQuestions])
 
   const handleOpenAddModal = () => {
     setEditingQuestion(null)
@@ -129,8 +130,9 @@ export const AdminQuestions = ({ autoOpenNewModal = false }: AdminQuestionsProps
       }
       setIsModalOpen(false)
       fetchQuestions()
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi lưu câu hỏi.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi lưu câu hỏi.'
+      alert(msg)
     }
   }
 
@@ -139,8 +141,9 @@ export const AdminQuestions = ({ autoOpenNewModal = false }: AdminQuestionsProps
     try {
       await adminService.deleteQuestion(id)
       fetchQuestions()
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi xóa câu hỏi.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi xóa câu hỏi.'
+      alert(msg)
     }
   }
 

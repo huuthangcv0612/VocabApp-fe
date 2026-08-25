@@ -1,13 +1,16 @@
 export interface ExerciseSubmitPayload {
   lessonId: string
   exerciseId: string
-  userAnswer: string | number | string[]
+  answer: string | number | string[]
 }
 
 export interface ExerciseSubmitResponse {
-  correct: boolean
-  feedback: string
-  xp: number
+  is_correct: boolean
+  xp_earned: number
+  explanation: string
+  correct?: boolean
+  feedback?: string
+  xp?: number
   correctAnswer?: string
 }
 

@@ -35,8 +35,9 @@ export const AdminLevels: React.FC = () => {
       setError(null)
       const data = await adminService.getLevels()
       setLevels(data)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách Trình độ từ server.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Trình độ từ server.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -104,8 +105,9 @@ export const AdminLevels: React.FC = () => {
         toast.success(`Đã thêm trình độ ${formData.level_name} thành công!`)
       }
       setIsModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại, vui lòng thử lại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại, vui lòng thử lại.'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -119,8 +121,9 @@ export const AdminLevels: React.FC = () => {
       setLevels((prev) => prev.filter((item) => item._id !== deleteTarget._id))
       toast.success(`Đã xóa trình độ ${deleteTarget.level_name}!`)
       setDeleteTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Xóa trình độ thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Xóa trình độ thất bại.'
+      toast.error(msg)
     } finally {
       setIsDeleting(false)
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import AdminLayout from '../../components/admin/AdminLayout'
 import AdminEmptyState from '../../components/admin/AdminEmptyState'
@@ -16,6 +16,7 @@ import type {
   StatusType,
   ExerciseType,
 } from '../../types/admin'
+import type { ExerciseContentPayload, ExerciseAnswerPayload } from '../../types/exercise'
 import { toast } from 'react-hot-toast'
 
 export const AdminLessonBuilder: React.FC = () => {
@@ -92,7 +93,7 @@ export const AdminLessonBuilder: React.FC = () => {
   const [deleteExerciseTarget, setDeleteExerciseTarget] = useState<LessonExercise | null>(null)
   const [isDeletingExercise, setIsDeletingExercise] = useState(false)
 
-  const fetchLessonData = async () => {
+  const fetchLessonData = useCallback(async () => {
     if (!lessonId) return
     try {
       setLoading(true)
@@ -107,16 +108,17 @@ export const AdminLessonBuilder: React.FC = () => {
       setVocabularies(detailData.vocabularies.sort((a, b) => a.order - b.order))
       setExercises(detailData.exercises.sort((a, b) => a.order - b.order))
       setUnits(unitList)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải chi tiết bài học.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải chi tiết bài học.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
-  }
+  }, [lessonId])
 
   useEffect(() => {
     fetchLessonData()
-  }, [lessonId])
+  }, [fetchLessonData])
 
   // --- 1. LESSON INFO HANDLERS ---
   const handleOpenEditLessonModal = () => {
@@ -143,8 +145,9 @@ export const AdminLessonBuilder: React.FC = () => {
       setLesson((prev) => (prev ? { ...prev, ...updated, ...lessonFormData } : null))
       toast.success('Cập nhật thông tin bài học thành công!')
       setIsEditLessonModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Cập nhật thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Cập nhật thất bại.'
+      toast.error(msg)
     } finally {
       setIsUpdatingLesson(false)
     }
@@ -216,7 +219,7 @@ export const AdminLessonBuilder: React.FC = () => {
         vocabularyId: v._id,
         word: v.word,
         meaning: v.meaning,
-        gender: (v as any).gender,
+        gender: (v as { gender?: string }).gender,
         phonetic: v.pronunciation,
         order: nextOrder,
         is_new: true,
@@ -225,8 +228,9 @@ export const AdminLessonBuilder: React.FC = () => {
       }
       setVocabularies((prev) => [...prev, newPreviewItem])
       toast.success(`Đã thêm từ "${v.word}" vào bài học!`)
-    } catch (err: any) {
-      toast.error(err.message || 'Không thể thêm từ vựng.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể thêm từ vựng.'
+      toast.error(msg)
     }
   }
 
@@ -236,8 +240,9 @@ export const AdminLessonBuilder: React.FC = () => {
       await adminService.removeVocabularyFromLesson(lessonId, pv.vocabularyId || pv._id)
       setVocabularies((prev) => prev.filter((item) => item._id !== pv._id && item.vocabularyId !== pv.vocabularyId))
       toast.success(`Đã loại bỏ từ "${pv.word}" khỏi bài học.`)
-    } catch (err: any) {
-      toast.error(err.message || 'Không thể loại bỏ từ vựng.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể loại bỏ từ vựng.'
+      toast.error(msg)
     }
   }
 
@@ -316,7 +321,7 @@ export const AdminLessonBuilder: React.FC = () => {
     setMcQuestion(ex.question || content.question || content.prompt || content.sentence || '')
     setMcAudioUrl(content.audio_url || '')
     if (ex.options && ex.options.length >= 2) {
-      setMcOptions(ex.options)
+      setMcOptions(ex.options.map((opt) => ({ text: opt.text, isCorrect: Boolean(opt.isCorrect) })))
     } else if (content.options) {
       const corrIdx = answer.correct_option_index ?? 0
       setMcOptions(content.options.map((opt: string, idx: number) => ({
@@ -411,8 +416,8 @@ export const AdminLessonBuilder: React.FC = () => {
     const vocabName = vocabularies.find((v) => v.vocabularyId === exerciseVocabularyId || v._id === exerciseVocabularyId)?.word || 'Tổng hợp'
 
     let questionText = ''
-    let contentObj: any = {}
-    let answerObj: any = {}
+    let contentObj: ExerciseContentPayload = {}
+    let answerObj: ExerciseAnswerPayload = {}
 
     // Validation per Exercise Type
     if (exerciseType === 'multiple_choice') {
@@ -524,8 +529,9 @@ export const AdminLessonBuilder: React.FC = () => {
         toast.success('Đã tạo bài tập mới thành công!')
       }
       setIsExerciseModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
+      toast.error(msg)
     } finally {
       setIsSavingExercise(false)
     }
@@ -539,8 +545,9 @@ export const AdminLessonBuilder: React.FC = () => {
       setExercises((prev) => prev.filter((item) => item._id !== deleteExerciseTarget._id))
       toast.success('Đã xóa bài tập!')
       setDeleteExerciseTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Xóa bài tập thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Xóa bài tập thất bại.'
+      toast.error(msg)
     } finally {
       setIsDeletingExercise(false)
     }

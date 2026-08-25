@@ -51,8 +51,9 @@ export const AdminTopics: React.FC = () => {
       ])
       setTopics(topicList)
       setLevels(levelList)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách Chủ đề từ server.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Chủ đề từ server.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -154,8 +155,9 @@ export const AdminTopics: React.FC = () => {
         toast.success(`Đã thêm chủ đề "${formData.name}" thành công!`)
       }
       setIsModalOpen(false)
-    } catch (err: any) {
-      toast.error(err.message || 'Thao tác thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
+      toast.error(msg)
     } finally {
       setIsSubmitting(false)
     }
@@ -169,8 +171,9 @@ export const AdminTopics: React.FC = () => {
       setTopics((prev) => prev.filter((item) => item._id !== deleteTarget._id))
       toast.success(`Đã xóa chủ đề "${deleteTarget.name || deleteTarget.topic_name}"!`)
       setDeleteTarget(null)
-    } catch (err: any) {
-      toast.error(err.message || 'Xóa chủ đề thất bại.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Xóa chủ đề thất bại.'
+      toast.error(msg)
     } finally {
       setIsDeleting(false)
     }

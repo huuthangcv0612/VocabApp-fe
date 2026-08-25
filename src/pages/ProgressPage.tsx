@@ -18,8 +18,9 @@ const ProgressPage: React.FC = () => {
       setError(null)
       const data = await progressService.getDashboardOverview()
       setDashboard(data)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải thông tin tiến độ.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải thông tin tiến độ.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -30,10 +31,13 @@ const ProgressPage: React.FC = () => {
   }, [])
 
   const masteryTotal = dashboard
-    ? dashboard.masteryBreakdown.new +
-      dashboard.masteryBreakdown.learning +
-      dashboard.masteryBreakdown.review +
-      dashboard.masteryBreakdown.mastered
+    ? Math.max(
+        1,
+        dashboard.masteryBreakdown.new +
+          dashboard.masteryBreakdown.learning +
+          dashboard.masteryBreakdown.review +
+          dashboard.masteryBreakdown.mastered,
+      )
     : 1
 
   return (

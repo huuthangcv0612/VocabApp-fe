@@ -13,8 +13,9 @@ export const AdminUsers = () => {
       setLoading(true)
       const data = await adminService.getUsers()
       setUsers(Array.isArray(data) ? data : (data as { users?: UserAdminItem[] }).users || [])
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải danh sách người dùng.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách người dùng.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -30,8 +31,9 @@ export const AdminUsers = () => {
     try {
       await adminService.updateUserRole(userId, newRole)
       fetchUsers()
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi đổi quyền user.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi đổi quyền user.'
+      alert(msg)
     }
   }
 
@@ -40,8 +42,9 @@ export const AdminUsers = () => {
     try {
       await adminService.toggleUserStatus(userId)
       fetchUsers()
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi thay đổi trạng thái user.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi thay đổi trạng thái user.'
+      alert(msg)
     }
   }
 

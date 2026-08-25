@@ -28,8 +28,9 @@ export const QuickTestPage = () => {
         setLoading(true)
         const data = await testService.getQuickTest(levelParam)
         setTestData(data)
-      } catch (err: any) {
-        setError(err.message || 'Không thể tải đề test.')
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Không thể tải đề test.'
+        setError(msg)
       } finally {
         setLoading(false)
       }
@@ -62,8 +63,9 @@ export const QuickTestPage = () => {
         answers: formattedAnswers,
       })
       setResult(res)
-    } catch (err: any) {
-      alert(err.message || 'Lỗi khi nộp bài test.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Lỗi khi nộp bài test.'
+      alert(msg)
     } finally {
       setSubmitting(false)
     }
@@ -105,7 +107,6 @@ export const QuickTestPage = () => {
       <div className="test-page">
         <div className="test-container">
           {!result ? (
-            /* EXAM TAKING INTERFACE */
             <div className="test-card">
               <div className="test-header">
                 <div>
@@ -117,15 +118,12 @@ export const QuickTestPage = () => {
                 </div>
               </div>
 
-              {/* Progress bar */}
               <div className="test-progress-bar">
                 <div className="test-progress-fill" style={{ width: `${progressPercent}%` }}></div>
               </div>
 
-              {/* Question Text */}
               <h3 className="question-text">{currentQuestion?.question}</h3>
 
-              {/* Options */}
               <div className="options-grid">
                 {currentQuestion?.options.map((optText, idx) => {
                   const isSelected = answers[currentQuestion._id] === idx
@@ -144,7 +142,6 @@ export const QuickTestPage = () => {
                 })}
               </div>
 
-              {/* Controls */}
               <div className="test-navigation">
                 <button
                   className="btn-test-nav btn-test-prev"
@@ -173,7 +170,6 @@ export const QuickTestPage = () => {
               </div>
             </div>
           ) : (
-            /* TEST RESULT & DIAGNOSTIC REVIEW SCREEN */
             <div className="test-card">
               <div className="result-header-badge">
                 <div className="score-circle">
@@ -186,7 +182,6 @@ export const QuickTestPage = () => {
                 <p style={{ color: '#64748b' }}>Hệ thống đã tự động chấm điểm và phân tích năng lực tiếng Đức của bạn.</p>
               </div>
 
-              {/* Weakness Warnings (< 60%) */}
               {(() => {
                 const weakSkills = result.weaknesses && result.weaknesses.length > 0
                   ? result.weaknesses
@@ -232,7 +227,6 @@ export const QuickTestPage = () => {
                 )
               })()}
 
-              {/* Skill Breakdown Progress Bars */}
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>📊 Phân Tích Theo Kỹ Năng:</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
                 {result.skillBreakdown &&
@@ -272,7 +266,6 @@ export const QuickTestPage = () => {
                   })}
               </div>
 
-              {/* Question Review */}
               <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>📝 Chi Tiết Đáp Án & Giải Thích:</h3>
               {result.answers && result.answers.length > 0 ? (
                 result.answers.map((ans, idx) => (

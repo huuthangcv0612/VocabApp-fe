@@ -13,8 +13,9 @@ export const AdminResults = () => {
       setLoading(true)
       const data = await adminService.getAllResults()
       setResults(data.results)
-    } catch (err: any) {
-      setError(err.message || 'Không thể tải lịch sử làm bài test.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể tải lịch sử làm bài test.'
+      setError(msg)
     } finally {
       setLoading(false)
     }

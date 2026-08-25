@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -39,9 +39,10 @@ export const PaymentPage: React.FC = () => {
         if (isMounted) {
           setOrderData(res)
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (isMounted) {
-          toast.error(err.message || 'Không thể tải thông tin đơn hàng.')
+          const msg = err instanceof Error ? err.message : 'Không thể tải thông tin đơn hàng.'
+          toast.error(msg)
         }
       } finally {
         if (isMounted) {
@@ -55,42 +56,40 @@ export const PaymentPage: React.FC = () => {
     return () => {
       isMounted = false
     }
-  }, [idParam])
+  }, [idParam, orderData])
 
-  // Process payment success: Toast -> GET /api/subscriptions/current -> isPremium = true -> Navigate -> Dashboard
-  const handlePaymentSuccess = async () => {
+  // Process payment success
+  const handlePaymentSuccess = useCallback(async () => {
     toast.success('Thanh toán thành công!')
 
     try {
-      // GET /api/subscriptions/current
       const sub = await subscriptionService.getCurrentSubscription()
       const isPremium = sub.plan_id !== 'free' && sub.status === 'active'
       console.log('Current subscription updated:', sub, 'isPremium:', isPremium)
-    } catch (err) {
+    } catch (err: unknown) {
       console.warn('Error updating current subscription:', err)
     }
 
-    // Navigate → Dashboard (/levels)
     navigate('/levels', { state: { paymentSuccess: true } })
-  }
+  }, [navigate])
 
-  // Phase 4: Polling GET /api/orders/:id every 3 seconds
+  // Polling GET /api/orders/:id every 3 seconds
   useEffect(() => {
     if (!orderData?.order.id && !orderData?.order.orderCode) return
 
     const targetId = orderData.order.id || orderData.order.orderCode
+    const currentOrderStatus = orderData.order.status
     let isCancelled = false
 
     const interval = setInterval(async () => {
       try {
-        // GET /api/orders/:id
         const { status, isPaid } = await subscriptionService.getOrderStatus(targetId)
         if (isCancelled) return
 
         if (isPaid) {
           clearInterval(interval)
           await handlePaymentSuccess()
-        } else if (status !== orderData.order.status) {
+        } else if (status !== currentOrderStatus) {
           setOrderData((prev) =>
             prev
               ? {
@@ -100,23 +99,22 @@ export const PaymentPage: React.FC = () => {
               : null
           )
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.warn('Status polling error (GET /api/orders/:id):', err)
       }
-    }, 3000) // 3 seconds interval
+    }, 3000)
 
     return () => {
       isCancelled = true
       clearInterval(interval)
     }
-  }, [orderData?.order.id, orderData?.order.orderCode])
+  }, [orderData?.order.id, orderData?.order.orderCode, orderData?.order.status, handlePaymentSuccess])
 
   const copyTransferContent = (content: string) => {
     navigator.clipboard.writeText(content)
     toast.success('Đã sao chép nội dung chuyển khoản!')
   }
 
-  // Manual check when user clicks "[Tôi đã thanh toán]"
   const handleCheckPaymentStatus = async () => {
     if (!orderData) return
     const targetId = orderData.order.id || orderData.order.orderCode
@@ -133,7 +131,7 @@ export const PaymentPage: React.FC = () => {
           duration: 3000,
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Không thể kiểm tra trạng thái thanh toán. Thử lại sau.')
     } finally {
       setCheckingStatus(false)
@@ -158,17 +156,14 @@ export const PaymentPage: React.FC = () => {
             </div>
           ) : orderData ? (
             <div className="payment-card-container">
-              {/* Header Title */}
               <h1 className="payment-card-title">
                 Thanh toán {orderData.order.planName || 'Premium'}
               </h1>
 
-              {/* Amount */}
               <div className="payment-card-amount">
                 {formatPrice(orderData.order.amount)}
               </div>
 
-              {/* QR Code */}
               {orderData.payment.qrCodeUrl && (
                 <div className="payment-qr-wrapper">
                   <img
@@ -179,7 +174,6 @@ export const PaymentPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Bank Account Details Table */}
               <table className="payment-info-table">
                 <tbody>
                   <tr>
@@ -197,7 +191,6 @@ export const PaymentPage: React.FC = () => {
                 </tbody>
               </table>
 
-              {/* Transfer Content Section with Copy button */}
               <div className="transfer-content-box">
                 <div className="transfer-content-header">Nội dung</div>
                 <div className="transfer-content-row">
@@ -214,13 +207,11 @@ export const PaymentPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Status Indicator (Backend PENDING -> webhook -> PAID) */}
               <div className="payment-status-wrapper">
                 <div className="spinner-pulse"></div>
                 <span>Đang chờ thanh toán...</span>
               </div>
 
-              {/* Action Button */}
               <button
                 type="button"
                 className="btn-i-paid"

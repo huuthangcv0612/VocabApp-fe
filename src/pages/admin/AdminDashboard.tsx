@@ -14,8 +14,9 @@ export const AdminDashboard = () => {
         setLoading(true)
         const data = await adminService.getStatistics()
         setStats(data)
-      } catch (err: any) {
-        setError(err.message || 'Không thể tải thống kê Admin.')
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Không thể tải thống kê Admin.'
+        setError(msg)
       } finally {
         setLoading(false)
       }

@@ -37,7 +37,7 @@ const VerifyEmail = () => {
     }
 
     void verify()
-  }, [token])
+  }, [token, isPending])
 
   return (
     <main className="auth-page">
