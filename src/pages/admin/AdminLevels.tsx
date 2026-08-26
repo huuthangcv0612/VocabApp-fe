@@ -34,7 +34,7 @@ export const AdminLevels: React.FC = () => {
       setLoading(true)
       setError(null)
       const data = await adminService.getLevels()
-      setLevels(data)
+      setLevels(Array.isArray(data) ? data : [])
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Trình độ từ server.'
       setError(msg)
@@ -47,8 +47,10 @@ export const AdminLevels: React.FC = () => {
     fetchLevels()
   }, [])
 
-  const filteredLevels = levels.filter((lvl) => {
-    const name = lvl.level_name || ''
+  const safeLevels = Array.isArray(levels) ? levels : []
+
+  const filteredLevels = safeLevels.filter((lvl) => {
+    const name = lvl.level_name || lvl.name || ''
     const desc = lvl.description || ''
     return (
       name.toLowerCase().includes(search.toLowerCase()) ||
@@ -182,7 +184,7 @@ export const AdminLevels: React.FC = () => {
                 {filteredLevels.map((lvl) => (
                   <tr key={lvl._id}>
                     <td>
-                      <span className="badge-pill badge-a1">{lvl.level_name}</span>
+                      <span className="badge-pill badge-a1">{lvl.level_name || lvl.name || 'Level'}</span>
                     </td>
                     <td style={{ color: '#334155', maxWidth: '360px' }}>{lvl.description || 'Chưa có mô tả'}</td>
                     <td>

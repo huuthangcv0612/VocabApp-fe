@@ -66,6 +66,7 @@ function App() {
             <Route path="/topics" element={<TopicsPage />} />
             <Route path="/topics/:levelId" element={<TopicsPage />} />
             <Route path="/levels/:levelId" element={<LevelDetail />} />
+            <Route path="/levels/:levelId/lessons" element={<LevelDetail />} />
             <Route path="/levels/:levelId/topics/:topicId" element={<LevelDetail />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/pricing" element={<PricingPage />} />
@@ -74,12 +75,17 @@ function App() {
             <Route path="/payment/order/:orderId" element={<PaymentPage />} />
             <Route path="/payment/result" element={<PaymentResultPage />} />
             <Route path="/unit/:unitId" element={<UnitPage />} />
-            <Route path="/learn/lesson/:lessonId" element={<LessonLearnPage />} />
+            <Route path="/lessons/:lessonId" element={<Lektion />} />
             <Route path="/lektion/:lektionId" element={<Lektion />} />
             <Route path="/lesson/:lektionId" element={<Lektion />} />
+            <Route path="/learn/lesson/:lessonId" element={<LessonLearnPage />} />
+            <Route path="/lessons/:lessonId/learn" element={<LessonLearnPage />} />
             <Route path="/flashcard/:lektionId" element={<Flashcard />} />
+            <Route path="/lessons/:lessonId/flashcard" element={<Flashcard />} />
             <Route path="/quiz/:lektionId" element={<Quiz />} />
+            <Route path="/lessons/:lessonId/quiz" element={<Quiz />} />
             <Route path="/spinwheel/:lektionId" element={<SpinWheel />} />
+            <Route path="/lessons/:lessonId/spinwheel" element={<SpinWheel />} />
             <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
             <Route path="/test" element={<QuickTestPage />} />
             <Route path="/take-test" element={<QuickTestPage />} />

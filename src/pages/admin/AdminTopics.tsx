@@ -45,12 +45,23 @@ export const AdminTopics: React.FC = () => {
     try {
       setLoading(true)
       setError(null)
+      const levelIdParam = selectedLevelFilter === 'all' ? undefined : selectedLevelFilter
       const [topicList, levelList] = await Promise.all([
-        adminService.getTopics(),
+        adminService.getTopics(levelIdParam),
         adminService.getLevels(),
       ])
-      setTopics(topicList)
-      setLevels(levelList)
+      
+      // Fallback: if filtered API returned empty but level is set, try fetching all topics and filtering client-side
+      let finalTopics = Array.isArray(topicList) ? topicList : []
+      if (finalTopics.length === 0 && levelIdParam) {
+        const allTopics = await adminService.getTopics().catch(() => [])
+        if (Array.isArray(allTopics) && allTopics.length > 0) {
+          finalTopics = allTopics
+        }
+      }
+
+      setTopics(finalTopics)
+      setLevels(Array.isArray(levelList) ? levelList : [])
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không thể tải danh sách Chủ đề từ server.'
       setError(msg)
@@ -61,17 +72,38 @@ export const AdminTopics: React.FC = () => {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [selectedLevelFilter])
 
-  const filteredTopics = topics.filter((t) => {
+  const selectedLevelObj = levels.find(
+    (l) => l._id === selectedLevelFilter || l.level_name === selectedLevelFilter
+  )
+
+  const filteredTopics = (Array.isArray(topics) ? topics : []).filter((t) => {
     const topicName = t.name || t.topic_name || ''
     const matchesSearch =
+      !search.trim() ||
       topicName.toLowerCase().includes(search.toLowerCase()) ||
       (t.description || '').toLowerCase().includes(search.toLowerCase())
 
-    const levelObj = typeof t.level_id === 'object' ? t.level_id : typeof t.level === 'object' ? t.level : null
-    const levelIdStr = levelObj ? levelObj._id : String(t.level_id || t.level || '')
-    const matchesLevel = selectedLevelFilter === 'all' || levelIdStr === selectedLevelFilter
+    if (selectedLevelFilter === 'all') return matchesSearch
+
+    const tLevelId = typeof t.level_id === 'object' && t.level_id !== null ? t.level_id._id : t.level_id
+    const tLevelName = typeof t.level_id === 'object' && t.level_id !== null ? t.level_id.level_name : undefined
+    const tLevelObjId = typeof t.level === 'object' && t.level !== null ? (t.level as { _id?: string })._id : t.level
+    const tLevelObjName = typeof t.level === 'object' && t.level !== null ? (t.level as { level_name?: string }).level_name : undefined
+
+    const matchesLevel =
+      tLevelId === selectedLevelFilter ||
+      tLevelName === selectedLevelFilter ||
+      tLevelObjId === selectedLevelFilter ||
+      tLevelObjName === selectedLevelFilter ||
+      (selectedLevelObj && (
+        tLevelId === selectedLevelObj._id ||
+        tLevelId === selectedLevelObj.level_name ||
+        tLevelName === selectedLevelObj.level_name ||
+        tLevelObjId === selectedLevelObj._id ||
+        tLevelObjName === selectedLevelObj.level_name
+      ))
 
     return matchesSearch && matchesLevel
   })
@@ -80,11 +112,12 @@ export const AdminTopics: React.FC = () => {
     if (typeof topic.level_id === 'object' && topic.level_id?.level_name) {
       return topic.level_id.level_name
     }
-    if (typeof topic.level === 'object' && topic.level?.level_name) {
-      return topic.level.level_name
+    if (typeof topic.level === 'object' && topic.level && 'level_name' in topic.level) {
+      return (topic.level as { level_name: string }).level_name
     }
-    const found = levels.find((l) => l._id === topic.level_id || l._id === topic.level)
-    return found ? found.level_name : 'N/A'
+    const targetId = typeof topic.level_id === 'string' ? topic.level_id : typeof topic.level === 'string' ? topic.level : ''
+    const found = levels.find((l) => l._id === targetId || l.level_name === targetId)
+    return found ? found.level_name : (targetId || 'N/A')
   }
 
   const handleOpenCreateModal = () => {

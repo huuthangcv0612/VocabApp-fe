@@ -14,8 +14,9 @@ interface QuizQuestion {
 }
 
 export default function Quiz() {
-  const { lektionId } = useParams<{ lektionId: string }>()
-  const { vocabulary, loading, error } = useVocabulary(lektionId)
+  const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
+  const activeLessonId = lessonId || lektionId || ''
+  const { vocabulary, loading, error } = useVocabulary(activeLessonId)
 
   const shuffledQuestions = useMemo<QuizQuestion[]>(() => {
     return [...vocabulary]
@@ -55,9 +56,9 @@ export default function Quiz() {
     } else if (isCorrect) {
       setFeedback('correct')
       setScore((prev) => prev + 1)
-      if (lektionId) {
+      if (activeLessonId) {
         try {
-          await progressApi.learnWord(lektionId, currentQuestion.id)
+          await progressApi.startLesson(activeLessonId)
         } catch (err) {
           console.error('Error recording word progress:', err)
         }
@@ -77,11 +78,11 @@ export default function Quiz() {
       setAnswered(false)
     } else {
       setCompleted(true)
-      if (lektionId && score >= Math.ceil(shuffledQuestions.length * 0.7)) {
+      if (activeLessonId && score >= Math.ceil(shuffledQuestions.length * 0.7)) {
         try {
-          await progressApi.completeLektion(lektionId)
+          await progressApi.completeLesson(activeLessonId)
         } catch (err) {
-          console.error('Error completing lektion:', err)
+          console.error('Error completing lesson:', err)
         }
       }
     }
@@ -115,7 +116,7 @@ export default function Quiz() {
         {!loading && !error && shuffledQuestions.length === 0 && (
           <div className="quiz-empty">
             <p>Không có câu hỏi cho bài học này.</p>
-            <Link to={`/lektion/${lektionId}`} className="back-button">
+            <Link to={`/lessons/${activeLessonId}`} className="back-button">
               ← Quay lại bài học
             </Link>
           </div>
@@ -201,7 +202,7 @@ export default function Quiz() {
                     <button onClick={handleRestart} className="submit-button">
                       Làm lại Quiz
                     </button>
-                    <Link to={`/lektion/${lektionId}`} className="next-button">
+                    <Link to={`/lessons/${activeLessonId}`} className="next-button">
                       Quay lại bài học
                     </Link>
                   </div>
@@ -217,7 +218,7 @@ export default function Quiz() {
         )}
 
         {!loading && !error && shuffledQuestions.length > 0 && (
-          <Link to={`/lektion/${lektionId}`} className="back-button">
+          <Link to={`/lessons/${activeLessonId}`} className="back-button">
             ← Quay lại
           </Link>
         )}

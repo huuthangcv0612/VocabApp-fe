@@ -15,8 +15,9 @@ import 'swiper/css'
 import 'swiper/css/effect-cards'
 
 const Flashcard = () => {
-  const { lektionId } = useParams<{ lektionId: string }>()
-  const { vocabulary, loading, error } = useVocabulary(lektionId)
+  const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
+  const activeLessonId = lessonId || lektionId || ''
+  const { vocabulary, loading, error } = useVocabulary(activeLessonId)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [learned, setLearned] = useState<string[]>([])
@@ -28,7 +29,7 @@ const Flashcard = () => {
     setIsFlipped(false)
     setLearned([])
     setIsCompleted(false)
-  }, [lektionId])
+  }, [activeLessonId])
 
   const currentCard = vocabulary[currentIndex]
   const learnedCount = learned.length
@@ -49,7 +50,7 @@ const Flashcard = () => {
   }
 
   const handleMarkLearned = async () => {
-    if (!currentCard || !lektionId) return
+    if (!currentCard || !activeLessonId) return
     const cardId = currentCard._id
     
     let updatedLearned = learned
@@ -57,22 +58,20 @@ const Flashcard = () => {
       updatedLearned = [...learned, cardId]
       setLearned(updatedLearned)
 
-      // Step 4: POST /api/progress/lektion/:lektionId/learn-word
       try {
-        await progressApi.learnWord(lektionId, cardId)
+        await progressApi.startLesson(activeLessonId)
       } catch (err) {
-        console.error('Error learning word:', err)
+        console.error('Error starting/updating lesson progress:', err)
       }
     }
 
-    // Step 5: Check if all words learned
     if (updatedLearned.length >= totalCount && totalCount > 0 && !isCompleted) {
       setIsCompleted(true)
       try {
-        await progressApi.completeLektion(lektionId)
-        toast.success('Chúc mừng! Bạn đã hoàn thành Lektion này! 🎉')
+        await progressApi.completeLesson(activeLessonId)
+        toast.success('Chúc mừng! Bạn đã hoàn thành Bài Học này! 🎉')
       } catch (err) {
-        console.error('Error completing lektion:', err)
+        console.error('Error completing lesson:', err)
       }
     }
 
@@ -84,7 +83,7 @@ const Flashcard = () => {
       <Header />
 
       <main className="flashcard-main">
-        <Link to={`/lektion/${lektionId}`} className="back-button">
+        <Link to={`/lessons/${activeLessonId}`} className="back-button">
           ← Quay lại bài học
         </Link>
 

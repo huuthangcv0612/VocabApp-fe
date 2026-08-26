@@ -30,8 +30,9 @@ const describeArc = (x: number, y: number, radius: number, startAngle: number, e
 const SEGMENT_COLORS = ['#1e7f34', '#fbbf24', '#ef4444']
 
 export const SpinWheel = () => {
-  const { lektionId } = useParams<{ lektionId: string }>()
-  const { vocabulary, loading, error } = useVocabulary(lektionId)
+  const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
+  const activeLessonId = lessonId || lektionId || ''
+  const { vocabulary, loading, error } = useVocabulary(activeLessonId)
   const [rotating, setRotating] = useState(false)
   const [rotation, setRotation] = useState(0)
   const [result, setResult] = useState<string | null>(null)
@@ -246,7 +247,7 @@ export const SpinWheel = () => {
         )}
 
         {!showSentenceCard && (
-          <Link to={`/lektion/${lektionId}`} className="back-button">
+          <Link to={`/lessons/${activeLessonId}`} className="back-button">
             ← Quay lại trang bài học
           </Link>
         )}

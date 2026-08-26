@@ -244,6 +244,15 @@ export const LessonLearnPage: React.FC = () => {
       <Header />
 
       <main style={{ flex: 1, padding: '30px 20px', maxWidth: '760px', margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <button
+            onClick={() => navigate(`/lessons/${activeLessonId}`)}
+            className="btn-admin-secondary"
+            style={{ fontSize: '0.88rem', padding: '6px 16px', borderRadius: '9999px', cursor: 'pointer' }}
+          >
+            ← Quay lại danh sách bài tập
+          </button>
+        </div>
         {step === 'intro' && (
           <div className="admin-card" style={{ padding: '40px', borderRadius: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎓</div>
@@ -642,9 +651,9 @@ export const LessonLearnPage: React.FC = () => {
               <button
                 className="btn-admin-secondary"
                 style={{ padding: '14px 28px', borderRadius: '9999px' }}
-                onClick={() => navigate('/levels')}
+                onClick={() => navigate(`/lessons/${activeLessonId}`)}
               >
-                🏠 Back to Unit
+                🏠 Quay lại Bài Học
               </button>
 
               <button

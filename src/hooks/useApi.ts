@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   levelsApi,
   topicsApi,
-  lektionsApi,
   vocabularyApi,
   progressApi,
   Level,
@@ -12,6 +11,7 @@ import {
   Vocabulary,
   ProgressOverview,
 } from '../services/api'
+import { lessonApi } from '../services/lessonApi'
 
 export const useLevels = () => {
   const [levels, setLevels] = useState<Level[]>([])
@@ -120,10 +120,19 @@ export const useLektions = (levelId?: string) => {
     setLoading(true)
     setError(null)
     try {
-      const data = id ? await lektionsApi.getByLevelId(id) : await lektionsApi.getAll()
-      setLektions(data)
+      const data = id ? await lessonApi.getByLevel(id) : await lessonApi.getAll()
+      const formatted = data.map((item) => ({
+        _id: item._id,
+        lektion_name: item.title || item.lektion_name || '',
+        description: item.description,
+        order: item.order,
+        level_id: typeof item.level_id === 'object' ? item.level_id : (item.level_id || id),
+        topic: typeof item.topic_id === 'object' && item.topic_id !== null ? (item.topic_id.name || item.topic_id.topic_name) : (typeof item.topic_id === 'string' ? item.topic_id : undefined),
+        vocabularyCount: item.vocabularyCount,
+      })) as unknown as Lektion[]
+      setLektions(formatted)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch lektions')
+      setError(err instanceof Error ? err.message : 'Failed to fetch lessons')
     } finally {
       setLoading(false)
     }

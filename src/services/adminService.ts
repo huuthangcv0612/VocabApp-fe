@@ -133,7 +133,7 @@ export const adminService = {
   deleteUnit: async (id: string): Promise<void> => unitApi.delete(id),
 
   // 9. Lesson CRUD
-  getLessons: async (unitId?: string, topicId?: string): Promise<LessonItem[]> => lessonApi.getAll({ unitId, topicId }),
+  getLessons: async (unitId?: string): Promise<LessonItem[]> => lessonApi.getAll({ unit_id: unitId }),
   createLesson: async (payload: Partial<LessonItem>): Promise<LessonItem> => lessonApi.create(payload),
   updateLesson: async (id: string, payload: Partial<LessonItem>): Promise<LessonItem> => lessonApi.update(id, payload),
   deleteLesson: async (id: string): Promise<void> => lessonApi.delete(id),
@@ -184,7 +184,11 @@ export const adminService = {
     await api.put(`/admin/lessons/${encodeURIComponent(lessonId)}/vocabularies/order`, { items })
   },
 
+  getExercises: async (): Promise<LessonExercise[]> => exerciseApi.getAll(),
   createLessonExercise: async (lessonId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.create(lessonId, payload),
   updateLessonExercise: async (exerciseId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.update(exerciseId, payload),
   deleteLessonExercise: async (exerciseId: string): Promise<void> => exerciseApi.delete(exerciseId),
+  createExercise: async (lessonId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.create(lessonId, payload),
+  updateExercise: async (exerciseId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.update(exerciseId, payload),
+  deleteExercise: async (exerciseId: string): Promise<void> => exerciseApi.delete(exerciseId),
 }

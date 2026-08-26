@@ -9,7 +9,7 @@ const clearExpiredAuth = () => {
   delete api.defaults.headers.common.Authorization
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -171,9 +171,25 @@ export interface VocabularyListResponse {
 
 export const levelsApi = {
   getAll: async (): Promise<Level[]> => {
-    const response = await api.get<ApiResponse<Level[]>>('/levels')
-    if (Array.isArray(response.data.data)) return response.data.data
-    return []
+    try {
+      const response = await api.get<unknown>('/levels')
+      const resData = response.data as Record<string, unknown> | Level[]
+      if (Array.isArray(resData)) return resData as Level[]
+      
+      const dataObj = (resData as Record<string, unknown>)?.data || resData
+      if (Array.isArray(dataObj)) return dataObj as Level[]
+      if (dataObj && typeof dataObj === 'object') {
+        const record = dataObj as Record<string, unknown>
+        if (Array.isArray(record.levels)) return record.levels as Level[]
+        if (Array.isArray(record.data)) return record.data as Level[]
+      }
+      if (Array.isArray((resData as Record<string, unknown>)?.levels)) {
+        return (resData as Record<string, unknown>).levels as Level[]
+      }
+      return []
+    } catch {
+      return []
+    }
   },
 
   getById: async (id: string): Promise<Level> => {
@@ -214,19 +230,25 @@ export const topicsApi = {
 
 export const lektionsApi = {
   getAll: async (): Promise<Lektion[]> => {
-    const response = await api.get<ApiResponse<Lektion[]>>('/lektions')
-    if (Array.isArray(response.data.data)) return response.data.data
+    const response = await api.get<ApiResponse<Lektion[] | { lessons: Lektion[] }>>('/lessons')
+    const resData = response.data.data
+    if (Array.isArray(resData)) return resData
+    if (resData && typeof resData === 'object' && 'lessons' in resData && Array.isArray(resData.lessons)) return resData.lessons
     return []
   },
 
   getById: async (id: string): Promise<LektionWithProgress> => {
-    const response = await api.get<ApiResponse<LektionWithProgress>>(`/lektions/${id}`)
-    return response.data.data
+    const response = await api.get<ApiResponse<LektionWithProgress | { lesson: LektionWithProgress }>>(`/lessons/${encodeURIComponent(id)}`)
+    const resData = response.data.data
+    if (resData && typeof resData === 'object' && 'lesson' in resData) return resData.lesson
+    return resData as LektionWithProgress
   },
 
   getByLevelId: async (levelId: string): Promise<Lektion[]> => {
-    const response = await api.get<ApiResponse<Lektion[]>>(`/lektions/level/${encodeURIComponent(levelId)}`)
-    if (Array.isArray(response.data.data)) return response.data.data
+    const response = await api.get<ApiResponse<Lektion[] | { lessons: Lektion[] }>>(`/lessons?level_id=${encodeURIComponent(levelId)}`)
+    const resData = response.data.data
+    if (Array.isArray(resData)) return resData
+    if (resData && typeof resData === 'object' && 'lessons' in resData && Array.isArray(resData.lessons)) return resData.lessons
     return []
   },
 }
@@ -301,28 +323,41 @@ export const vocabularyApi = {
 }
 
 export const progressApi = {
-  learnWord: async (lektionId: string, vocabularyId: string, isCorrect?: boolean): Promise<{ success: boolean; data?: unknown }> => {
-    const response = await api.post<ApiResponse<unknown>>(`/progress/lektion/${encodeURIComponent(lektionId)}/learn-word`, {
-      vocabulary_id: vocabularyId,
-      isCorrect,
+  startLesson: async (lessonId: string): Promise<{ success: boolean; data?: unknown }> => {
+    const response = await api.post<ApiResponse<unknown>>(`/progress/lessons/${encodeURIComponent(lessonId)}/start`)
+    return { success: response.data.success, data: response.data.data }
+  },
+
+  submitExercise: async (lessonId: string, exerciseId: string, answer: unknown): Promise<{ success: boolean; data?: unknown }> => {
+    const response = await api.post<ApiResponse<unknown>>(`/progress/lessons/${encodeURIComponent(lessonId)}/submit-exercise`, {
+      exercise_id: exerciseId,
+      answer,
     })
     return { success: response.data.success, data: response.data.data }
   },
 
-  completeLektion: async (lektionId: string): Promise<{ success: boolean; data?: unknown }> => {
-    const response = await api.post<ApiResponse<unknown>>(`/progress/lektion/${encodeURIComponent(lektionId)}/complete`)
+  completeLesson: async (lessonId: string): Promise<{ success: boolean; data?: unknown }> => {
+    const response = await api.post<ApiResponse<unknown>>(`/progress/lessons/${encodeURIComponent(lessonId)}/complete`)
     return { success: response.data.success, data: response.data.data }
   },
 
+  learnWord: async (lessonId: string, _vocabularyId?: string, _isCorrect?: boolean): Promise<{ success: boolean; data?: unknown }> => {
+    return progressApi.startLesson(lessonId)
+  },
+
+  completeLektion: async (lessonId: string): Promise<{ success: boolean; data?: unknown }> => {
+    return progressApi.completeLesson(lessonId)
+  },
+
   getOverview: async (): Promise<ProgressOverview | null> => {
-    const response = await api.get<ApiResponse<{ lektionProgresses: ProgressOverview['lektionProgresses']; stats: { completedLektionsCount: number; totalLearnedWordsCount: number } }>>('/progress')
+    const response = await api.get<ApiResponse<{ lessonProgresses?: ProgressOverview['lektionProgresses']; lektionProgresses?: ProgressOverview['lektionProgresses']; stats: { completedLessonsCount?: number; completedLektionsCount?: number; totalLearnedWordsCount: number } }>>('/progress')
     const resData = response.data.data
     if (!resData) return null
 
     return {
-      completedLektionsCount: resData.stats?.completedLektionsCount || 0,
+      completedLektionsCount: resData.stats?.completedLessonsCount || resData.stats?.completedLektionsCount || 0,
       totalLearnedWordsCount: resData.stats?.totalLearnedWordsCount || 0,
-      lektionProgresses: resData.lektionProgresses || [],
+      lektionProgresses: resData.lessonProgresses || resData.lektionProgresses || [],
     }
   },
 }

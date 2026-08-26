@@ -49,10 +49,10 @@ export const studentLearningService = {
   },
 
   completeLesson: async (lessonId: string): Promise<{ success: boolean; xpEarned: number }> => {
-    const response = await api.post<ApiResponse<{ xpEarned?: number }>>(`/progress/lektion/${encodeURIComponent(lessonId)}/complete`)
+    const response = await api.post<ApiResponse<{ lessonProgress?: { xp_earned?: number }; xpEarned?: number }>>(`/progress/lessons/${encodeURIComponent(lessonId)}/complete`)
     return {
       success: response.data.success,
-      xpEarned: response.data.data?.xpEarned || 20,
+      xpEarned: response.data.data?.lessonProgress?.xp_earned || response.data.data?.xpEarned || 20,
     }
   },
 }

@@ -1,71 +1,33 @@
 import { useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { useTopics, useTopicLektions, useLektions, useLevels } from '../hooks/useApi'
-import type { Topic, LektionWithProgress } from '../services/api'
+import { useLektions, useLevels } from '../hooks/useApi'
+import type { LektionWithProgress } from '../services/api'
 import CloudIcon from '../assets/Cloud.svg'
 import GirlIcon from '../assets/Girl 1.svg'
 import '../styles/pages/levels.css'
 
 const LevelDetail = () => {
-  const { levelId, topicId } = useParams<{ levelId: string; topicId?: string }>()
+  const { levelId } = useParams<{ levelId: string }>()
   const navigate = useNavigate()
   const { levels } = useLevels()
-  const { topics } = useTopics(levelId)
-  const { lektions: allLektions } = useLektions(levelId)
 
-  // Find level object
-  const level = levels.find((item) => item._id === levelId || item.level_name === levelId)
-  const levelName = level ? level.level_name : levelId || 'A1.1'
+  // Find level object by _id or level_name
+  const levelObj = useMemo(() => {
+    if (!levelId) return null
+    return levels.find((item) => item._id === levelId || item.level_name === levelId)
+  }, [levels, levelId])
 
-  // Extract unique topics from allLektions if backend topics endpoint returns empty
-  const fallbackTopics = useMemo(() => {
-    if (topics.length > 0) return []
-    const map = new Map<string, Topic>()
-    allLektions.forEach((l) => {
-      const topicVal = l.topic
-      if (typeof topicVal === 'string' && topicVal) {
-        if (!map.has(topicVal)) {
-          map.set(topicVal, { _id: topicVal, topic_name: topicVal })
-        }
-      } else if (topicVal && typeof topicVal === 'object' && topicVal.topic_name) {
-        if (!map.has(topicVal._id)) {
-          map.set(topicVal._id, topicVal)
-        }
-      }
-    })
-    return Array.from(map.values())
-  }, [topics, allLektions])
+  const resolvedLevelId = levelObj?._id || levelId || ''
+  const levelName = levelObj ? levelObj.level_name : levelId || 'A1.1'
 
-  const effectiveTopics = topics.length > 0 ? topics : fallbackTopics
+  // Fetch all lektions for this level directly (Level -> Lesson flow)
+  const { lektions: rawLektions, loading: lektionsLoading, error: lektionsError } = useLektions(resolvedLevelId)
 
-  // Selected topic resolution
-  const activeTopic = useMemo(() => {
-    if (!topicId) return effectiveTopics[0] || null
-    return effectiveTopics.find((t) => t._id === topicId || t.topic_name === topicId) || {
-      _id: topicId,
-      topic_name: topicId,
-    }
-  }, [topicId, effectiveTopics])
-
-  // Fetch lektions for selected topic
-  const { lektions: topicLektions, loading: lektionsLoading, error: lektionsError } = useTopicLektions(
-    activeTopic?._id,
-    levelId
-  )
-
-  // Fallback for lektions if API returned empty
   const displayLektions: LektionWithProgress[] = useMemo(() => {
-    if (topicLektions.length > 0) return topicLektions
-    if (!activeTopic) return allLektions
-    const filtered = allLektions.filter((l) => {
-      if (typeof l.topic === 'string') return l.topic === activeTopic._id || l.topic === activeTopic.topic_name
-      if (l.topic && typeof l.topic === 'object') return l.topic._id === activeTopic._id || l.topic.topic_name === activeTopic.topic_name
-      return false
-    })
-    return filtered.length > 0 ? filtered : allLektions
-  }, [topicLektions, allLektions, activeTopic])
+    return rawLektions || []
+  }, [rawLektions])
 
   return (
     <div className="lektion-page">
@@ -81,7 +43,7 @@ const LevelDetail = () => {
         <div className="lektion-hero-container">
           <div className="lektion-hero-title-wrapper">
             <h1 className="lektion-hero-title">
-              CHOOSE<br />LEKTION
+              LEVEL {levelName}<br />LESSONS
             </h1>
           </div>
 
@@ -94,17 +56,26 @@ const LevelDetail = () => {
         <div className="lektion-hero-wave"></div>
       </section>
 
-      {/* Section 2: WHAT LEKTION YOU LIKE ? Selection Grid */}
+      {/* Section 2: Lesson Selection Grid */}
       <section className="lektion-selection-section">
         <div className="lektion-container">
-          <h2 className="lektion-section-title">WHAT LEKTION YOU LIKE ?</h2>
+          {/* Breadcrumb / Back button */}
+          <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
+            <Link to="/levels" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              ← Levels
+            </Link>
+            <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>/</span>
+            <span style={{ color: '#ffffff', fontWeight: 700 }}>{levelName}</span>
+          </div>
+
+          <h2 className="lektion-section-title">CHỌN BÀI HỌC ({levelName})</h2>
 
           {lektionsLoading && <p className="status-text white-text">Đang tải danh sách bài học...</p>}
           {lektionsError && <p className="status-text error">Lỗi: {lektionsError}</p>}
 
           {!lektionsLoading && displayLektions.length === 0 && (
             <p className="status-text white-text">
-              Chưa có bài học nào trong chủ đề này ({activeTopic?.topic_name || levelName}).
+              Chưa có bài học nào trong trình độ {levelName}.
             </p>
           )}
 
@@ -114,6 +85,13 @@ const LevelDetail = () => {
               const displayTitle = lektion.lektion_name.includes('-')
                 ? lektion.lektion_name.split('-').pop()?.trim() || lektion.lektion_name
                 : lektion.lektion_name
+
+              // Extract Topic metadata (Topic is metadata only, not a navigation button)
+              const topicVal = lektion.topic
+              const topicName = typeof topicVal === 'object' && topicVal !== null
+                ? (topicVal.topic_name || topicVal.name || '')
+                : (typeof topicVal === 'string' ? topicVal : '')
+
               const count = typeof lektion.vocabularyCount === 'number' ? lektion.vocabularyCount : 0
               const progress = lektion.progress || { status: 'not_started', percentage: 0, learnedWordsCount: 0 }
               const isCompleted = progress.status === 'completed' || progress.percentage === 100
@@ -122,7 +100,7 @@ const LevelDetail = () => {
                 <div
                   key={lektion._id}
                   className="lektion-card-item"
-                  onClick={() => navigate(`/lektion/${lektion._id}`)}
+                  onClick={() => navigate(`/lessons/${lektion._id}`)}
                   role="button"
                   tabIndex={0}
                 >
@@ -132,6 +110,19 @@ const LevelDetail = () => {
 
                   <div className="lektion-card-content">
                     <h3 className="lektion-card-name">{displayTitle}</h3>
+                    
+                    {topicName && (
+                      <p style={{ margin: '4px 0', fontSize: '0.85rem', fontWeight: 600, color: '#e2e8f0' }}>
+                        🏷️ Topic: {topicName}
+                      </p>
+                    )}
+
+                    {lektion.description && (
+                      <p style={{ margin: '2px 0 6px 0', fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.4 }}>
+                        {lektion.description}
+                      </p>
+                    )}
+
                     <p className="lektion-card-desc">
                       📖 {count} từ vựng • {isCompleted ? '✓ Hoàn thành' : progress.percentage > 0 ? `⏳ Đang học (${progress.percentage}%)` : '░ Chưa học'}
                     </p>

@@ -522,13 +522,15 @@ export const AdminLessonBuilder: React.FC = () => {
       } else {
         const created = await adminService.createLessonExercise(lessonId, payload)
         const newEx: LessonExercise = {
-          _id: created._id || `ex_${Date.now()}`,
+          _id: created?._id || `ex_${Date.now()}`,
           ...payload,
         } as LessonExercise
         setExercises((prev) => [...prev, newEx])
         toast.success('Đã tạo bài tập mới thành công!')
       }
       setIsExerciseModalOpen(false)
+      setEditingExercise(null)
+      await fetchLessonData()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
       toast.error(msg)
@@ -545,6 +547,7 @@ export const AdminLessonBuilder: React.FC = () => {
       setExercises((prev) => prev.filter((item) => item._id !== deleteExerciseTarget._id))
       toast.success('Đã xóa bài tập!')
       setDeleteExerciseTarget(null)
+      await fetchLessonData()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Xóa bài tập thất bại.'
       toast.error(msg)

@@ -3,14 +3,44 @@ import type { ApiResponse } from '../types/api'
 import type { TopicItem, TopicPayload } from '../types/topic'
 import type { LessonItem } from '../types/lesson'
 
+const extractTopicArray = (responseData: unknown): TopicItem[] => {
+  if (!responseData) return []
+  if (Array.isArray(responseData)) return responseData as TopicItem[]
+
+  const resObj = responseData as Record<string, unknown>
+  const dataObj = resObj.data || resObj
+
+  if (Array.isArray(dataObj)) return dataObj as TopicItem[]
+
+  if (dataObj && typeof dataObj === 'object') {
+    const dataRecord = dataObj as Record<string, unknown>
+    if (Array.isArray(dataRecord.topics)) return dataRecord.topics as TopicItem[]
+    if (Array.isArray(dataRecord.data)) return dataRecord.data as TopicItem[]
+  }
+
+  if (Array.isArray(resObj.topics)) return resObj.topics as TopicItem[]
+  return []
+}
+
 export const topicApi = {
   getAll: async (params?: { levelId?: string; q?: string }): Promise<TopicItem[]> => {
-    const url = params?.levelId ? `/topics/level/${encodeURIComponent(params.levelId)}` : '/topics'
-    const response = await api.get<ApiResponse<TopicItem[] | { topics: TopicItem[] }>>(url)
-    const data = response.data.data
-    if (Array.isArray(data)) return data
-    if (data && 'topics' in data && Array.isArray(data.topics)) return data.topics
-    return []
+    try {
+      const url = params?.levelId ? `/topics/level/${encodeURIComponent(params.levelId)}` : '/topics'
+      const response = await api.get<unknown>(url)
+      const items = extractTopicArray(response.data)
+      if (items.length > 0 || params?.levelId) return items
+
+      const adminResponse = await api.get<unknown>('/admin/topics')
+      return extractTopicArray(adminResponse.data)
+    } catch {
+      try {
+        const fallbackUrl = params?.levelId ? `/topics/level/${encodeURIComponent(params.levelId)}` : '/admin/topics'
+        const response = await api.get<unknown>(fallbackUrl)
+        return extractTopicArray(response.data)
+      } catch {
+        return []
+      }
+    }
   },
 
   getById: async (id: string): Promise<TopicItem> => {

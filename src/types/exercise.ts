@@ -25,8 +25,10 @@ export interface ExerciseAnswerPayload {
 
 export interface LessonExercise {
   _id: string
+  lesson_id?: string
   order: number
   type: ExerciseType | string
+  vocabulary_id?: string | { _id: string; word: string; meaning?: string }
   vocabularyId?: string
   vocabularyName?: string
   xp: number

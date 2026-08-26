@@ -13,6 +13,8 @@ export interface LessonItem {
   status?: StatusType
   estimated_minutes?: number
   xp?: number
+  level_id?: { _id: string; level_name?: string; description?: string; order?: number } | string
+  level?: { _id: string; level_name?: string } | string
   unit_id?: UnitItem | string
   unit?: UnitItem | string
   topic_id?: TopicItem | string

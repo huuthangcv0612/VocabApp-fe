@@ -29,9 +29,13 @@ export const UnitPage: React.FC = () => {
         ])
 
         const map: Record<string, { status: string; progress: number }> = {}
-        if (userProgress && Array.isArray(userProgress.lektionProgresses)) {
-          userProgress.lektionProgresses.forEach((p) => {
-            map[p.lektionId] = { status: p.status, progress: p.progress }
+        const progresses = userProgress?.lessonProgresses || userProgress?.lektionProgresses
+        if (progresses && Array.isArray(progresses)) {
+          progresses.forEach((p) => {
+            const id = typeof p.lesson_id === 'object' ? p.lesson_id?._id : (p.lesson_id || p.lektionId)
+            if (id) {
+              map[id] = { status: p.status, progress: p.progress }
+            }
           })
         }
 
