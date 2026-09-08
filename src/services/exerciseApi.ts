@@ -1,4 +1,5 @@
 import api from './api'
+import { progressService } from './progressService'
 import type { ApiResponse } from '../types/api'
 import type { LessonExercise } from '../types/exercise'
 import type { ExerciseSubmitResponse } from '../types/student'
@@ -85,15 +86,11 @@ export const exerciseApi = {
   },
 
   submitAnswer: async (lessonId: string, exerciseId: string, answer: string | number | string[]): Promise<ExerciseSubmitResponse> => {
-    const response = await api.post<ApiResponse<{ is_correct: boolean; xp_earned: number; explanation?: string; feedback?: string }>>(
-      `/progress/lessons/${encodeURIComponent(lessonId)}/submit-exercise`,
-      { exercise_id: exerciseId, answer },
-    )
+    const rawData = await progressService.submitExerciseAnswer(lessonId, exerciseId, answer) as { is_correct?: boolean; correct?: boolean; xp_earned?: number; xp?: number; explanation?: string; feedback?: string } | undefined
 
-    const resData = response.data.data
-    const isCorrect = resData?.is_correct ?? false
-    const xp = resData?.xp_earned ?? 0
-    const explanation = resData?.explanation || resData?.feedback || ''
+    const isCorrect = rawData?.is_correct ?? rawData?.correct ?? false
+    const xp = rawData?.xp_earned ?? rawData?.xp ?? 0
+    const explanation = rawData?.explanation || rawData?.feedback || ''
 
     return {
       is_correct: isCorrect,

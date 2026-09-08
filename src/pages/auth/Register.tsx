@@ -7,6 +7,7 @@ import '../../styles/pages/auth.css'
 
 const Register = () => {
   const [name, setName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -24,7 +25,8 @@ const Register = () => {
 
     const trimmedName = name.trim()
     const trimmedEmail = email.trim()
-    console.log('Register form submitted:', { name: trimmedName, email: trimmedEmail })
+    const trimmedUsername = username.trim() || undefined
+    console.log('Register form submitted:', { name: trimmedName, email: trimmedEmail, username: trimmedUsername })
 
     if (trimmedName.length < 2) {
       setError('Vui lòng nhập họ tên hợp lệ.')
@@ -51,7 +53,7 @@ const Register = () => {
     }
 
     try {
-      await register(trimmedName, trimmedEmail, password, passwordConfirm)
+      await register(trimmedName, trimmedEmail, password, passwordConfirm, trimmedUsername)
       toast.success('Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.')
       console.log('Register successful, navigating to verify email pending state')
       navigate('/verify-email/pending', { replace: true })
@@ -82,6 +84,14 @@ const Register = () => {
           onChange={(e) => setName(e.target.value)}
           autoComplete="name"
           required
+        />
+        <FormInput
+          label="Tên tài khoản (Username)"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          autoComplete="username"
+          placeholder="Tùy chọn (Tự tạo từ Email nếu bỏ trống)"
         />
         <FormInput
           label="Email"

@@ -29,6 +29,23 @@ export const progressService = {
     return response.data.data
   },
 
+  submitExercise: async (lessonId: string, exerciseId: string, answer: unknown): Promise<{ success: boolean; data?: unknown }> => {
+    const data = await progressService.submitExerciseAnswer(lessonId, exerciseId, answer)
+    return { success: true, data }
+  },
+
+  getOverview: async () => {
+    const response = await api.get<ApiResponse<{ lessonProgresses?: Array<{ lektionId: string; status: 'not_started' | 'in_progress' | 'completed'; progress: number; learnedWordsCount: number; updatedAt?: string }>; lektionProgresses?: Array<{ lektionId: string; status: 'not_started' | 'in_progress' | 'completed'; progress: number; learnedWordsCount: number; updatedAt?: string }>; stats: { completedLessonsCount?: number; completedLektionsCount?: number; totalLearnedWordsCount: number } }>>('/progress')
+    const resData = response.data.data
+    if (!resData) return null
+
+    return {
+      completedLektionsCount: resData.stats?.completedLessonsCount || resData.stats?.completedLektionsCount || 0,
+      totalLearnedWordsCount: resData.stats?.totalLearnedWordsCount || 0,
+      lektionProgresses: resData.lessonProgresses || resData.lektionProgresses || [],
+    }
+  },
+
   completeLesson: async (lessonId: string) => {
     const response = await api.post<ApiResponse<{ lessonProgress?: unknown; nextLesson?: unknown }>>(`/progress/lessons/${encodeURIComponent(lessonId)}/complete`)
     return response.data
@@ -36,9 +53,11 @@ export const progressService = {
 
   markWordLearned: async (
     lessonId: string,
-    _vocabularyId?: string,
-    _isCorrect?: boolean,
+    vocabularyId?: string,
+    isCorrect?: boolean,
   ): Promise<{ success: boolean; data?: unknown }> => {
+    void vocabularyId
+    void isCorrect
     return await progressService.startLesson(lessonId).then(data => ({ success: true, data })).catch(() => ({ success: false }))
   },
 

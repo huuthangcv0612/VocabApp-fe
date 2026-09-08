@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { authApi } from './api'
+import { authApi } from './authApi'
 import type { AuthUser } from '../types/auth'
 
 interface AuthResult {
@@ -24,9 +24,9 @@ export const authService = {
     }
   },
 
-  register: async (name: string, email: string, password: string, passwordConfirm: string): Promise<void> => {
+  register: async (name: string, email: string, password: string, passwordConfirm: string, username?: string): Promise<void> => {
     try {
-      await authApi.register(name, email, password, passwordConfirm)
+      await authApi.register(name, email, password, passwordConfirm, username)
     } catch (error) {
       throw new Error(getAuthErrorMessage(error))
     }
@@ -40,6 +40,14 @@ export const authService = {
     }
   },
 
+  resendVerification: async (email: string): Promise<void> => {
+    try {
+      await authApi.resendVerification(email)
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error))
+    }
+  },
+
   forgotPassword: async (email: string): Promise<void> => {
     try {
       await authApi.forgotPassword(email)
@@ -48,9 +56,17 @@ export const authService = {
     }
   },
 
-  resetPassword: async (token: string, password: string, passwordConfirm: string): Promise<void> => {
+  validateResetToken: async (token: string): Promise<void> => {
     try {
-      await authApi.resetPassword(token, password, passwordConfirm)
+      await authApi.validateResetToken(token)
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error))
+    }
+  },
+
+  resetPassword: async (token: string, password: string, confirmPassword: string): Promise<void> => {
+    try {
+      await authApi.resetPassword(token, password, confirmPassword)
     } catch (error) {
       throw new Error(getAuthErrorMessage(error))
     }
@@ -59,6 +75,14 @@ export const authService = {
   changePassword: async (oldPassword: string, newPassword: string, confirmPassword: string): Promise<void> => {
     try {
       await authApi.changePassword(oldPassword, newPassword, confirmPassword)
+    } catch (error) {
+      throw new Error(getAuthErrorMessage(error))
+    }
+  },
+
+  googleLogin: async (idToken: string): Promise<AuthResult> => {
+    try {
+      return await authApi.googleLogin(idToken)
     } catch (error) {
       throw new Error(getAuthErrorMessage(error))
     }

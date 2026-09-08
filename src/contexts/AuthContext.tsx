@@ -10,12 +10,16 @@ interface AuthContextValue {
   isAuthenticated: boolean
   loading: boolean
   login: (email: string, password: string) => Promise<AuthUser>
-  register: (name: string, email: string, password: string, passwordConfirm: string) => Promise<void>
+  register: (name: string, email: string, password: string, passwordConfirm: string, username?: string) => Promise<void>
   logout: () => void
   verifyEmail: (token: string) => Promise<void>
+  resendVerification: (email: string) => Promise<void>
   forgotPassword: (email: string) => Promise<void>
-  resetPassword: (token: string, password: string, passwordConfirm: string) => Promise<void>
+  resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>
   changePassword: (oldPassword: string, newPassword: string, confirmPassword: string) => Promise<void>
+  googleLogin: (idToken: string) => Promise<AuthUser>
+  updateProfileState: (updatedUser: AuthUser) => void
+  refreshUser: () => Promise<AuthUser>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -91,9 +95,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return response.user
   }
 
-  const register = async (name: string, email: string, password: string, passwordConfirm: string) => {
-    console.log('AuthContext register called:', { name, email })
-    await authService.register(name, email, password, passwordConfirm)
+  const register = async (name: string, email: string, password: string, passwordConfirm: string, username?: string) => {
+    console.log('AuthContext register called:', { name, email, username })
+    await authService.register(name, email, password, passwordConfirm, username)
     console.log('AuthContext register completed without auto-login')
   }
 
@@ -109,16 +113,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await authService.verifyEmail(verifyToken)
   }
 
+  const resendVerification = async (email: string) => {
+    await authService.resendVerification(email)
+  }
+
   const forgotPassword = async (email: string) => {
     await authService.forgotPassword(email)
   }
 
-  const resetPassword = async (resetToken: string, password: string, passwordConfirm: string) => {
-    await authService.resetPassword(resetToken, password, passwordConfirm)
+  const resetPassword = async (resetToken: string, password: string, confirmPassword: string) => {
+    await authService.resetPassword(resetToken, password, confirmPassword)
   }
 
   const changePassword = async (oldPassword: string, newPassword: string, confirmPassword: string) => {
     await authService.changePassword(oldPassword, newPassword, confirmPassword)
+  }
+
+  const googleLogin = async (idToken: string): Promise<AuthUser> => {
+    const response = await authService.googleLogin(idToken)
+    setToken(response.token)
+    setUser(response.user)
+    localStorage.setItem(STORAGE_TOKEN, response.token)
+    localStorage.setItem(STORAGE_USER, JSON.stringify(response.user))
+    return response.user
+  }
+
+  const updateProfileState = (updatedUser: AuthUser) => {
+    setUser(updatedUser)
+    localStorage.setItem(STORAGE_USER, JSON.stringify(updatedUser))
+  }
+
+  const refreshUser = async (): Promise<AuthUser> => {
+    const currentUser = await authService.getCurrentUser()
+    setUser(currentUser)
+    localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser))
+    return currentUser
   }
 
   const value = useMemo(
@@ -131,9 +160,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       register,
       logout,
       verifyEmail,
+      resendVerification,
       forgotPassword,
       resetPassword,
       changePassword,
+      googleLogin,
+      updateProfileState,
+      refreshUser,
     }),
     [loading, token, user],
   )

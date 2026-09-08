@@ -19,6 +19,7 @@ import VerifyEmail from './pages/auth/VerifyEmail'
 import ForgotPassword from './pages/auth/ForgotPassword'
 import ResetPassword from './pages/auth/ResetPassword'
 import ChangePassword from './pages/auth/ChangePassword'
+import ProfilePage from './pages/ProfilePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/admin/AdminRoute'
 import UnitPage from './pages/UnitPage'
@@ -89,6 +90,7 @@ function App() {
             <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
             <Route path="/test" element={<QuickTestPage />} />
             <Route path="/take-test" element={<QuickTestPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/change-password" element={<ChangePassword />} />
           </Route>
 

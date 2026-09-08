@@ -12,6 +12,7 @@ import {
   ProgressOverview,
 } from '../services/api'
 import { lessonApi } from '../services/lessonApi'
+import { unitApi } from '../services/unitApi'
 
 export const useLevels = () => {
   const [levels, setLevels] = useState<Level[]>([])
@@ -56,8 +57,8 @@ export const useTopics = (levelId?: string) => {
     setLoading(true)
     setError(null)
     try {
-      const data = await topicsApi.getAll(id)
-      setTopics(data)
+      const data = await topicsApi.getAll({ levelId: id })
+      setTopics(data as unknown as Topic[])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch topics')
     } finally {
@@ -77,6 +78,40 @@ export const useTopics = (levelId?: string) => {
   }
 }
 
+export const useUnits = (topicId?: string) => {
+  const [units, setUnits] = useState<Array<{ _id: string; unit_name?: string; name?: string; description?: string; order?: number }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchUnits = useCallback(async (id?: string) => {
+    if (!id) {
+      setUnits([])
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await unitApi.getAll({ topicId: id })
+      setUnits(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch units')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUnits(topicId)
+  }, [topicId, fetchUnits])
+
+  return {
+    units,
+    loading,
+    error,
+    refetch: () => fetchUnits(topicId),
+  }
+}
+
 export const useTopicLektions = (topicId?: string, levelId?: string) => {
   const [lektions, setLektions] = useState<LektionWithProgress[]>([])
   const [loading, setLoading] = useState(false)
@@ -91,7 +126,7 @@ export const useTopicLektions = (topicId?: string, levelId?: string) => {
     setError(null)
     try {
       const data = await topicsApi.getLektionsByTopic(tId, lId)
-      setLektions(data)
+      setLektions(data as unknown as LektionWithProgress[])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch lektions for topic')
     } finally {
@@ -160,7 +195,8 @@ export const useVocabulary = (lektionId?: string) => {
     setError(null)
     try {
       const data = id ? await vocabularyApi.getByLektionId(id) : await vocabularyApi.getAll()
-      setVocabulary(Array.isArray(data) ? data : [])
+      const list = Array.isArray(data) ? data : (data as unknown as { vocabularies: Vocabulary[] })?.vocabularies || []
+      setVocabulary(list as unknown as Vocabulary[])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch vocabulary')
     } finally {
@@ -197,7 +233,7 @@ export const useVocabularySearch = () => {
     setError(null)
     try {
       const data = await vocabularyApi.search(keyword)
-      setResults(data)
+      setResults(data as unknown as Vocabulary[])
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to search vocabulary')
     } finally {

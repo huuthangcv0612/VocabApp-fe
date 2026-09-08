@@ -1,4 +1,5 @@
 import api from './api'
+import { vocabularyApi } from './vocabularyApi'
 import type { ApiResponse } from '../types/api'
 import type {
   SubscriptionPackage,
@@ -108,6 +109,16 @@ export const subscriptionService = {
     return response.data.success
   },
 
+  getOrders: async (): Promise<BackendOrderResponse[]> => {
+    const response = await api.get<ApiResponse<BackendOrderResponse[] | { orders: BackendOrderResponse[] }>>('/orders')
+    const data = response.data.data
+    if (Array.isArray(data)) return data
+    if (data && typeof data === 'object' && 'orders' in data && Array.isArray(data.orders)) {
+      return data.orders
+    }
+    return []
+  },
+
   getPlans: async (): Promise<SubscriptionPackage[]> => {
     const response = await api.get<ApiResponse<PlanItem[]>>('/plans')
     const plans = Array.isArray(response.data.data) ? response.data.data : []
@@ -121,6 +132,15 @@ export const subscriptionService = {
       features: plan.features || (plan.description ? [plan.description] : []),
       badge: plan.badge,
     }))
+  },
+
+  getPlan: async (planId: string): Promise<PlanItem> => {
+    const response = await api.get<ApiResponse<PlanItem | { plan: PlanItem }>>(`/plans/${encodeURIComponent(planId)}`)
+    const data = response.data.data
+    if (data && typeof data === 'object' && 'plan' in data) {
+      return data.plan
+    }
+    return data as PlanItem
   },
 
   getPackages: async (): Promise<SubscriptionPackage[]> => {
@@ -168,20 +188,21 @@ export const subscriptionService = {
     }
   },
 
+  getSubscriptionHistory: async (): Promise<BackendSubscriptionResponse[]> => {
+    const response = await api.get<ApiResponse<BackendSubscriptionResponse[] | { subscriptions: BackendSubscriptionResponse[] }>>('/subscriptions/history')
+    const data = response.data.data
+    if (Array.isArray(data)) return data
+    if (data && typeof data === 'object' && 'subscriptions' in data && Array.isArray(data.subscriptions)) {
+      return data.subscriptions
+    }
+    return []
+  },
+
   checkAiGrammarPermission: async (
     sentence: string,
   ): Promise<{ allowed: boolean; feedback?: string; reason?: string }> => {
     try {
-      const response = await api.post<ApiResponse<{ correct: boolean; corrected: string; errors: string[] }>>('/ai/check-german-sentence', { sentence })
-      const { correct, corrected, errors } = response.data.data
-      let feedback = ''
-
-      if (correct) {
-        feedback = 'Tuyệt vời! Câu của bạn hoàn toàn chính xác.'
-      } else {
-        feedback = `Câu đúng: "${corrected}". ${errors?.length ? `Lỗi: ${errors.join(', ')}` : ''}`
-      }
-
+      const feedback = await vocabularyApi.getSentenceFeedback(sentence)
       return { allowed: true, feedback }
     } catch (err: unknown) {
       if (typeof err === 'object' && err !== null && 'response' in err) {

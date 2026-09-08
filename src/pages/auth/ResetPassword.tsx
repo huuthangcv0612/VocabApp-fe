@@ -19,7 +19,19 @@ const ResetPassword = () => {
   useEffect(() => {
     if (!token) {
       setError('Link đặt lại mật khẩu không hợp lệ.')
+      return
     }
+
+    const checkToken = async () => {
+      try {
+        await authService.validateResetToken(token)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.'
+        setError(errorMessage)
+      }
+    }
+
+    void checkToken()
   }, [token])
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

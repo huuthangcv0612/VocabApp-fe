@@ -105,7 +105,7 @@ const Levels = () => {
                   <div
                     key={level._id || levelName}
                     className={`card-level-item ${isBlue ? 'card-blue' : 'card-red'}`}
-                    onClick={() => navigate(`/levels/${level._id || levelName}/lessons`)}
+                    onClick={() => navigate(`/topics/${level._id || levelName}`)}
                     role="button"
                     tabIndex={0}
                   >

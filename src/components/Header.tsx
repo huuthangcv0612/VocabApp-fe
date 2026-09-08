@@ -102,9 +102,9 @@ const Header = ({ animate = false }: HeaderProps) => {
         <div className="header-actions">
           {isAuthenticated ? (
             <>
-              <span className="user-greeting">
-                Hallo, <span className="username">{user?.name}</span>
-              </span>
+              <NavLink to="/profile" className="user-greeting" style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                Hallo, <span className="username">{user?.name}</span> 👤
+              </NavLink>
               <button onClick={handleLogout} className="btn-book">
                 Logout
               </button>

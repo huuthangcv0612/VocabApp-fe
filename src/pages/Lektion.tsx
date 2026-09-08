@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { lessonApi } from '../services/lessonApi'
+import { progressService } from '../services/progressService'
 import type { LessonDetailData } from '../types/lesson'
 import type { LevelItem } from '../types/level'
 import '../styles/pages/lesson.css'
@@ -11,6 +12,15 @@ export const Lektion: React.FC = () => {
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId || ''
   const navigate = useNavigate()
+
+  const handleStartAndNavigate = async (targetPath: string) => {
+    if (activeLessonId) {
+      progressService.startLesson(activeLessonId).catch((err) => {
+        console.warn('Start lesson tracking failed:', err)
+      })
+    }
+    navigate(targetPath)
+  }
 
   const [lessonData, setLessonData] = useState<LessonDetailData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -194,7 +204,7 @@ export const Lektion: React.FC = () => {
               justifyContent: 'space-between',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
-            onClick={() => navigate(`/flashcard/${activeLessonId}`)}
+            onClick={() => handleStartAndNavigate(`/flashcard/${activeLessonId}`)}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -229,7 +239,7 @@ export const Lektion: React.FC = () => {
               justifyContent: 'space-between',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
-            onClick={() => navigate(`/quiz/${activeLessonId}`)}
+            onClick={() => handleStartAndNavigate(`/quiz/${activeLessonId}`)}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -264,7 +274,7 @@ export const Lektion: React.FC = () => {
               justifyContent: 'space-between',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
-            onClick={() => navigate(`/spinwheel/${activeLessonId}`)}
+            onClick={() => handleStartAndNavigate(`/spinwheel/${activeLessonId}`)}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -299,7 +309,7 @@ export const Lektion: React.FC = () => {
               justifyContent: 'space-between',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease',
             }}
-            onClick={() => navigate(`/learn/lesson/${activeLessonId}`)}
+            onClick={() => handleStartAndNavigate(`/learn/lesson/${activeLessonId}`)}
           >
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>

@@ -1,25 +1,24 @@
-import api from './api'
+import { unitApi } from './unitApi'
 import { lessonApi } from './lessonApi'
 import { exerciseApi } from './exerciseApi'
-import type { ApiResponse } from '../types/api'
+import { progressService } from './progressService'
 import type {
   ExerciseSubmitPayload,
   ExerciseSubmitResponse,
   UnitLearningData,
 } from '../types/student'
 import type { LessonDetailData } from '../types/lesson'
-import type { UnitItem } from '../types/unit'
-import type { LessonItem } from '../types/lesson'
 
 export const studentLearningService = {
   getUnitLessons: async (unitId: string): Promise<UnitLearningData> => {
-    const response = await api.get<ApiResponse<UnitItem & { lessons?: LessonItem[] }>>(`/units/${encodeURIComponent(unitId)}`)
-    const res = response.data.data
+    const [unitRes, rawLessons] = await Promise.all([
+      unitApi.getById(unitId).catch(() => null),
+      lessonApi.getAll({ unit_id: unitId }),
+    ])
 
-    const unitName = res.unit_name || res.name || 'Unit'
-    const topicName = typeof res.topic === 'object' && res.topic !== null ? (res.topic.topic_name || res.topic.name) : 'Topic'
-    const levelName = typeof res.level_id === 'object' && res.level_id !== null ? (res.level_id.level_name || res.level_id.name) : 'A1'
-    const rawLessons = res.lessons || []
+    const unitName = unitRes?.unit_name || unitRes?.name || 'Unit'
+    const topicName = typeof unitRes?.topic === 'object' && unitRes.topic !== null ? (unitRes.topic.topic_name || unitRes.topic.name) : 'Topic'
+    const levelName = typeof unitRes?.level_id === 'object' && unitRes.level_id !== null ? (unitRes.level_id.level_name || unitRes.level_id.name) : 'A1'
 
     const lessons = rawLessons.map((l, idx) => ({
       _id: l._id || `l_${idx}`,
@@ -35,13 +34,20 @@ export const studentLearningService = {
       unitName,
       topicName,
       levelName,
-      description: res.description || '',
+      description: unitRes?.description || '',
       lessons,
     }
   },
 
   getLessonLearningData: async (lessonId: string): Promise<LessonDetailData> => {
-    return await lessonApi.getById(lessonId)
+    const data = await lessonApi.getById(lessonId)
+    if (!data.exercises || data.exercises.length === 0) {
+      const extraExercises = await exerciseApi.getByLesson(lessonId).catch(() => [])
+      if (extraExercises.length > 0) {
+        data.exercises = extraExercises
+      }
+    }
+    return data
   },
 
   submitExerciseAnswer: async (payload: ExerciseSubmitPayload): Promise<ExerciseSubmitResponse> => {
@@ -49,10 +55,11 @@ export const studentLearningService = {
   },
 
   completeLesson: async (lessonId: string): Promise<{ success: boolean; xpEarned: number }> => {
-    const response = await api.post<ApiResponse<{ lessonProgress?: { xp_earned?: number }; xpEarned?: number }>>(`/progress/lessons/${encodeURIComponent(lessonId)}/complete`)
+    const response = await progressService.completeLesson(lessonId)
+    const resData = response.data as { lessonProgress?: { xp_earned?: number }; xpEarned?: number } | undefined
     return {
-      success: response.data.success,
-      xpEarned: response.data.data?.lessonProgress?.xp_earned || response.data.data?.xpEarned || 20,
+      success: response.success ?? true,
+      xpEarned: resData?.lessonProgress?.xp_earned || resData?.xpEarned || 20,
     }
   },
 }

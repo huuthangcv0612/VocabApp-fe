@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
-import { subscriptionService } from '../services/subscriptionService'
+import { subscriptionService, BackendSubscriptionResponse } from '../services/subscriptionService'
 import type { UserSubscription } from '../types/gamification'
 import CloudIcon from '../assets/Cloud.svg'
 import '../styles/pages/progress.css'
@@ -11,14 +11,19 @@ export const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate()
 
   const [sub, setSub] = useState<UserSubscription | null>(null)
+  const [history, setHistory] = useState<BackendSubscriptionResponse[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
-        const currentSub = await subscriptionService.getCurrentSubscription()
+        const [currentSub, subHistory] = await Promise.all([
+          subscriptionService.getCurrentSubscription(),
+          subscriptionService.getSubscriptionHistory().catch(() => []),
+        ])
         setSub(currentSub)
+        setHistory(subHistory)
       } catch (err: unknown) {
         console.warn('Error loading subscription data:', err)
       } finally {
@@ -62,49 +67,89 @@ export const SubscriptionPage: React.FC = () => {
               <p>Đang tải thông tin tài khoản...</p>
             </div>
           ) : (
-            <div className="admin-card" style={{ padding: '32px', borderRadius: '24px', marginBottom: '28px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
-                <div>
-                  <span className={`badge-pill ${sub?.plan_id === 'free' ? 'badge-draft' : 'badge-active'}`} style={{ marginBottom: '8px', display: 'inline-block' }}>
-                    {sub?.isPremium ? 'Gói Nâng Cấp' : 'Gói Miễn Phí'}
-                  </span>
-                  <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                    {sub?.plan_name || 'Gói Free'}
-                  </h2>
+            <>
+              <div className="admin-card" style={{ padding: '32px', borderRadius: '24px', marginBottom: '28px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+                  <div>
+                    <span className={`badge-pill ${sub?.plan_id === 'free' ? 'badge-draft' : 'badge-active'}`} style={{ marginBottom: '8px', display: 'inline-block' }}>
+                      {sub?.isPremium ? 'Gói Nâng Cấp' : 'Gói Miễn Phí'}
+                    </span>
+                    <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+                      {sub?.plan_name || 'Gói Free'}
+                    </h2>
+                  </div>
+
+                  <button
+                    className="btn-admin-primary"
+                    onClick={() => navigate('/pricing')}
+                    style={{ padding: '12px 24px', borderRadius: '9999px' }}
+                  >
+                    ✨ Nâng Cấp / Đổi Gói Dịch Vụ
+                  </button>
                 </div>
 
-                <button
-                  className="btn-admin-primary"
-                  onClick={() => navigate('/pricing')}
-                  style={{ padding: '12px 24px', borderRadius: '9999px' }}
-                >
-                  ✨ Nâng Cấp / Đổi Gói Dịch Vụ
-                </button>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TRẠNG THÁI GÓI</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: sub?.isPremium ? '#16a34a' : '#64748b', textTransform: 'uppercase', marginTop: '2px' }}>
+                      ● {sub?.status || 'Active'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>NGÀY HẾT HẠN</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
+                      {sub?.end_date ? new Date(sub.end_date).toLocaleDateString('vi-VN') : 'Không giới hạn'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TÍNH NĂNG ĐƯỢC PHÉP</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2a63e8', marginTop: '2px' }}>
+                      {sub?.features && sub.features.length > 0 ? sub.features.join(', ') : 'Học bài cơ bản'}
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TRẠNG THÁI GÓI</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: sub?.isPremium ? '#16a34a' : '#64748b', textTransform: 'uppercase', marginTop: '2px' }}>
-                    ● {sub?.status || 'Active'}
+              {history.length > 0 && (
+                <div className="admin-card" style={{ padding: '28px', borderRadius: '24px' }}>
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
+                    📜 Lịch Sử Đăng Ký Gói (Subscription History)
+                  </h3>
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    {history.map((item, idx) => (
+                      <div
+                        key={item.subscription?._id || idx}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          backgroundColor: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: '12px',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#0f172a' }}>
+                            Gói: {typeof item.subscription?.planId === 'object' ? item.subscription.planId.name : item.subscription?.planId || 'Premium'}
+                          </div>
+                          <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                            Thời gian: {new Date(item.subscription?.startDate).toLocaleDateString('vi-VN')} - {new Date(item.subscription?.endDate).toLocaleDateString('vi-VN')}
+                          </div>
+                        </div>
+                        <span className={`badge-pill ${item.subscription?.status === 'active' ? 'badge-active' : 'badge-draft'}`}>
+                          {item.subscription?.status || 'Ended'}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
-                <div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>NGÀY HẾT HẠN</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                    {sub?.end_date ? new Date(sub.end_date).toLocaleDateString('vi-VN') : 'Không giới hạn'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TÍNH NĂNG ĐƯỢC PHÉP</div>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2a63e8', marginTop: '2px' }}>
-                    {sub?.features && sub.features.length > 0 ? sub.features.join(', ') : 'Học bài cơ bản'}
-                  </div>
-                </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>

@@ -96,6 +96,10 @@ export const LessonLearnPage: React.FC = () => {
   const handleStartLesson = () => {
     if (!lessonData || !activeLessonId) return
 
+    progressService.startLesson(activeLessonId).catch((err) => {
+      console.warn('Start lesson tracking failed:', err)
+    })
+
     if (lessonData.vocabularies.length > 0) {
       setStep('vocab_preview')
       setVocabIndex(0)
@@ -200,7 +204,7 @@ export const LessonLearnPage: React.FC = () => {
       setExerciseIndex((prev) => prev + 1)
     } else {
       if (activeLessonId) {
-        await progressService.completeLektion(activeLessonId).catch(() => null)
+        await studentLearningService.completeLesson(activeLessonId).catch(() => null)
       }
       setStep('complete')
     }

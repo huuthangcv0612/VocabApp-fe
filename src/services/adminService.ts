@@ -191,4 +191,15 @@ export const adminService = {
   createExercise: async (lessonId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.create(lessonId, payload),
   updateExercise: async (exerciseId: string, payload: Partial<LessonExercise>): Promise<LessonExercise> => exerciseApi.update(exerciseId, payload),
   deleteExercise: async (exerciseId: string): Promise<void> => exerciseApi.delete(exerciseId),
+
+  // 12. Admin Orders
+  getAllOrders: async (): Promise<unknown[]> => {
+    const response = await api.get<ApiResponse<unknown[] | { orders: unknown[] }>>('/orders/admin/all')
+    const data = response.data.data
+    if (Array.isArray(data)) return data
+    if (data && typeof data === 'object' && 'orders' in data && Array.isArray(data.orders)) {
+      return data.orders
+    }
+    return []
+  },
 }

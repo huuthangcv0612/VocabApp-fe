@@ -41,7 +41,17 @@ export const levelApi = {
   },
 
   getByName: async (name: string): Promise<LevelItem> => {
-    return levelApi.getById(name)
+    const response = await api.get<ApiResponse<{ level: LevelItem } | LevelItem>>(`/levels/name/${encodeURIComponent(name)}`)
+    const resData = response.data.data
+    if (resData && typeof resData === 'object' && 'level' in resData) {
+      return resData.level
+    }
+    return resData as LevelItem
+  },
+
+  getTopicsByLevel: async (levelId: string) => {
+    const response = await api.get<ApiResponse<unknown>>(`/levels/${encodeURIComponent(levelId)}/topics`)
+    return response.data.data
   },
 
   create: async (payload: LevelPayload): Promise<LevelItem> => {

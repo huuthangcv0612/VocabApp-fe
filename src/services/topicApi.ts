@@ -25,7 +25,7 @@ const extractTopicArray = (responseData: unknown): TopicItem[] => {
 export const topicApi = {
   getAll: async (params?: { levelId?: string; q?: string }): Promise<TopicItem[]> => {
     try {
-      const url = params?.levelId ? `/topics/level/${encodeURIComponent(params.levelId)}` : '/topics'
+      const url = params?.levelId ? `/levels/${encodeURIComponent(params.levelId)}/topics` : '/topics'
       const response = await api.get<unknown>(url)
       const items = extractTopicArray(response.data)
       if (items.length > 0 || params?.levelId) return items
@@ -34,13 +34,17 @@ export const topicApi = {
       return extractTopicArray(adminResponse.data)
     } catch {
       try {
-        const fallbackUrl = params?.levelId ? `/topics/level/${encodeURIComponent(params.levelId)}` : '/admin/topics'
+        const fallbackUrl = params?.levelId ? `/levels/${encodeURIComponent(params.levelId)}/topics` : '/admin/topics'
         const response = await api.get<unknown>(fallbackUrl)
         return extractTopicArray(response.data)
       } catch {
         return []
       }
     }
+  },
+
+  getByLevelId: async (levelId: string): Promise<TopicItem[]> => {
+    return topicApi.getAll({ levelId })
   },
 
   getById: async (id: string): Promise<TopicItem> => {

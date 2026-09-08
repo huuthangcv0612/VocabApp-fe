@@ -1,4 +1,5 @@
 import api from './api'
+import { aiService } from './aiService'
 import type { ApiResponse } from '../types/api'
 import type { VocabularyItem, VocabularyPayload } from '../types/vocabulary'
 import type { PaginationMeta } from '../types/admin'
@@ -78,8 +79,8 @@ export const vocabularyApi = {
   },
 
   getSentenceFeedback: async (sentence: string): Promise<string> => {
-    const response = await api.post<ApiResponse<{ correct: boolean; corrected: string; errors: string[] }>>('/ai/check-german-sentence', { sentence })
-    const { correct, corrected, errors } = response.data.data
+    const data = await aiService.checkGermanSentence(sentence)
+    const { correct, corrected, errors } = data
     let feedback = ''
 
     if (correct) {

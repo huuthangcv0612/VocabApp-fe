@@ -1,12 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const ChangePassword = () => {
-  const navigate = useNavigate()
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -35,7 +33,9 @@ const ChangePassword = () => {
       await authService.changePassword(oldPassword, newPassword, confirmPassword)
       toast.success('Mật khẩu đã được đổi thành công')
       setSuccess('Mật khẩu đã được đổi thành công.')
-      setTimeout(() => navigate('/login', { replace: true }), 1200)
+      setOldPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Không thể đổi mật khẩu.'
       setError(errorMessage)

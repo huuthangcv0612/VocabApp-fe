@@ -124,6 +124,26 @@ const TopicsPage = () => {
       {/* Section 2: WHAT TOPIC YOU LIKE ? Selection Grid */}
       <section className="topics-selection-section">
         <div className="topics-container">
+          <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => navigate('/levels')}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                color: '#ffffff',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '9999px',
+                cursor: 'pointer',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              ← Back to Levels ({displayLevelName})
+            </button>
+          </div>
           <h2 className="topics-section-title">WHAT TOPIC YOU LIKE ?</h2>
 
           {topicsLoading && <p className="status-text white-text">Đang tải danh sách chủ đề...</p>}

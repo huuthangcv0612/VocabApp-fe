@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
 import AdminEmptyState from '../../components/admin/AdminEmptyState'
 import AdminLoadingState from '../../components/admin/AdminLoadingState'
@@ -41,7 +41,7 @@ export const AdminTopics: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<TopicItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -68,11 +68,11 @@ export const AdminTopics: React.FC = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedLevelFilter])
 
   useEffect(() => {
     fetchData()
-  }, [selectedLevelFilter])
+  }, [fetchData])
 
   const selectedLevelObj = levels.find(
     (l) => l._id === selectedLevelFilter || l.level_name === selectedLevelFilter
