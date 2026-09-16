@@ -138,28 +138,28 @@ export const AdminExercises: React.FC = () => {
     setStatus(ex.status || 'active')
     setExplanation(ex.explanation || '')
 
-    const content = ex.content || {}
-    const answer = ex.answer || {}
+    const content = (ex.content || {}) as Record<string, unknown>
+    const answer = (ex.answer || {}) as Record<string, unknown>
 
-    setMcQuestion(ex.question || content.question || content.prompt || content.sentence || '')
-    setMcAudioUrl(content.audio_url || '')
+    setMcQuestion(ex.question || (typeof content.question === 'string' ? content.question : '') || (typeof content.prompt === 'string' ? content.prompt : '') || (typeof content.sentence === 'string' ? content.sentence : '') || '')
+    setMcAudioUrl(typeof content.audio_url === 'string' ? content.audio_url : '')
 
     if (ex.options && ex.options.length >= 2) {
       setMcOptions(ex.options.map((opt) => ({ text: opt.text, isCorrect: Boolean(opt.isCorrect) })))
-    } else if (content.options) {
-      const corrIdx = answer.correct_option_index ?? 0
-      setMcOptions(content.options.map((opt: string, idx: number) => ({
+    } else if (Array.isArray(content.options)) {
+      const corrIdx = typeof answer.correct_option_index === 'number' ? answer.correct_option_index : 0
+      setMcOptions((content.options as string[]).map((opt: string, idx: number) => ({
         text: opt,
         isCorrect: idx === corrIdx,
       })))
     }
 
-    setTranslationPrompt(content.prompt || ex.question || '')
-    setTranslationExpected(answer.expected_answer || '')
-    setFillSentence(content.sentence || ex.question || '')
-    setFillAnswer(answer.blank_answer || '')
-    setArrangeWords(content.words || ['', '', ''])
-    setArrangeCorrectSentence(answer.correct_sentence || '')
+    setTranslationPrompt((typeof content.prompt === 'string' ? content.prompt : '') || ex.question || '')
+    setTranslationExpected(typeof answer.expected_answer === 'string' ? answer.expected_answer : '')
+    setFillSentence((typeof content.sentence === 'string' ? content.sentence : '') || ex.question || '')
+    setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
+    setArrangeWords(Array.isArray(content.words) ? (content.words as string[]) : ['', '', ''])
+    setArrangeCorrectSentence(typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '')
 
     setIsModalOpen(true)
   }

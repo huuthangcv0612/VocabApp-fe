@@ -3,7 +3,6 @@ import { Toaster } from 'react-hot-toast'
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext'
 import Home from './pages/Home'
-import Levels from './pages/Levels'
 import LevelDetail from './pages/LevelDetail'
 import TopicsPage from './pages/TopicsPage'
 import ProgressPage from './pages/ProgressPage'
@@ -45,6 +44,8 @@ import AdminPlans from './pages/admin/AdminPlans'
 
 import { ErrorBoundary } from './components/ErrorBoundary'
 
+import LearningPathPage from './features/learning-path/pages/LearningPathPage'
+
 function App() {
   return (
     <ErrorBoundary>
@@ -62,8 +63,9 @@ function App() {
 
           {/* Student Protected Routes */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/levels" element={<Levels />} />
-            <Route path="/learn" element={<Levels />} />
+            <Route path="/learning-path" element={<LearningPathPage />} />
+            <Route path="/levels" element={<LearningPathPage />} />
+            <Route path="/learn" element={<LearningPathPage />} />
             <Route path="/topics" element={<TopicsPage />} />
             <Route path="/topics/:levelId" element={<TopicsPage />} />
             <Route path="/levels/:levelId" element={<LevelDetail />} />

@@ -12,6 +12,11 @@ export const unitApi = {
     return []
   },
 
+  getByLevel: async (levelId: string): Promise<unknown> => {
+    const response = await api.get<ApiResponse<unknown>>(`/levels/${encodeURIComponent(levelId)}/units`)
+    return response.data.data
+  },
+
   getById: async (id: string): Promise<UnitItem> => {
     const response = await api.get<ApiResponse<UnitItem>>(`/units/${encodeURIComponent(id)}`)
     return response.data.data

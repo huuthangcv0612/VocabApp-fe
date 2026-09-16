@@ -6,6 +6,7 @@ export type ExerciseType =
   | 'translation'
   | 'fill_blank'
   | 'sentence_arrangement'
+  | 'word_arrangement'
 
 export interface ExerciseContentPayload {
   question?: string
@@ -14,13 +15,21 @@ export interface ExerciseContentPayload {
   sentence?: string
   words?: string[]
   options?: string[]
+  hint?: string
+  sentence_translation?: string
+  [key: string]: unknown
 }
 
 export interface ExerciseAnswerPayload {
+  correct_answer?: string | string[]
   correct_option_index?: number
+  correct_option?: string
+  value?: string
   expected_answer?: string
   blank_answer?: string
   correct_sentence?: string
+  explanation?: string
+  [key: string]: unknown
 }
 
 export interface LessonExercise {
@@ -35,7 +44,15 @@ export interface LessonExercise {
   status?: StatusType
   question: string
   content?: ExerciseContentPayload
-  answer?: ExerciseAnswerPayload
+  answer?: ExerciseAnswerPayload | Record<string, unknown>
   options?: Array<{ text: string; isCorrect?: boolean }>
   explanation?: string
+  hint?: string
+  sentence_translation?: string
+
+  // Normalized internal format fields for FE
+  optionsList?: string[]
+  wordTokens?: string[]
+  correctAnswer?: string
+  rawAnswerFormat?: 'text' | 'index' | 'array'
 }

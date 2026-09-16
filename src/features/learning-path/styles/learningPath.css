@@ -1,0 +1,909 @@
+/* ==================================================
+   LEARNING PATH - DARK EMERALD REFERENCE UI THEME
+   ================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
+
+.learning-path-page {
+  min-height: 100vh;
+  background-color: #041714;
+  background-image: 
+    radial-gradient(rgba(16, 185, 129, 0.08) 1.5px, transparent 1.5px),
+    radial-gradient(rgba(16, 185, 129, 0.08) 1.5px, #041714 1.5px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  color: #e2e8f0;
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.lp-main-container {
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 20px 80px 20px;
+  flex: 1;
+}
+
+/* Two-Column Grid Layout matching Reference Image */
+.lp-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+.lp-content-column {
+  min-width: 0;
+}
+
+/* --------------------------------------------------
+   HEADER & EMERALD HERO BANNER
+   -------------------------------------------------- */
+.lp-header {
+  margin-bottom: 32px;
+}
+
+.lp-header-top {
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.lp-header-top::-webkit-scrollbar {
+  display: none;
+}
+
+.lp-level-tabs {
+  display: flex;
+  gap: 12px;
+  min-width: max-content;
+}
+
+.lp-level-tab {
+  background: #082923;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #94a3b8;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-level-tab:hover {
+  background: #0b362f;
+  color: #ffffff;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.lp-level-tab.active {
+  background: #10b981;
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+}
+
+.lp-tab-pct {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+}
+
+/* Emerald Banner Card matching Reference UI */
+.lp-header-card {
+  background: linear-gradient(135deg, #05855e 0%, #0d9668 100%);
+  border-radius: 22px;
+  padding: 24px 30px;
+  box-shadow: 0 10px 30px rgba(5, 133, 94, 0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  color: #ffffff;
+}
+
+.lp-header-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.lp-banner-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.lp-level-tag {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #a7f3d0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.lp-header-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 0 0 6px 0;
+  color: #ffffff;
+}
+
+.lp-header-title .highlight {
+  color: #ffffff;
+  text-decoration: underline;
+  text-decoration-color: #6ee7b7;
+}
+
+.lp-header-desc {
+  color: #e6f4f0;
+  font-size: 0.92rem;
+  margin: 0;
+  max-width: 440px;
+  line-height: 1.5;
+}
+
+.lp-header-progress-box {
+  background: rgba(4, 38, 32, 0.45);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 16px 20px;
+  min-width: 240px;
+}
+
+.lp-progress-box-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #a7f3d0;
+}
+
+.lp-progress-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.lp-progress-fill {
+  height: 100%;
+  background: #00e699;
+  border-radius: 9999px;
+  box-shadow: 0 0 10px #00e699;
+  transition: width 0.5s ease;
+}
+
+.lp-progress-val-sub {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  text-align: right;
+}
+
+/* --------------------------------------------------
+   UNIT SECTION & MARKER
+   -------------------------------------------------- */
+.lp-unit-section {
+  margin-bottom: 56px;
+  background: #072621;
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  border-radius: 22px;
+  padding: 24px 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.lp-unit-marker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.lp-marker-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00e699;
+  box-shadow: 0 0 10px #00e699;
+}
+
+.lp-unit-label {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #10b981;
+  text-transform: uppercase;
+}
+
+.lp-unit-name-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 2px 0 0 0;
+}
+
+.lp-unit-count {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------
+   SERPENTINE LESSON PATH & NODES
+   -------------------------------------------------- */
+.lp-path-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 20px 0;
+}
+
+.lp-path-nodes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.lp-path-step {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.lp-node-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Node Circle Button matching Reference UI */
+.lp-node-circle {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 3;
+}
+
+.lp-node-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-node-icon {
+  font-size: 1.7rem;
+}
+
+/* Node States */
+.lp-node-circle.completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: 3px solid #34d399;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.lp-node-circle.completed:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 28px rgba(16, 185, 129, 0.7);
+}
+
+.lp-node-circle.current {
+  background: linear-gradient(135deg, #00e699 0%, #10b981 100%);
+  color: #ffffff;
+  border: 4px solid #ffffff;
+  box-shadow: 0 0 30px rgba(0, 230, 153, 0.85);
+  transform: scale(1.08);
+}
+
+.lp-node-circle.current:hover {
+  transform: scale(1.15);
+}
+
+.lp-node-circle.locked {
+  background: #0d3630;
+  color: #4b7a71;
+  border: 2px solid #195248;
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+.lp-node-lock-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #072621;
+  border: 1px solid #195248;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-node-check-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #10b981;
+  color: #ffffff;
+  border: 2px solid #072621;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Floating BẮT ĐẦU Tooltip */
+.lp-node-start-tooltip {
+  position: absolute;
+  top: -44px;
+  background: #00e699;
+  color: #041714;
+  border-radius: 12px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  box-shadow: 0 4px 14px rgba(0, 230, 153, 0.4);
+  white-space: nowrap;
+  z-index: 12;
+}
+
+.lp-tooltip-arrow {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #00e699;
+}
+
+.lp-node-pulse {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid #00e699;
+  animation: emerald-pulse 2s infinite ease-out;
+}
+
+@keyframes emerald-pulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* Sublabel Under Node matching Reference Image */
+.lp-node-sublabel {
+  text-align: center;
+  margin-top: 10px;
+  max-width: 140px;
+}
+
+.lp-sublabel-step {
+  font-size: 0.76rem;
+  color: #71a89c;
+  font-weight: 800;
+  display: block;
+}
+
+.lp-sublabel-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 2px 0 0 0;
+  line-height: 1.3;
+}
+
+.lp-sublabel-title .check-mark {
+  color: #00e699;
+}
+
+/* Node Popover Card */
+.lp-node-card {
+  position: absolute;
+  top: 90px;
+  width: 240px;
+  background: #082d27;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.25s ease;
+  z-index: 10;
+  text-align: left;
+}
+
+.lp-node-wrapper:hover .lp-node-card {
+  opacity: 1;
+  transform: translateY(4px);
+}
+
+.lp-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.lp-card-tag {
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #71a89c;
+}
+
+.lp-card-xp {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #00e699;
+}
+
+.lp-card-title {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+}
+
+.lp-card-desc {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.lp-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.lp-card-time {
+  color: #71a89c;
+}
+
+.lp-card-status-badge {
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.lp-card-status-badge.completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.lp-card-status-badge.current { background: rgba(0, 230, 153, 0.2); color: #00e699; }
+.lp-card-status-badge.locked { background: rgba(255, 255, 255, 0.05); color: #64748b; }
+
+/* End of Path Crown Banner */
+.lp-path-end-flag {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 12px 20px;
+  border-radius: 20px;
+}
+
+.lp-end-crown-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+  position: relative;
+}
+
+.lp-flag-mini {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  font-size: 0.85rem;
+}
+
+.lp-end-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.lp-end-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.lp-end-xp {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #00e699;
+}
+
+/* --------------------------------------------------
+   RIGHT SIDEBAR MATCHING REFERENCE UI
+   -------------------------------------------------- */
+.lp-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lp-sidebar-card {
+  background: #072621;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.lp-sidebar-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lp-card-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lp-card-header-title h4 {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+}
+
+.lp-header-icon {
+  font-size: 1.2rem;
+}
+
+.lp-header-link {
+  font-size: 0.75rem;
+  color: #10b981;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Daily Goal Chart */
+.lp-goal-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.lp-ring-chart {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: conic-gradient(#00e699 var(--ring-pct, 60%), rgba(255, 255, 255, 0.1) 0%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.lp-ring-inner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #072621;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.lp-ring-num {
+  font-size: 1.2rem;
+  color: #ffffff;
+}
+
+.lp-ring-denom {
+  font-size: 0.85rem;
+  color: #71a89c;
+}
+
+.lp-goal-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  margin: 0 0 2px 0;
+  color: #ffffff;
+}
+
+.lp-goal-desc {
+  font-size: 0.8rem;
+  color: #71a89c;
+  margin: 0;
+}
+
+.lp-reward-box {
+  background: #041a17;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lp-reward-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lp-reward-icon {
+  font-size: 1.5rem;
+}
+
+.lp-reward-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #71a89c;
+  font-weight: 700;
+}
+
+.lp-reward-val {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #00e699;
+}
+
+.lp-reward-check {
+  color: #10b981;
+  font-weight: 900;
+  font-size: 1.1rem;
+}
+
+/* Stats Card */
+.lp-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lp-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.lp-stat-row.vertical {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.lp-stat-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lp-stat-label-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.lp-stat-value {
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.lp-stat-progress-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.lp-stat-progress-fill {
+  height: 100%;
+  background: #00e699;
+  border-radius: 9999px;
+}
+
+/* Mascot Card */
+.lp-card-mascot {
+  background: linear-gradient(135deg, #072e28 0%, #0a3d35 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.lp-mascot-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lp-mascot-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #05855e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  border: 2px solid #34d399;
+}
+
+.lp-mascot-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.lp-mascot-desc {
+  font-size: 0.82rem;
+  color: #a7f3d0;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* --------------------------------------------------
+   EMPTY, ERROR & SKELETON STATES
+   -------------------------------------------------- */
+.lp-empty-state,
+.lp-error-state {
+  text-align: center;
+  padding: 60px 24px;
+  background: #072621;
+  border-radius: 20px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.lp-empty-icon,
+.lp-error-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.lp-empty-title,
+.lp-error-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.lp-empty-desc,
+.lp-error-desc {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin: 0 0 24px 0;
+}
+
+.lp-retry-btn {
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lp-skeleton-container {
+  padding: 20px 0;
+}
+
+.lp-skeleton-box {
+  background: linear-gradient(90deg, #072621 25%, #0b362f 50%, #072621 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+.lp-skeleton-box.tab {
+  width: 100px;
+  height: 40px;
+  border-radius: 14px;
+}
+
+.lp-skeleton-card {
+  height: 180px;
+  background: #072621;
+  border-radius: 20px;
+  padding: 24px;
+  margin-top: 20px;
+}
+
+.lp-skeleton-node-circle {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #072621;
+  margin: 16px auto;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --------------------------------------------------
+   RESPONSIVE DESIGN (390px, 768px, 1440px)
+   -------------------------------------------------- */
+@media (max-width: 960px) {
+  .lp-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-header-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lp-header-progress-box {
+    min-width: auto;
+  }
+  .lp-header-title {
+    font-size: 1.5rem;
+  }
+  .lp-node-wrapper {
+    transform: none !important;
+  }
+}

@@ -4,6 +4,8 @@ import type { ApiResponse } from '../types/api'
 import type { LessonExercise } from '../types/exercise'
 import type { ExerciseSubmitResponse } from '../types/student'
 
+import { normalizeExercise } from '../utils/exerciseAdapter'
+
 const extractExerciseArray = (responseData: unknown): LessonExercise[] => {
   if (!responseData) return []
   let items: LessonExercise[] = []
@@ -25,22 +27,7 @@ const extractExerciseArray = (responseData: unknown): LessonExercise[] => {
     }
   }
 
-  return items.map((ex) => {
-    const content = ex.content || {}
-    const vocabObj = typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id : null
-    const displayQuestion =
-      ex.question ||
-      content.question ||
-      content.prompt ||
-      content.sentence ||
-      (vocabObj ? `Câu hỏi từ vựng: "${vocabObj.word}" (${vocabObj.meaning || ''})` : '') ||
-      'Bài tập'
-
-    return {
-      ...ex,
-      question: displayQuestion,
-    }
-  })
+  return items.map((ex) => normalizeExercise(ex))
 }
 
 export const exerciseApi = {

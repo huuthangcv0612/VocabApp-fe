@@ -314,17 +314,17 @@ export const AdminLessonBuilder: React.FC = () => {
     setExerciseStatus(ex.status || 'active')
     setExerciseExplanation(ex.explanation || '')
 
-    const content = ex.content || {}
-    const answer = ex.answer || {}
+    const content = (ex.content || {}) as Record<string, unknown>
+    const answer = (ex.answer || {}) as Record<string, unknown>
 
     // Populate MCQ / Listening
-    setMcQuestion(ex.question || content.question || content.prompt || content.sentence || '')
-    setMcAudioUrl(content.audio_url || '')
+    setMcQuestion(ex.question || (typeof content.question === 'string' ? content.question : '') || (typeof content.prompt === 'string' ? content.prompt : '') || (typeof content.sentence === 'string' ? content.sentence : '') || '')
+    setMcAudioUrl(typeof content.audio_url === 'string' ? content.audio_url : '')
     if (ex.options && ex.options.length >= 2) {
       setMcOptions(ex.options.map((opt) => ({ text: opt.text, isCorrect: Boolean(opt.isCorrect) })))
-    } else if (content.options) {
-      const corrIdx = answer.correct_option_index ?? 0
-      setMcOptions(content.options.map((opt: string, idx: number) => ({
+    } else if (Array.isArray(content.options)) {
+      const corrIdx = typeof answer.correct_option_index === 'number' ? answer.correct_option_index : 0
+      setMcOptions((content.options as string[]).map((opt: string, idx: number) => ({
         text: opt,
         isCorrect: idx === corrIdx,
       })))
@@ -338,16 +338,16 @@ export const AdminLessonBuilder: React.FC = () => {
     }
 
     // Populate Translation
-    setTranslationPrompt(content.prompt || ex.question || '')
-    setTranslationExpected(answer.expected_answer || '')
+    setTranslationPrompt((typeof content.prompt === 'string' ? content.prompt : '') || ex.question || '')
+    setTranslationExpected(typeof answer.expected_answer === 'string' ? answer.expected_answer : '')
 
     // Populate Fill Blank
-    setFillSentence(content.sentence || ex.question || '')
-    setFillAnswer(answer.blank_answer || '')
+    setFillSentence((typeof content.sentence === 'string' ? content.sentence : '') || ex.question || '')
+    setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
 
     // Populate Sentence Arrangement
-    setArrangeWords(content.words || ['', '', ''])
-    setArrangeCorrectSentence(answer.correct_sentence || '')
+    setArrangeWords(Array.isArray(content.words) ? (content.words as string[]) : ['', '', ''])
+    setArrangeCorrectSentence(typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '')
 
     setIsExerciseModalOpen(true)
   }
@@ -1469,14 +1469,14 @@ export const AdminLessonBuilder: React.FC = () => {
             {viewingExercise.type === 'translation' && (
               <div>
                 <div><strong>Prompt (Câu nguồn):</strong> {viewingExercise.content?.prompt || viewingExercise.question}</div>
-                <div><strong>Expected Answer (Câu dịch):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{viewingExercise.answer?.expected_answer || 'N/A'}</span></div>
+                <div><strong>Expected Answer (Câu dịch):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.expected_answer || 'N/A')}</span></div>
               </div>
             )}
 
             {viewingExercise.type === 'fill_blank' && (
               <div>
                 <div><strong>Sentence:</strong> {viewingExercise.content?.sentence || viewingExercise.question}</div>
-                <div><strong>Blank Answer (Từ điền):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{viewingExercise.answer?.blank_answer || 'N/A'}</span></div>
+                <div><strong>Blank Answer (Từ điền):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.blank_answer || 'N/A')}</span></div>
               </div>
             )}
 
@@ -1492,7 +1492,7 @@ export const AdminLessonBuilder: React.FC = () => {
                 </div>
                 <div>
                   <strong>Câu ghép hoàn chỉnh đúng:</strong>{' '}
-                  <span style={{ color: '#16a34a', fontWeight: 700 }}>{viewingExercise.answer?.correct_sentence || 'N/A'}</span>
+                  <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.correct_sentence || 'N/A')}</span>
                 </div>
               </div>
             )}

@@ -58,7 +58,7 @@ const Header = ({ animate = false }: HeaderProps) => {
         </NavLink>
 
         <nav className="nav-menu">
-          <NavLink to="/levels" className="nav-link">
+          <NavLink to="/learning-path" className="nav-link">
             Start Learning
           </NavLink>
           <NavLink to="/progress" className="nav-link">
@@ -133,7 +133,7 @@ const Header = ({ animate = false }: HeaderProps) => {
       {/* Mobile Dropdown Navigation */}
       {isMobileMenuOpen && (
         <div className="mobile-menu open">
-          <NavLink to="/levels" className="nav-link" onClick={closeMobileMenu}>
+          <NavLink to="/learning-path" className="nav-link" onClick={closeMobileMenu}>
             Start Learning
           </NavLink>
           <NavLink to="/progress" className="nav-link" onClick={closeMobileMenu}>

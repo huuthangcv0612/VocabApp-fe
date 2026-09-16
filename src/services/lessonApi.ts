@@ -1,6 +1,8 @@
 import api from './api'
 import type { ApiResponse } from '../types/api'
 import type { LessonItem, LessonDetailData, LessonDetailResponse } from '../types/lesson'
+import type { LessonExercise } from '../types/exercise'
+import { normalizeExercise } from '../utils/exerciseAdapter'
 
 export const lessonApi = {
   getAll: async (params?: { level_id?: string; levelId?: string; unit_id?: string; unitId?: string; status?: string }): Promise<LessonItem[]> => {
@@ -51,30 +53,20 @@ export const lessonApi = {
     })
 
     const exercises = rawExercises.map((ex, idx) => {
-      const contentObj = ex.content || {}
-      const exType = ex.type || 'multiple_choice'
       const vocabObj = ex.vocabulary_id
-
-      const displayQuestion = ex.question || contentObj.question || contentObj.prompt || contentObj.sentence || 'Exercise Question'
-
       const vocabIdVal = typeof vocabObj === 'object' && vocabObj !== null ? vocabObj._id : (typeof vocabObj === 'string' ? vocabObj : ex.vocabularyId)
       const vocabNameVal = typeof vocabObj === 'object' && vocabObj !== null ? vocabObj.word : (ex.vocabularyName || 'Tổng hợp')
 
-      return {
+      const baseEx: LessonExercise = {
+        ...ex,
         _id: ex._id || `ex_${idx}`,
         order: ex.order || idx + 1,
-        type: exType,
         vocabularyId: vocabIdVal,
         vocabularyName: vocabNameVal,
-        xp: ex.xp || (exType === 'sentence_arrangement' ? 15 : exType === 'multiple_choice' ? 5 : 10),
+        xp: ex.xp || (ex.type === 'sentence_arrangement' ? 15 : ex.type === 'multiple_choice' ? 5 : 10),
         status: ex.status || 'active',
-        question: displayQuestion,
-        content: contentObj,
-        options: ex.options || (contentObj.options ? contentObj.options.map((optText: string) => ({
-          text: optText,
-        })) : []),
-        explanation: ex.explanation || '',
       }
+      return normalizeExercise(baseEx)
     })
 
     return { lesson: rawLesson, vocabularies, exercises }

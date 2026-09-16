@@ -7,7 +7,7 @@ import type {
   ExerciseSubmitResponse,
   UnitLearningData,
 } from '../types/student'
-import type { LessonDetailData } from '../types/lesson'
+import type { LessonDetailData, LessonItem } from '../types/lesson'
 
 export const studentLearningService = {
   getUnitLessons: async (unitId: string): Promise<UnitLearningData> => {
@@ -54,12 +54,14 @@ export const studentLearningService = {
     return await exerciseApi.submitAnswer(payload.lessonId, payload.exerciseId, payload.answer)
   },
 
-  completeLesson: async (lessonId: string): Promise<{ success: boolean; xpEarned: number }> => {
+  completeLesson: async (lessonId: string): Promise<{ success: boolean; xpEarned: number; nextLesson: LessonItem | null }> => {
     const response = await progressService.completeLesson(lessonId)
-    const resData = response.data as { lessonProgress?: { xp_earned?: number }; xpEarned?: number } | undefined
+    const resData = response.data as { lessonProgress?: { xp_earned?: number }; xpEarned?: number; nextLesson?: LessonItem | null } | undefined
+
     return {
       success: response.success ?? true,
       xpEarned: resData?.lessonProgress?.xp_earned || resData?.xpEarned || 20,
+      nextLesson: (resData?.nextLesson as LessonItem) || null,
     }
   },
 }

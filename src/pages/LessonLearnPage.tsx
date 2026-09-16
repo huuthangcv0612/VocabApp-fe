@@ -4,9 +4,10 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
 import { progressService } from '../services/progressService'
-import type { LessonDetailData, LessonPreviewVocabulary } from '../types/lesson'
+import type { LessonDetailData, LessonItem, LessonPreviewVocabulary } from '../types/lesson'
 import type { LessonExercise } from '../types/exercise'
 import type { LessonLearningStep } from '../types/student'
+import { formatSubmitAnswer } from '../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 import '../styles/pages/lesson.css'
 
@@ -16,6 +17,7 @@ export const LessonLearnPage: React.FC = () => {
   const navigate = useNavigate()
 
   const [lessonData, setLessonData] = useState<LessonDetailData | null>(null)
+  const [nextLessonData, setNextLessonData] = useState<LessonItem | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,9 +31,13 @@ export const LessonLearnPage: React.FC = () => {
   const [exerciseIndex, setExerciseIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState<string | number | string[]>('')
 
-  // Sentence Arrangement tapped words state
-  const [arrangedWords, setArrangedWords] = useState<string[]>([])
-  const [availableWords, setAvailableWords] = useState<string[]>([])
+  // Word Arrangement token instance state (UI-only IDs)
+  interface TokenInstance {
+    id: string
+    text: string
+  }
+  const [selectedTokens, setSelectedTokens] = useState<TokenInstance[]>([])
+  const [availableTokens, setAvailableTokens] = useState<TokenInstance[]>([])
 
   // Submission & Feedback states
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -74,10 +80,32 @@ export const LessonLearnPage: React.FC = () => {
     setSubmissionResult(null)
     setUserAnswer('')
 
-    if (currentEx.type === 'sentence_arrangement') {
-      const words = currentEx.content?.words || []
-      setAvailableWords([...words].sort(() => Math.random() - 0.5))
-      setArrangedWords([])
+    if (currentEx.type === 'word_arrangement' || currentEx.type === 'sentence_arrangement') {
+      const contentObj = (currentEx.content || {}) as Record<string, unknown>
+      const words: string[] = (
+        Array.isArray(contentObj.words)
+          ? contentObj.words
+          : Array.isArray(currentEx.wordTokens)
+          ? currentEx.wordTokens
+          : []
+      ).map((w: unknown) => String(w))
+
+      const tokenInstances: TokenInstance[] = words.map((w, idx) => ({
+        id: `tok-${idx}-${w}-${Math.random().toString(36).substring(2, 8)}`,
+        text: w,
+      }))
+
+      // Shuffle available tokens using Fisher-Yates copy
+      const shuffled = [...tokenInstances]
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        const temp = shuffled[i]
+        shuffled[i] = shuffled[j]
+        shuffled[j] = temp
+      }
+
+      setAvailableTokens(shuffled)
+      setSelectedTokens([])
     }
   }, [exerciseIndex, step, lessonData])
 
@@ -132,14 +160,16 @@ export const LessonLearnPage: React.FC = () => {
   }
 
   // --- STEP 3: EXERCISE ACTIONS ---
-  const handleTapAvailableWord = (word: string, index: number) => {
-    setAvailableWords((prev) => prev.filter((_, idx) => idx !== index))
-    setArrangedWords((prev) => [...prev, word])
+  const handleSelectWordToken = (token: TokenInstance) => {
+    if (isSubmitting || submissionResult) return
+    setAvailableTokens((prev) => prev.filter((t) => t.id !== token.id))
+    setSelectedTokens((prev) => [...prev, token])
   }
 
-  const handleTapArrangedWord = (word: string, index: number) => {
-    setArrangedWords((prev) => prev.filter((_, idx) => idx !== index))
-    setAvailableWords((prev) => [...prev, word])
+  const handleDeselectWordToken = (token: TokenInstance) => {
+    if (isSubmitting || submissionResult) return
+    setSelectedTokens((prev) => prev.filter((t) => t.id !== token.id))
+    setAvailableTokens((prev) => [...prev, token])
   }
 
   const handleSubmitAnswer = async () => {
@@ -149,17 +179,48 @@ export const LessonLearnPage: React.FC = () => {
 
     let finalAnswer: string | number | string[] = userAnswer
 
-    if (currentEx.type === 'sentence_arrangement') {
-      finalAnswer = arrangedWords.join(' ')
+    if (currentEx.type === 'word_arrangement' || currentEx.type === 'sentence_arrangement') {
+      if (selectedTokens.length === 0) {
+        toast.error('Vui lòng chọn các từ để tạo câu.')
+        return
+      }
+      const tokenStrings = selectedTokens.map((t) => t.text)
+      if (currentEx.type === 'sentence_arrangement') {
+        finalAnswer = tokenStrings.join(' ')
+      } else {
+        finalAnswer = formatSubmitAnswer(currentEx, tokenStrings)
+      }
+    } else if (currentEx.type === 'fill_blank') {
+      const textAns = typeof userAnswer === 'string' ? userAnswer : String(userAnswer || '')
+      if (!textAns.trim()) {
+        toast.error('Vui lòng nhập câu trả lời.')
+        return
+      }
+      finalAnswer = formatSubmitAnswer(currentEx, textAns)
+    } else if (currentEx.type === 'multiple_choice' || currentEx.type === 'listening') {
+      if (typeof userAnswer === 'string') {
+        finalAnswer = formatSubmitAnswer(currentEx, userAnswer)
+      }
     }
 
     if (
       (typeof finalAnswer === 'string' && !finalAnswer.trim()) ||
       (Array.isArray(finalAnswer) && finalAnswer.length === 0)
     ) {
-      toast.error('Vui lòng chọn hoặc nhập câu trả lời trước khi kiểm tra!')
+      toast.error('Vui lòng chọn các từ để tạo câu.')
       return
     }
+
+    console.log('[DEBUG ExerciseSubmit]', {
+      exerciseType: currentEx.type,
+      currentExerciseId: currentEx._id,
+      question: currentEx.question,
+      optionsList: currentEx.optionsList,
+      correctAnswer: currentEx.correctAnswer,
+      rawAnswerFormat: currentEx.rawAnswerFormat,
+      userAnswer,
+      formattedSubmitAnswer: finalAnswer,
+    })
 
     try {
       setIsSubmitting(true)
@@ -170,8 +231,8 @@ export const LessonLearnPage: React.FC = () => {
       })
 
       const isCorrect = res.is_correct ?? res.correct ?? false
-      const xpEarned = res.xp_earned ?? res.xp ?? 5
-      const explanation = res.explanation || res.feedback || (isCorrect ? 'Chính xác!' : 'Chưa chính xác.')
+      const xpEarned = res.xp_earned ?? res.xp ?? 0
+      const explanation = res.explanation || res.feedback || ''
 
       setSubmissionResult({
         submitted: true,
@@ -183,12 +244,6 @@ export const LessonLearnPage: React.FC = () => {
       if (isCorrect) {
         setCorrectCount((prev) => prev + 1)
         setTotalXpEarned((prev) => prev + xpEarned)
-      }
-
-      if (currentEx.vocabularyId && activeLessonId) {
-        progressService.markWordLearned(activeLessonId, currentEx.vocabularyId, isCorrect).catch((err) => {
-          console.warn('Mark word learned error:', err)
-        })
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gửi câu trả lời thất bại.'
@@ -204,7 +259,10 @@ export const LessonLearnPage: React.FC = () => {
       setExerciseIndex((prev) => prev + 1)
     } else {
       if (activeLessonId) {
-        await studentLearningService.completeLesson(activeLessonId).catch(() => null)
+        const res = await studentLearningService.completeLesson(activeLessonId).catch(() => null)
+        if (res?.nextLesson) {
+          setNextLessonData(res.nextLesson)
+        }
       }
       setStep('complete')
     }
@@ -229,8 +287,8 @@ export const LessonLearnPage: React.FC = () => {
         <Header />
         <div style={{ textAlign: 'center', padding: '60px 20px', minHeight: '60vh', color: '#dc2626' }}>
           <p>{error || 'Không thể tải bài học.'}</p>
-          <button className="btn-admin-primary" onClick={() => navigate('/levels')}>
-            Về Danh Sách Khóa Học
+          <button className="btn-admin-primary" onClick={() => navigate('/learning-path')}>
+            Về Lộ Trình Học
           </button>
         </div>
         <Footer />
@@ -250,11 +308,11 @@ export const LessonLearnPage: React.FC = () => {
       <main style={{ flex: 1, padding: '30px 20px', maxWidth: '760px', margin: '0 auto', width: '100%' }}>
         <div style={{ marginBottom: '20px' }}>
           <button
-            onClick={() => navigate(`/lessons/${activeLessonId}`)}
+            onClick={() => navigate('/learning-path')}
             className="btn-admin-secondary"
             style={{ fontSize: '0.88rem', padding: '6px 16px', borderRadius: '9999px', cursor: 'pointer' }}
           >
-            ← Quay lại danh sách bài tập
+            ← Quay lại Lộ Trình Học
           </button>
         </div>
         {step === 'intro' && (
@@ -437,14 +495,13 @@ export const LessonLearnPage: React.FC = () => {
                   </h3>
 
                   <div style={{ display: 'grid', gap: '12px' }}>
-                    {(currentExercise.options || currentExercise.content?.options || []).map((opt: string | { text: string }, oIdx: number) => {
-                      const optText = typeof opt === 'string' ? opt : opt.text
-                      const isSelected = userAnswer === oIdx || userAnswer === optText
+                    {(currentExercise.optionsList || (currentExercise.options || currentExercise.content?.options || []).map((opt: string | { text: string }) => (typeof opt === 'string' ? opt : opt.text))).map((optText: string, oIdx: number) => {
+                      const isSelected = userAnswer === optText || userAnswer === oIdx
 
                       return (
                         <div
                           key={oIdx}
-                          onClick={() => !submissionResult && setUserAnswer(oIdx)}
+                          onClick={() => !submissionResult && setUserAnswer(optText)}
                           style={{
                             padding: '16px 20px',
                             borderRadius: '16px',
@@ -484,72 +541,117 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
-              {currentExercise.type === 'fill_blank' && (
-                <div>
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
-                    ✏️ Điền từ còn thiếu vào chỗ trống:
-                  </h3>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
-                    {currentExercise.content?.sentence || currentExercise.question}
-                  </div>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder="Nhập từ còn thiếu..."
-                    value={typeof userAnswer === 'string' ? userAnswer : ''}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    disabled={Boolean(submissionResult)}
-                    style={{ fontSize: '1.05rem', padding: '14px' }}
-                  />
-                </div>
-              )}
+              {currentExercise.type === 'fill_blank' && (() => {
+                const contentObj = (currentExercise.content || {}) as Record<string, unknown>
+                const questionText = (typeof contentObj.question === 'string' && contentObj.question.trim().length > 0 ? contentObj.question : '') || currentExercise.question || (typeof contentObj.sentence === 'string' ? contentObj.sentence : '') || 'Điền từ còn thiếu vào chỗ trống'
+                const hintText = currentExercise.hint || (typeof contentObj.hint === 'string' ? contentObj.hint : '') || currentExercise.sentence_translation || (typeof contentObj.sentence_translation === 'string' ? contentObj.sentence_translation : '')
 
-              {currentExercise.type === 'sentence_arrangement' && (
+                return (
+                  <div>
+                    <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
+                      ✏️ Điền từ còn thiếu vào chỗ trống:
+                    </h3>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: '16px', background: '#f8fafc', padding: '18px 20px', borderRadius: '16px', border: '1px solid #cbd5e1', lineHeight: 1.5 }}>
+                      {questionText}
+                    </div>
+
+                    {hintText && (
+                      <div style={{ marginBottom: '20px', padding: '12px 16px', backgroundColor: '#f0f9ff', borderLeft: '4px solid #0284c7', borderRadius: '10px' }}>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0369a1', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>
+                          💡 Gợi ý:
+                        </span>
+                        <span style={{ fontSize: '1rem', color: '#0c4a6e', fontWeight: 500 }}>
+                          {hintText}
+                        </span>
+                      </div>
+                    )}
+
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="Nhập câu trả lời..."
+                      value={typeof userAnswer === 'string' ? userAnswer : ''}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          if (!isSubmitting && !submissionResult) {
+                            handleSubmitAnswer()
+                          }
+                        }
+                      }}
+                      disabled={isSubmitting || Boolean(submissionResult)}
+                      style={{ fontSize: '1.05rem', padding: '14px', width: '100%', borderRadius: '12px', boxSizing: 'border-box' }}
+                      autoFocus
+                    />
+                  </div>
+                )
+              })()}
+
+              {(currentExercise.type === 'word_arrangement' || currentExercise.type === 'sentence_arrangement') && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-                    🧩 Chạm các từ bên dưới để ghép thành câu hoàn chỉnh:
+                    🧩 {currentExercise.question || (currentExercise.content?.question as string) || 'Sắp xếp các từ thành câu đúng:'}
                   </h3>
 
                   <div
                     style={{
-                      minHeight: '60px',
+                      minHeight: '64px',
                       padding: '16px',
-                      borderBottom: '2px solid #cbd5e1',
+                      border: '2px dashed #cbd5e1',
+                      borderRadius: '16px',
                       display: 'flex',
                       gap: '10px',
                       flexWrap: 'wrap',
                       marginBottom: '24px',
                       backgroundColor: '#f8fafc',
-                      borderRadius: '12px',
+                      alignItems: 'center',
                     }}
                   >
-                    {arrangedWords.length === 0 ? (
-                      <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Chạm vào các từ bên dưới để ghép câu...</span>
+                    {selectedTokens.length === 0 ? (
+                      <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.95rem' }}>
+                        Chạm vào các từ bên dưới để ghép câu...
+                      </span>
                     ) : (
-                      arrangedWords.map((w, idx) => (
+                      selectedTokens.map((token) => (
                         <button
-                          key={idx}
-                          disabled={Boolean(submissionResult)}
-                          onClick={() => handleTapArrangedWord(w, idx)}
+                          key={token.id}
+                          disabled={isSubmitting || Boolean(submissionResult)}
+                          onClick={() => handleDeselectWordToken(token)}
                           className="btn-admin-primary"
-                          style={{ borderRadius: '12px', padding: '8px 16px' }}
+                          style={{
+                            borderRadius: '12px',
+                            padding: '10px 18px',
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            boxShadow: '0 2px 6px rgba(42,99,232,0.2)',
+                            cursor: isSubmitting || submissionResult ? 'default' : 'pointer',
+                          }}
                         >
-                          {w}
+                          {token.text}
                         </button>
                       ))
                     )}
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    {availableWords.map((w, idx) => (
+                    {availableTokens.map((token) => (
                       <button
-                        key={idx}
-                        disabled={Boolean(submissionResult)}
-                        onClick={() => handleTapAvailableWord(w, idx)}
+                        key={token.id}
+                        disabled={isSubmitting || Boolean(submissionResult)}
+                        onClick={() => handleSelectWordToken(token)}
                         className="btn-admin-secondary"
-                        style={{ borderRadius: '12px', padding: '10px 18px', fontWeight: 700 }}
+                        style={{
+                          borderRadius: '12px',
+                          padding: '10px 18px',
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          backgroundColor: '#ffffff',
+                          border: '2px solid #cbd5e1',
+                          cursor: isSubmitting || submissionResult ? 'default' : 'pointer',
+                        }}
                       >
-                        {w}
+                        {token.text}
                       </button>
                     ))}
                   </div>
@@ -562,9 +664,9 @@ export const LessonLearnPage: React.FC = () => {
                     onClick={handleSubmitAnswer}
                     disabled={isSubmitting}
                     className="btn-admin-primary"
-                    style={{ width: '100%', padding: '16px', borderRadius: '9999px', fontSize: '1.1rem' }}
+                    style={{ width: '100%', padding: '16px', borderRadius: '9999px', fontSize: '1.1rem', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
                   >
-                    {isSubmitting ? 'Đang gửi kiểm tra...' : 'Kiểm Tra Đáp Án ✓'}
+                    {isSubmitting ? 'Đang kiểm tra...' : 'Kiểm Tra Đáp Án ✓'}
                   </button>
                 </div>
               )}
@@ -589,10 +691,16 @@ export const LessonLearnPage: React.FC = () => {
                   <div style={{ fontSize: '2.5rem' }}>{submissionResult.correct ? '🎉' : '❌'}</div>
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: submissionResult.correct ? '#15803d' : '#b91c1c' }}>
-                      {submissionResult.correct ? 'Chính Xác! +XP' : 'Chưa Chính Xác'}
+                      {submissionResult.correct ? '✓ Chính xác!' : '✗ Chưa chính xác'}
                     </h4>
                     <p style={{ margin: 0, color: submissionResult.correct ? '#166534' : '#991b1b', fontSize: '0.92rem' }}>
-                      {submissionResult.feedback}
+                      {submissionResult.correct
+                        ? `+${submissionResult.xp} XP`
+                        : submissionResult.feedback
+                        ? submissionResult.feedback
+                        : currentExercise.correctAnswer
+                        ? `Đáp án đúng là: ${currentExercise.correctAnswer}`
+                        : ''}
                     </p>
                   </div>
                 </div>
@@ -655,15 +763,21 @@ export const LessonLearnPage: React.FC = () => {
               <button
                 className="btn-admin-secondary"
                 style={{ padding: '14px 28px', borderRadius: '9999px' }}
-                onClick={() => navigate(`/lessons/${activeLessonId}`)}
+                onClick={() => navigate('/learning-path')}
               >
-                🏠 Quay lại Bài Học
+                🏠 Quay lại Lộ Trình Học
               </button>
 
               <button
                 className="btn-admin-primary"
                 style={{ padding: '14px 36px', borderRadius: '9999px' }}
-                onClick={() => navigate('/levels')}
+                onClick={() => {
+                  if (nextLessonData && nextLessonData._id) {
+                    navigate(`/learn/lesson/${nextLessonData._id}`)
+                  } else {
+                    navigate('/learning-path')
+                  }
+                }}
               >
                 Tiếp Tục Khóa Học ➔
               </button>

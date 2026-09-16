@@ -20,10 +20,10 @@ const Hero = () => {
           </p>
 
           <div className="hero-buttons">
-            <Link to="/levels" className="btn btn-primary">
+            <Link to="/learning-path" className="btn btn-primary">
               Bắt Đầu Ngay
             </Link>
-            <Link to="/levels" className="btn btn-secondary">
+            <Link to="/learning-path" className="btn btn-secondary">
               Khám Phá Trình Độ
             </Link>
           </div>

@@ -63,8 +63,8 @@ export const Lektion: React.FC = () => {
         <Header />
         <div style={{ textAlign: 'center', padding: '60px 20px', minHeight: '60vh', color: '#dc2626' }}>
           <p>{error || 'Không tìm thấy bài học.'}</p>
-          <button className="btn-admin-primary" onClick={() => navigate('/levels')}>
-            Về Danh Sách Trình Độ
+          <button className="btn-admin-primary" onClick={() => navigate('/learning-path')}>
+            Về Lộ Trình Học
           </button>
         </div>
         <Footer />
@@ -89,14 +89,11 @@ export const Lektion: React.FC = () => {
     lessonRecord.level
   const levelObj = rawLevelObj as LevelItem | string | undefined
 
-  const levelIdVal = typeof levelObj === 'object' && levelObj !== null
-    ? (levelObj._id || levelObj.level_name || '')
-    : (typeof levelObj === 'string' ? levelObj : (vocabularies[0]?.level || ''))
   const levelNameVal = typeof levelObj === 'object' && levelObj !== null
     ? (levelObj.level_name || levelObj.name || '')
     : (typeof levelObj === 'string' ? levelObj : (vocabularies[0]?.level || ''))
 
-  const backToLessonListUrl = levelIdVal ? `/levels/${levelIdVal}/lessons` : '/levels'
+  const backToLessonListUrl = '/learning-path'
 
   return (
     <div className="lesson-page" style={{ backgroundColor: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -105,8 +102,8 @@ export const Lektion: React.FC = () => {
       <main style={{ flex: 1, padding: '30px 20px', maxWidth: '960px', margin: '0 auto', width: '100%' }}>
         {/* Breadcrumb / Back button */}
         <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.92rem', flexWrap: 'wrap' }}>
-          <Link to="/levels" style={{ color: '#2a63e8', textDecoration: 'none', fontWeight: 600 }}>
-            Levels
+          <Link to="/learning-path" style={{ color: '#2a63e8', textDecoration: 'none', fontWeight: 600 }}>
+            Learning Path
           </Link>
           {levelNameVal && (
             <>
