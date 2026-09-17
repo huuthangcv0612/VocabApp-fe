@@ -45,6 +45,7 @@ import AdminPlans from './pages/admin/AdminPlans'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
 import LearningPathPage from './features/learning-path/pages/LearningPathPage'
+import AIConversationPage from './features/ai-conversation/pages/AIConversationPage'
 
 function App() {
   return (
@@ -92,6 +93,7 @@ function App() {
             <Route path="/interactive-room/*" element={<InteractiveRoomPage />} />
             <Route path="/test" element={<QuickTestPage />} />
             <Route path="/take-test" element={<QuickTestPage />} />
+            <Route path="/ai-conversation/:sessionId" element={<AIConversationPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/change-password" element={<ChangePassword />} />
           </Route>

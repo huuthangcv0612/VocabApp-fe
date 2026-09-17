@@ -4,6 +4,7 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
 import { progressService } from '../services/progressService'
+import { aiConversationService } from '../features/ai-conversation/services/aiConversation.service'
 import type { LessonDetailData, LessonItem, LessonPreviewVocabulary } from '../types/lesson'
 import type { LessonExercise } from '../types/exercise'
 import type { LessonLearningStep } from '../types/student'
@@ -52,6 +53,25 @@ export const LessonLearnPage: React.FC = () => {
   const [correctCount, setCorrectCount] = useState(0)
   const [totalXpEarned, setTotalXpEarned] = useState(0)
   const [startTime] = useState(Date.now())
+  const [isStartingAI, setIsStartingAI] = useState(false)
+
+  const handleStartAIConversation = async () => {
+    if (!activeLessonId || isStartingAI) return
+    try {
+      setIsStartingAI(true)
+      const data = await aiConversationService.startConversation(activeLessonId)
+      if (data && data.session_id) {
+        navigate(`/ai-conversation/${data.session_id}`)
+      } else {
+        toast.error('Không thể tạo phiên hội thoại AI.')
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Không thể bắt đầu hội thoại AI.'
+      toast.error(msg)
+    } finally {
+      setIsStartingAI(false)
+    }
+  }
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -759,10 +779,10 @@ export const LessonLearnPage: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
                 className="btn-admin-secondary"
-                style={{ padding: '14px 28px', borderRadius: '9999px' }}
+                style={{ padding: '14px 24px', borderRadius: '9999px' }}
                 onClick={() => navigate('/learning-path')}
               >
                 🏠 Quay lại Lộ Trình Học
@@ -770,7 +790,21 @@ export const LessonLearnPage: React.FC = () => {
 
               <button
                 className="btn-admin-primary"
-                style={{ padding: '14px 36px', borderRadius: '9999px' }}
+                style={{
+                  padding: '14px 28px',
+                  borderRadius: '9999px',
+                  backgroundColor: '#8b5cf6',
+                  boxShadow: '0 4px 14px rgba(139,92,246,0.35)',
+                }}
+                disabled={isStartingAI}
+                onClick={handleStartAIConversation}
+              >
+                {isStartingAI ? '🤖 Đang khởi tạo AI...' : '🤖 Luyện tập với AI'}
+              </button>
+
+              <button
+                className="btn-admin-primary"
+                style={{ padding: '14px 32px', borderRadius: '9999px' }}
                 onClick={() => {
                   if (nextLessonData && nextLessonData._id) {
                     navigate(`/learn/lesson/${nextLessonData._id}`)
