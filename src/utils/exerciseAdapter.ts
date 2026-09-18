@@ -11,19 +11,227 @@ export interface NormalizedExercise extends LessonExercise {
   sentenceTranslation?: string
 }
 
+export const cleanFillBlankText = (text: string): string => {
+  if (!text) return ''
+  return text
+    .replace(/^Điền từ\s*(thích hợp|vào|còn thiếu)*\s*(vào)?\s*chỗ trống:?\s*/i, '')
+    .trim()
+}
+
+export interface ExtractedExerciseFormState {
+  question: string
+  mcQuestion: string
+  mcAudioUrl: string
+  mcOptions: Array<{ text: string; isCorrect: boolean }>
+  translationPrompt: string
+  translationExpected: string
+  fillSentence: string
+  fillAnswer: string
+  arrangeWords: string[]
+  arrangeCorrectSentence: string
+  explanation: string
+  xp: number
+  status: 'active' | 'draft' | 'inactive'
+}
+
+export const extractExerciseFormState = (ex: LessonExercise): ExtractedExerciseFormState => {
+  const content = (ex.content || {}) as Record<string, unknown>
+  const answer = (ex.answer || {}) as Record<string, unknown>
+  const rootEx = (ex as unknown) as Record<string, unknown>
+
+  // XP & Status & Explanation
+  const xp = ex.xp || 5
+  const status = ((ex.status as string) || 'active') as 'active' | 'draft' | 'inactive'
+  const explanation =
+    ex.explanation ||
+    (typeof answer.explanation === 'string' ? answer.explanation : '') ||
+    (typeof content.explanation === 'string' ? content.explanation : '') ||
+    ''
+
+  // Question & Audio
+  const question = ex.question || (typeof content.question === 'string' ? content.question : '') || ''
+  const mcQuestion =
+    ex.question ||
+    (typeof content.question === 'string' ? content.question : '') ||
+    (typeof content.prompt === 'string' ? content.prompt : '') ||
+    (typeof content.sentence === 'string' ? content.sentence : '') ||
+    ''
+  const mcAudioUrl =
+    typeof content.audio_url === 'string'
+      ? content.audio_url
+      : typeof rootEx.audio_url === 'string'
+      ? (rootEx.audio_url as string)
+      : typeof rootEx.audioUrl === 'string'
+      ? (rootEx.audioUrl as string)
+      : ''
+
+  // Options & Correct option for MCQ / Listening
+  let rawOptions: Array<{ text: string; isCorrect: boolean }> = []
+
+  if (Array.isArray(ex.options) && ex.options.length >= 2) {
+    rawOptions = ex.options.map((opt) => {
+      if (typeof opt === 'string') return { text: opt, isCorrect: false }
+      return { text: opt.text || '', isCorrect: Boolean(opt.isCorrect) }
+    })
+  } else if (Array.isArray(content.options) && content.options.length >= 2) {
+    rawOptions = content.options.map((opt: unknown) => {
+      if (typeof opt === 'string') return { text: opt, isCorrect: false }
+      if (opt && typeof opt === 'object') {
+        const o = opt as Record<string, unknown>
+        return { text: typeof o.text === 'string' ? o.text : String(opt), isCorrect: Boolean(o.isCorrect) }
+      }
+      return { text: String(opt), isCorrect: false }
+    })
+  } else {
+    rawOptions = [
+      { text: '', isCorrect: true },
+      { text: '', isCorrect: false },
+      { text: '', isCorrect: false },
+      { text: '', isCorrect: false },
+    ]
+  }
+
+  // Determine correct option for MCQ / Listening
+  let correctIdx = -1
+
+  // 1. Check if an option already has isCorrect === true
+  const existingCorrectIdx = rawOptions.findIndex((o) => o.isCorrect)
+
+  // 2. Index from answer / rootEx / content
+  const idxFromAnswer =
+    typeof answer.correct_option_index === 'number'
+      ? answer.correct_option_index
+      : typeof rootEx.correct_option_index === 'number'
+      ? (rootEx.correct_option_index as number)
+      : typeof content.correct_option_index === 'number'
+      ? (content.correct_option_index as number)
+      : -1
+
+  // 3. Text string candidates for matching
+  const targetText =
+    (typeof answer.correct_option === 'string' && answer.correct_option.trim() ? answer.correct_option.trim() : '') ||
+    (typeof rootEx.correct_option === 'string' && (rootEx.correct_option as string).trim() ? (rootEx.correct_option as string).trim() : '') ||
+    (typeof content.correct_option === 'string' && (content.correct_option as string).trim() ? (content.correct_option as string).trim() : '') ||
+    (typeof answer.correct_answer === 'string' && answer.correct_answer.trim() ? answer.correct_answer.trim() : '') ||
+    (typeof rootEx.correct_answer === 'string' && (rootEx.correct_answer as string).trim() ? (rootEx.correct_answer as string).trim() : '') ||
+    (typeof content.correct_answer === 'string' && (content.correct_answer as string).trim() ? (content.correct_answer as string).trim() : '') ||
+    (typeof ex.correctAnswer === 'string' && ex.correctAnswer.trim() ? ex.correctAnswer.trim() : '') ||
+    (typeof answer.value === 'string' && answer.value.trim() ? answer.value.trim() : '') ||
+    (typeof rootEx.value === 'string' && (rootEx.value as string).trim() ? (rootEx.value as string).trim() : '')
+
+  if (idxFromAnswer >= 0 && idxFromAnswer < rawOptions.length) {
+    correctIdx = idxFromAnswer
+  } else if (targetText) {
+    const textIdx = rawOptions.findIndex((o) => o.text.trim().toLowerCase() === targetText.toLowerCase())
+    if (textIdx !== -1) {
+      correctIdx = textIdx
+    }
+  }
+
+  if (correctIdx === -1 && existingCorrectIdx !== -1) {
+    correctIdx = existingCorrectIdx
+  }
+
+  if (correctIdx === -1 && rawOptions.length > 0) {
+    correctIdx = 0
+  }
+
+  const mcOptions = rawOptions.map((opt, idx) => ({
+    ...opt,
+    isCorrect: idx === correctIdx,
+  }))
+
+  // Translation
+  const translationPrompt =
+    (typeof content.prompt === 'string' ? content.prompt : '') ||
+    (typeof content.question === 'string' ? content.question : '') ||
+    ex.question ||
+    ''
+
+  const translationExpected =
+    (typeof answer.expected_answer === 'string' ? answer.expected_answer : '') ||
+    (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
+    (typeof answer.value === 'string' ? answer.value : '') ||
+    (typeof ex.correctAnswer === 'string' ? ex.correctAnswer : '') ||
+    (typeof rootEx.expected_answer === 'string' ? (rootEx.expected_answer as string) : '') ||
+    (typeof rootEx.correct_answer === 'string' ? (rootEx.correct_answer as string) : '') ||
+    ''
+
+  // Fill Blank
+  const fillSentence = cleanFillBlankText(
+    (typeof content.sentence === 'string' ? content.sentence : '') ||
+    (typeof content.question === 'string' ? content.question : '') ||
+    ex.question ||
+    '',
+  )
+
+  const fillAnswer =
+    (typeof answer.blank_answer === 'string' ? answer.blank_answer : '') ||
+    (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
+    (typeof answer.value === 'string' ? answer.value : '') ||
+    (typeof answer.expected_answer === 'string' ? answer.expected_answer : '') ||
+    (typeof ex.correctAnswer === 'string' ? ex.correctAnswer : '') ||
+    (typeof rootEx.blank_answer === 'string' ? (rootEx.blank_answer as string) : '') ||
+    (typeof rootEx.correct_answer === 'string' ? (rootEx.correct_answer as string) : '') ||
+    (typeof content.blank_answer === 'string' ? (content.blank_answer as string) : '') ||
+    (typeof content.correct_answer === 'string' ? (content.correct_answer as string) : '') ||
+    ''
+
+  // Sentence Arrangement
+  const rawWords = content.words ?? ex.wordTokens ?? rootEx.words ?? content.tokens
+  let arrangeWords: string[] = []
+  if (Array.isArray(rawWords)) {
+    arrangeWords = rawWords.map((w) => String(w))
+  } else if (typeof rawWords === 'string' && rawWords.trim()) {
+    arrangeWords = rawWords.includes('/') ? rawWords.split('/').map((s) => s.trim()) : rawWords.split(' ')
+  } else {
+    arrangeWords = ['', '', '']
+  }
+
+  const arrangeCorrectSentence =
+    (typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '') ||
+    (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
+    (Array.isArray(answer.correct_answer) ? answer.correct_answer.join(' ') : '') ||
+    (typeof ex.correctAnswer === 'string' ? ex.correctAnswer : '') ||
+    (typeof rootEx.correct_sentence === 'string' ? (rootEx.correct_sentence as string) : '') ||
+    (typeof rootEx.correct_answer === 'string' ? (rootEx.correct_answer as string) : '') ||
+    (Array.isArray(rootEx.correct_answer) ? (rootEx.correct_answer as string[]).join(' ') : '') ||
+    ''
+
+  return {
+    question,
+    mcQuestion,
+    mcAudioUrl,
+    mcOptions,
+    translationPrompt,
+    translationExpected,
+    fillSentence,
+    fillAnswer,
+    arrangeWords: arrangeWords.length > 0 ? arrangeWords : ['', '', ''],
+    arrangeCorrectSentence,
+    explanation,
+    xp,
+    status,
+  }
+}
+
 export const normalizeExercise = (ex: LessonExercise): NormalizedExercise => {
   const contentObj = (ex.content || {}) as Record<string, unknown>
   const rawAnswer = (ex.answer || {}) as Record<string, unknown>
 
   // 1. Question extraction
   const vocabObj = typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id : null
-  const questionText =
+  let questionText =
     (typeof contentObj.question === 'string' && contentObj.question.trim().length > 0 ? contentObj.question.trim() : '') ||
     ex.question ||
     (typeof contentObj.prompt === 'string' ? contentObj.prompt : '') ||
     (typeof contentObj.sentence === 'string' ? contentObj.sentence : '') ||
     (vocabObj ? `Câu hỏi từ vựng: "${vocabObj.word}" (${vocabObj.meaning || ''})` : '') ||
     'Bài tập'
+
+  if (ex.type === 'fill_blank' || (ex.type as string) === 'fill_in_blank') {
+    questionText = cleanFillBlankText(questionText)
+  }
 
   // 2. Options list extraction (always string[])
   let optionsList: string[] = []

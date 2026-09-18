@@ -1,4 +1,4 @@
-import { normalizeExercise, formatSubmitAnswer, evaluateAnswerLocally } from './exerciseAdapter'
+import { normalizeExercise, formatSubmitAnswer, evaluateAnswerLocally, extractExerciseFormState } from './exerciseAdapter'
 import type { LessonExercise } from '../types/exercise'
 
 export const runExerciseAdapterTests = () => {
@@ -331,6 +331,54 @@ export const runExerciseAdapterTests = () => {
 
     assert(sourceWordsCopy.length === 4, 'Expected source array length unchanged')
     assert(sourceWordsCopy[0] === 'Ich' && sourceWordsCopy[3] === 'Bruder', 'Expected source array elements unchanged')
+  })
+
+  // Test 14: extractExerciseFormState for MCQ matching correct option string when options have isCorrect = false
+  testCase('extractExerciseFormState for MCQ matching correct_answer text', () => {
+    const rawMcq: LessonExercise = {
+      _id: 'ex_mcq',
+      order: 1,
+      type: 'multiple_choice',
+      xp: 2,
+      question: 'Từ tiếng Đức nào có nghĩa là “mắt”?',
+      options: [
+        { text: 'die Hand, -ä,e', isCorrect: false },
+        { text: 'das Auge, -n', isCorrect: false },
+        { text: 'der Körper, -', isCorrect: false },
+        { text: 'der Kopf, -ö,e', isCorrect: false },
+      ],
+      answer: {
+        correct_answer: 'das Auge, -n',
+        explanation: 'das Auge, -n = mắt',
+      },
+    }
+
+    const state = extractExerciseFormState(rawMcq)
+    assert(state.mcOptions[1].text === 'das Auge, -n', 'Expected option index 1 to be das Auge, -n')
+    assert(state.mcOptions[1].isCorrect === true, 'Expected option index 1 to be correct')
+    assert(state.mcOptions[0].isCorrect === false, 'Expected option index 0 to be incorrect')
+  })
+
+  // Test 15: extractExerciseFormState for fill_blank extracting correct_answer into fillAnswer
+  testCase('extractExerciseFormState for fill_blank extracting correct_answer into fillAnswer', () => {
+    const rawFill: LessonExercise = {
+      _id: 'ex_fill',
+      order: 1,
+      type: 'fill_blank',
+      xp: 2,
+      question: 'Điền từ vào chỗ trống: Das ist ___.',
+      content: {
+        sentence: 'Das ist ___.',
+      },
+      answer: {
+        correct_answer: 'der Vater',
+        explanation: 'der Vater = bố',
+      },
+    }
+
+    const state = extractExerciseFormState(rawFill)
+    assert(state.fillSentence === 'Das ist ___.', `Expected fillSentence 'Das ist ___.', got '${state.fillSentence}'`)
+    assert(state.fillAnswer === 'der Vater', `Expected fillAnswer 'der Vater', got '${state.fillAnswer}'`)
   })
 
   return results

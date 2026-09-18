@@ -17,6 +17,7 @@ import type {
   ExerciseType,
 } from '../../types/admin'
 import type { ExerciseContentPayload, ExerciseAnswerPayload } from '../../types/exercise'
+import { cleanFillBlankText, extractExerciseFormState } from '../../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 
 export const AdminLessonBuilder: React.FC = () => {
@@ -307,61 +308,30 @@ export const AdminLessonBuilder: React.FC = () => {
   const handleOpenEditExerciseModal = (ex: LessonExercise) => {
     setEditingExercise(ex)
     setExerciseStep(2)
+    const vocabIdVal = ex.vocabularyId || (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id._id : typeof ex.vocabulary_id === 'string' ? ex.vocabulary_id : '')
+    setExerciseVocabularyId(vocabIdVal || '')
+
     const rawType = (ex.type as string) || 'multiple_choice'
     const canonicalType: ExerciseType = rawType === 'word_arrangement' ? 'sentence_arrangement' : (rawType as ExerciseType)
     setExerciseType(canonicalType)
 
-    setExerciseVocabularyId(ex.vocabularyId || '')
-    setExerciseXp(ex.xp || 5)
-    setExerciseStatus(ex.status || 'active')
-    setExerciseExplanation(ex.explanation || '')
+    const state = extractExerciseFormState(ex)
+    setExerciseXp(state.xp)
+    setExerciseStatus(state.status)
+    setExerciseExplanation(state.explanation)
 
-    const content = (ex.content || {}) as Record<string, unknown>
-    const answer = (ex.answer || {}) as Record<string, unknown>
+    setMcQuestion(state.mcQuestion)
+    setMcAudioUrl(state.mcAudioUrl)
+    setMcOptions(state.mcOptions)
 
-    // Populate MCQ / Listening
-    setMcQuestion(ex.question || (typeof content.question === 'string' ? content.question : '') || (typeof content.prompt === 'string' ? content.prompt : '') || (typeof content.sentence === 'string' ? content.sentence : '') || '')
-    setMcAudioUrl(typeof content.audio_url === 'string' ? content.audio_url : '')
-    if (ex.options && ex.options.length >= 2) {
-      setMcOptions(ex.options.map((opt) => ({ text: opt.text, isCorrect: Boolean(opt.isCorrect) })))
-    } else if (Array.isArray(content.options)) {
-      const corrIdx = typeof answer.correct_option_index === 'number' ? answer.correct_option_index : 0
-      setMcOptions((content.options as string[]).map((opt: string, idx: number) => ({
-        text: opt,
-        isCorrect: idx === corrIdx,
-      })))
-    } else {
-      setMcOptions([
-        { text: '', isCorrect: true },
-        { text: '', isCorrect: false },
-        { text: '', isCorrect: false },
-        { text: '', isCorrect: false },
-      ])
-    }
+    setTranslationPrompt(state.translationPrompt)
+    setTranslationExpected(state.translationExpected)
 
-    // Populate Translation
-    setTranslationPrompt((typeof content.prompt === 'string' ? content.prompt : '') || ex.question || '')
-    setTranslationExpected(typeof answer.expected_answer === 'string' ? answer.expected_answer : '')
+    setFillSentence(state.fillSentence)
+    setFillAnswer(state.fillAnswer)
 
-    // Populate Fill Blank
-    setFillSentence((typeof content.sentence === 'string' ? content.sentence : '') || ex.question || '')
-    setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
-
-    // Populate Sentence Arrangement
-    const wordsArr = Array.isArray(content.words)
-      ? (content.words as string[])
-      : Array.isArray(ex.wordTokens)
-      ? ex.wordTokens
-      : ['', '', '']
-    setArrangeWords(wordsArr.length > 0 ? wordsArr : ['', '', ''])
-
-    const correctSentenceVal =
-      (typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '') ||
-      (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
-      (Array.isArray(answer.correct_answer) ? answer.correct_answer.join(' ') : '') ||
-      ex.correctAnswer ||
-      ''
-    setArrangeCorrectSentence(correctSentenceVal)
+    setArrangeWords(state.arrangeWords)
+    setArrangeCorrectSentence(state.arrangeCorrectSentence)
 
     setIsExerciseModalOpen(true)
   }
@@ -429,47 +399,45 @@ export const AdminLessonBuilder: React.FC = () => {
     const validWords = arrangeWords.filter((w) => w.trim().length > 0)
     const vocabName = vocabularies.find((v) => v.vocabularyId === exerciseVocabularyId || v._id === exerciseVocabularyId)?.word || 'Tổng hợp'
 
-    let questionText = ''
+    let questionText = mcQuestion.trim()
     let contentObj: ExerciseContentPayload = {}
     let answerObj: ExerciseAnswerPayload = {}
 
-    // Validation per Exercise Type
     if (exerciseType === 'multiple_choice') {
       if (!mcQuestion.trim()) {
-        toast.error('Vui lòng nhập câu hỏi cho bài tập Trắc nghiệm!')
+        toast.error('Vui lòng nhập nội dung câu hỏi!')
         return
       }
       if (validOptions.length < 2) {
         toast.error('Bài tập Trắc nghiệm phải có ít nhất 2 lựa chọn đáp án!')
         return
       }
-      const correctIdx = validOptions.findIndex((o) => o.isCorrect)
+      const correctIdx = validOptions.findIndex((opt) => opt.isCorrect)
       if (correctIdx === -1) {
-        toast.error('Vui lòng chọn 1 đáp án ĐÚNG!')
+        toast.error('Vui lòng tích chọn 1 đáp án ĐÚNG!')
         return
       }
 
-      questionText = mcQuestion
-      contentObj = { question: mcQuestion, options: validOptions.map((o) => o.text) }
-      answerObj = { correct_option_index: correctIdx }
+      contentObj = { question: mcQuestion.trim(), options: validOptions.map((opt) => opt.text) }
+      answerObj = { correct_option_index: correctIdx, correct_option: validOptions[correctIdx].text, correct_answer: validOptions[correctIdx].text }
     } else if (exerciseType === 'listening') {
       if (!mcAudioUrl.trim()) {
-        toast.error('Bài tập Luyện nghe yêu cầu nhập Audio URL!')
+        toast.error('Vui lòng nhập Audio URL!')
         return
       }
       if (validOptions.length < 2) {
         toast.error('Bài tập Luyện nghe phải có ít nhất 2 lựa chọn đáp án!')
         return
       }
-      const correctIdx = validOptions.findIndex((o) => o.isCorrect)
+      const correctIdx = validOptions.findIndex((opt) => opt.isCorrect)
       if (correctIdx === -1) {
-        toast.error('Vui lòng chọn 1 đáp án ĐÚNG!')
+        toast.error('Vui lòng tích chọn 1 đáp án ĐÚNG!')
         return
       }
 
-      questionText = mcQuestion.trim() || 'Nghe audio và chọn đáp án đúng'
-      contentObj = { audio_url: mcAudioUrl, question: questionText, options: validOptions.map((o) => o.text) }
-      answerObj = { correct_option_index: correctIdx }
+      questionText = mcQuestion.trim() || 'Nghe audio và chọn đáp án chính xác'
+      contentObj = { audio_url: mcAudioUrl.trim(), question: questionText, options: validOptions.map((opt) => opt.text) }
+      answerObj = { correct_option_index: correctIdx, correct_option: validOptions[correctIdx].text, correct_answer: validOptions[correctIdx].text }
     } else if (exerciseType === 'translation') {
       if (!translationPrompt.trim()) {
         toast.error('Vui lòng nhập câu/từ nguồn cần dịch (Prompt)!')
@@ -482,7 +450,7 @@ export const AdminLessonBuilder: React.FC = () => {
 
       questionText = `Dịch câu: ${translationPrompt}`
       contentObj = { prompt: translationPrompt }
-      answerObj = { expected_answer: translationExpected }
+      answerObj = { expected_answer: translationExpected, correct_answer: translationExpected }
     } else if (exerciseType === 'fill_blank') {
       if (!fillSentence.trim()) {
         toast.error('Vui lòng nhập câu chứa chỗ trống (Sentence)!')
@@ -493,9 +461,10 @@ export const AdminLessonBuilder: React.FC = () => {
         return
       }
 
-      questionText = `Điền từ vào chỗ trống: ${fillSentence}`
-      contentObj = { sentence: fillSentence }
-      answerObj = { blank_answer: fillAnswer }
+      const cleanSentenceVal = cleanFillBlankText(fillSentence)
+      questionText = cleanSentenceVal
+      contentObj = { sentence: cleanSentenceVal }
+      answerObj = { blank_answer: fillAnswer.trim(), correct_answer: fillAnswer.trim() }
     } else if (exerciseType === 'sentence_arrangement') {
       if (validWords.length < 2) {
         toast.error('Bài tập Sắp xếp câu phải có ít nhất 2 từ rời rạc!')
@@ -797,7 +766,11 @@ export const AdminLessonBuilder: React.FC = () => {
                     <td>
                       <strong style={{ color: '#64748b' }}>#{ex.order || idx + 1}</strong>
                     </td>
-                    <td style={{ fontWeight: 700, color: '#0f172a', maxWidth: '280px' }}>{ex.question}</td>
+                    <td style={{ fontWeight: 700, color: '#0f172a', maxWidth: '280px' }}>
+                      {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
+                        ? cleanFillBlankText((typeof ex.content?.sentence === 'string' ? ex.content.sentence : '') || ex.question || '')
+                        : ex.question}
+                    </td>
                     <td>
                       <span className="badge-pill badge-a1">{getExerciseTypeBadgeLabel(ex.type)}</span>
                     </td>
@@ -1453,7 +1426,11 @@ export const AdminLessonBuilder: React.FC = () => {
 
             <div>
               <strong>Yêu cầu / Câu hỏi:</strong>
-              <h4 style={{ margin: '6px 0', color: '#0f172a' }}>{viewingExercise.question}</h4>
+              <h4 style={{ margin: '6px 0', color: '#0f172a' }}>
+                {viewingExercise.type === 'fill_blank' || viewingExercise.type === 'fill_in_blank'
+                  ? cleanFillBlankText((typeof viewingExercise.content?.sentence === 'string' ? viewingExercise.content.sentence : '') || viewingExercise.question || '')
+                  : viewingExercise.question}
+              </h4>
             </div>
 
             {/* Type Specific Preview */}
@@ -1488,7 +1465,7 @@ export const AdminLessonBuilder: React.FC = () => {
 
             {viewingExercise.type === 'fill_blank' && (
               <div>
-                <div><strong>Sentence:</strong> {viewingExercise.content?.sentence || viewingExercise.question}</div>
+                <div><strong>Sentence:</strong> {cleanFillBlankText((typeof viewingExercise.content?.sentence === 'string' ? viewingExercise.content.sentence : '') || viewingExercise.question || '')}</div>
                 <div><strong>Blank Answer (Từ điền):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.blank_answer || 'N/A')}</span></div>
               </div>
             )}

@@ -5,8 +5,10 @@ import AdminLoadingState from '../../components/admin/AdminLoadingState'
 import AdminErrorState from '../../components/admin/AdminErrorState'
 import ConfirmDialog from '../../components/admin/ConfirmDialog'
 import Modal from '../../components/admin/Modal'
+import SearchableSelect from '../../components/admin/SearchableSelect'
 import { adminService } from '../../services/adminService'
 import type { LessonExercise, LessonItem, StatusType, ExerciseType } from '../../types/admin'
+import { cleanFillBlankText, extractExerciseFormState } from '../../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 
 export const AdminExercises: React.FC = () => {
@@ -48,23 +50,21 @@ export const AdminExercises: React.FC = () => {
   const [deleteTarget, setDeleteTarget] = useState<LessonExercise | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Fetch exercises and dependent data
+  // Fetch initial exercises & lessons
   const fetchExercisesData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      const [exList, lessonList] = await Promise.all([
+      const [exList, lesList] = await Promise.all([
         adminService.getExercises().catch(() => []),
         adminService.getLessons().catch(() => []),
       ])
 
       let aggregatedExercises: LessonExercise[] = Array.isArray(exList) ? exList : []
 
-      // If global getExercises returned empty, aggregate exercises from lesson details
-      if (aggregatedExercises.length === 0 && Array.isArray(lessonList) && lessonList.length > 0) {
+      if (aggregatedExercises.length === 0 && Array.isArray(lesList) && lesList.length > 0) {
         const details = await Promise.all(
-          lessonList.map((les) => adminService.getLessonDetail(les._id).catch(() => null))
+          lesList.map((les) => adminService.getLessonDetail(les._id).catch(() => null))
         )
         const collected: LessonExercise[] = []
         details.forEach((d) => {
@@ -76,10 +76,11 @@ export const AdminExercises: React.FC = () => {
       }
 
       setExercises(aggregatedExercises)
-      setLessons(Array.isArray(lessonList) ? lessonList : [])
+      setLessons(Array.isArray(lesList) ? lesList : [])
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách bài tập từ server.'
+      const msg = err instanceof Error ? err.message : 'Tải danh sách bài tập thất bại.'
       setError(msg)
+      toast.error(msg)
     } finally {
       setLoading(false)
     }
@@ -151,46 +152,24 @@ export const AdminExercises: React.FC = () => {
     const canonicalType: ExerciseType = rawType === 'word_arrangement' ? 'sentence_arrangement' : (rawType as ExerciseType)
     setExerciseType(canonicalType)
 
-    setQuestion(ex.question || '')
-    setXp(ex.xp || 5)
-    setStatus(ex.status || 'active')
-    setExplanation(ex.explanation || '')
+    const state = extractExerciseFormState(ex)
+    setQuestion(state.question)
+    setXp(state.xp)
+    setStatus(state.status)
+    setExplanation(state.explanation)
 
-    const content = (ex.content || {}) as Record<string, unknown>
-    const answer = (ex.answer || {}) as Record<string, unknown>
+    setMcQuestion(state.mcQuestion)
+    setMcAudioUrl(state.mcAudioUrl)
+    setMcOptions(state.mcOptions)
 
-    setMcQuestion(ex.question || (typeof content.question === 'string' ? content.question : '') || (typeof content.prompt === 'string' ? content.prompt : '') || (typeof content.sentence === 'string' ? content.sentence : '') || '')
-    setMcAudioUrl(typeof content.audio_url === 'string' ? content.audio_url : '')
+    setTranslationPrompt(state.translationPrompt)
+    setTranslationExpected(state.translationExpected)
 
-    if (ex.options && ex.options.length >= 2) {
-      setMcOptions(ex.options.map((opt) => ({ text: opt.text, isCorrect: Boolean(opt.isCorrect) })))
-    } else if (Array.isArray(content.options)) {
-      const corrIdx = typeof answer.correct_option_index === 'number' ? answer.correct_option_index : 0
-      setMcOptions((content.options as string[]).map((opt: string, idx: number) => ({
-        text: opt,
-        isCorrect: idx === corrIdx,
-      })))
-    }
+    setFillSentence(state.fillSentence)
+    setFillAnswer(state.fillAnswer)
 
-    setTranslationPrompt((typeof content.prompt === 'string' ? content.prompt : '') || ex.question || '')
-    setTranslationExpected(typeof answer.expected_answer === 'string' ? answer.expected_answer : '')
-    setFillSentence((typeof content.sentence === 'string' ? content.sentence : '') || ex.question || '')
-    setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
-
-    const wordsArr = Array.isArray(content.words)
-      ? (content.words as string[])
-      : Array.isArray(ex.wordTokens)
-      ? ex.wordTokens
-      : ['', '', '']
-    setArrangeWords(wordsArr.length > 0 ? wordsArr : ['', '', ''])
-
-    const correctSentenceVal =
-      (typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '') ||
-      (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
-      (Array.isArray(answer.correct_answer) ? answer.correct_answer.join(' ') : '') ||
-      ex.correctAnswer ||
-      ''
-    setArrangeCorrectSentence(correctSentenceVal)
+    setArrangeWords(state.arrangeWords)
+    setArrangeCorrectSentence(state.arrangeCorrectSentence)
 
     setIsModalOpen(true)
   }
@@ -227,15 +206,24 @@ export const AdminExercises: React.FC = () => {
         return
       }
       contentObj = { question, options: validOptions.map((o) => o.text) }
-      answerObj = { correct_option_index: correctIdx }
+      answerObj = { correct_option_index: correctIdx, correct_option: validOptions[correctIdx].text, correct_answer: validOptions[correctIdx].text }
     } else if (exerciseType === 'listening') {
       if (!mcAudioUrl.trim()) {
         toast.error('Vui lòng nhập Audio URL!')
         return
       }
+      if (validOptions.length < 2) {
+        toast.error('Cần ít nhất 2 lựa chọn đáp án!')
+        return
+      }
+      const correctIdx = validOptions.findIndex((o) => o.isCorrect)
+      if (correctIdx === -1) {
+        toast.error('Vui lòng chọn 1 đáp án ĐÚNG!')
+        return
+      }
       finalQuestionText = question.trim() || 'Nghe audio và chọn đáp án đúng'
       contentObj = { audio_url: mcAudioUrl, question: finalQuestionText, options: validOptions.map((o) => o.text) }
-      answerObj = { correct_option_index: validOptions.findIndex((o) => o.isCorrect) }
+      answerObj = { correct_option_index: correctIdx, correct_option: validOptions[correctIdx].text, correct_answer: validOptions[correctIdx].text }
     } else if (exerciseType === 'translation') {
       if (!translationPrompt.trim() || !translationExpected.trim()) {
         toast.error('Vui lòng nhập câu hỏi và câu dịch chuẩn!')
@@ -243,15 +231,16 @@ export const AdminExercises: React.FC = () => {
       }
       finalQuestionText = `Dịch câu: ${translationPrompt}`
       contentObj = { prompt: translationPrompt }
-      answerObj = { expected_answer: translationExpected }
+      answerObj = { expected_answer: translationExpected, correct_answer: translationExpected }
     } else if (exerciseType === 'fill_blank') {
       if (!fillSentence.trim() || !fillAnswer.trim()) {
         toast.error('Vui lòng nhập câu chỗ trống và đáp án!')
         return
       }
-      finalQuestionText = `Điền từ vào chỗ trống: ${fillSentence}`
-      contentObj = { sentence: fillSentence }
-      answerObj = { blank_answer: fillAnswer }
+      const cleanSentenceVal = cleanFillBlankText(fillSentence)
+      finalQuestionText = cleanSentenceVal
+      contentObj = { sentence: cleanSentenceVal }
+      answerObj = { blank_answer: fillAnswer.trim(), correct_answer: fillAnswer.trim() }
     } else if (exerciseType === 'sentence_arrangement') {
       if (validWords.length < 2 || !arrangeCorrectSentence.trim()) {
         toast.error('Vui lòng nhập ít nhất 2 từ và câu hoàn chỉnh đúng!')
@@ -397,14 +386,16 @@ export const AdminExercises: React.FC = () => {
                 {filteredExercises.map((ex) => (
                   <tr key={ex._id}>
                     <td style={{ fontWeight: 700, maxWidth: '320px' }}>
-                      {ex.question ||
-                        ex.content?.question ||
-                        ex.content?.prompt ||
-                        ex.content?.sentence ||
-                        (Array.isArray(ex.content?.words) ? `Sắp xếp: ${ex.content.words.join(' / ')}` : '') ||
-                        (Array.isArray(ex.wordTokens) ? `Sắp xếp: ${ex.wordTokens.join(' / ')}` : '') ||
-                        (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id.word : '') ||
-                        (ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement' ? 'Sentence Arrangement' : 'Exercise')}
+                      {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
+                        ? cleanFillBlankText((typeof ex.content?.sentence === 'string' ? ex.content.sentence : '') || ex.question || '')
+                        : (ex.question ||
+                          ex.content?.question ||
+                          ex.content?.prompt ||
+                          ex.content?.sentence ||
+                          (Array.isArray(ex.content?.words) ? `Sắp xếp: ${ex.content.words.join(' / ')}` : '') ||
+                          (Array.isArray(ex.wordTokens) ? `Sắp xếp: ${ex.wordTokens.join(' / ')}` : '') ||
+                          (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id.word : '') ||
+                          (ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement' ? 'Sentence Arrangement' : 'Exercise'))}
                     </td>
                     <td>
                       <span className="badge-pill badge-a1">{renderTypeLabel(ex.type)}</span>
@@ -449,19 +440,16 @@ export const AdminExercises: React.FC = () => {
           {!editingItem && (
             <div className="form-group">
               <label className="form-label">Chọn Bài Học (Lesson) *</label>
-              <select
-                className="form-select"
+              <SearchableSelect
+                options={lessons.map((les) => ({
+                  value: les._id,
+                  label: les.title || les.lektion_name || 'Bài học không tên',
+                }))}
                 value={selectedLessonId}
-                onChange={(e) => setSelectedLessonId(e.target.value)}
+                onChange={(val) => setSelectedLessonId(val)}
+                placeholder="🔍 Tìm kiếm hoặc chọn bài học..."
                 required
-              >
-                <option value="" disabled>-- Select Lesson --</option>
-                {lessons.map((les) => (
-                  <option key={les._id} value={les._id}>
-                    {les.title || les.lektion_name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           )}
 

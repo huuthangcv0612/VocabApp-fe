@@ -7,6 +7,8 @@ export interface AuthUser {
   role: 'user' | 'admin'
   avatar?: string | null
   isEmailVerified?: boolean
+  dateOfBirth?: string
+  gender?: 'male' | 'female' | 'other' | string
 }
 
 export interface AuthResponse<T = unknown> {

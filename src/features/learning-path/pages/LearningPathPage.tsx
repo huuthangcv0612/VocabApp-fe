@@ -6,6 +6,7 @@ import LearningPathHeader from '../components/LearningPathHeader'
 import UnitSection from '../components/UnitSection'
 import LearningPathSidebar from '../components/LearningPathSidebar'
 import LearningPathSkeleton from '../components/LearningPathSkeleton'
+import cloudSvg from '../../../assets/Cloud.svg'
 import '../styles/learningPath.css'
 
 export const LearningPathPage: React.FC = () => {
@@ -21,6 +22,15 @@ export const LearningPathPage: React.FC = () => {
 
   return (
     <div className="learning-path-page">
+      {/* Background Floating SVG Clouds */}
+      <div className="lp-bg-clouds" aria-hidden="true">
+        <img src={cloudSvg} alt="" className="lp-cloud lp-cloud-1" />
+        <img src={cloudSvg} alt="" className="lp-cloud lp-cloud-2" />
+        <img src={cloudSvg} alt="" className="lp-cloud lp-cloud-3" />
+        <img src={cloudSvg} alt="" className="lp-cloud lp-cloud-4" />
+        <img src={cloudSvg} alt="" className="lp-cloud lp-cloud-5" />
+      </div>
+
       <Header />
 
       <main className="lp-main-container">

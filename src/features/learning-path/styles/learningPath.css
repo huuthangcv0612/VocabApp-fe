@@ -1,21 +1,86 @@
 /* ==================================================
-   LEARNING PATH - DARK EMERALD REFERENCE UI THEME
+   LEARNING PATH - DEUTSCHUP THEME (MATCHING INDEX.CSS)
    ================================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
 
 .learning-path-page {
   min-height: 100vh;
-  background-color: #041714;
-  background-image: 
-    radial-gradient(rgba(16, 185, 129, 0.08) 1.5px, transparent 1.5px),
-    radial-gradient(rgba(16, 185, 129, 0.08) 1.5px, #041714 1.5px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
-  color: #e2e8f0;
-  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-accent, #FFF2B7);
+  color: var(--color-dark, #080616);
+  font-family: var(--font-body, 'Varela Round', sans-serif);
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Floating SVG Background Clouds */
+.lp-bg-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.lp-cloud {
+  position: absolute;
+  opacity: 0.75;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.04));
+  animation: floatCloud 14s ease-in-out infinite alternate;
+}
+
+.lp-cloud-1 {
+  top: 60px;
+  left: -20px;
+  width: 180px;
+  animation-duration: 16s;
+}
+
+.lp-cloud-2 {
+  top: 320px;
+  right: -30px;
+  width: 220px;
+  animation-duration: 20s;
+  animation-delay: -4s;
+}
+
+.lp-cloud-3 {
+  top: 720px;
+  left: 30px;
+  width: 160px;
+  animation-duration: 18s;
+  animation-delay: -2s;
+}
+
+.lp-cloud-4 {
+  top: 1150px;
+  right: 50px;
+  width: 200px;
+  animation-duration: 22s;
+  animation-delay: -7s;
+}
+
+.lp-cloud-5 {
+  top: 1600px;
+  left: -40px;
+  width: 240px;
+  animation-duration: 25s;
+  animation-delay: -10s;
+}
+
+@keyframes floatCloud {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(35px) translateY(-18px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
 }
 
 .lp-main-container {
@@ -24,9 +89,11 @@
   margin: 0 auto;
   padding: 28px 20px 80px 20px;
   flex: 1;
+  position: relative;
+  z-index: 2;
 }
 
-/* Two-Column Grid Layout matching Reference Image */
+/* Two-Column Grid Layout */
 .lp-layout-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -39,7 +106,7 @@
 }
 
 /* --------------------------------------------------
-   HEADER & EMERALD HERO BANNER
+   HEADER & HERO BANNER
    -------------------------------------------------- */
 .lp-header {
   margin-bottom: 32px;
@@ -63,46 +130,58 @@
 }
 
 .lp-level-tab {
-  background: #082923;
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  color: #94a3b8;
-  padding: 10px 20px;
-  border-radius: 14px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  color: var(--color-dark, #080616);
+  padding: 10px 22px;
+  border-radius: 9999px;
   font-weight: 800;
   font-size: 0.9rem;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   display: flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .lp-level-tab:hover {
-  background: #0b362f;
-  color: #ffffff;
-  border-color: rgba(16, 185, 129, 0.4);
+  background: #ffffff;
+  color: var(--color-secondary, #2A63E8);
+  border-color: var(--color-secondary, #2A63E8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(42, 99, 232, 0.15);
 }
 
 .lp-level-tab.active {
-  background: #10b981;
-  border-color: #34d399;
+  background: var(--color-secondary, #2A63E8);
+  border-color: var(--color-secondary, #2A63E8);
   color: #ffffff;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 20px rgba(42, 99, 232, 0.35);
 }
 
 .lp-tab-pct {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
   padding: 2px 8px;
   border-radius: 9999px;
   font-size: 0.75rem;
+  font-weight: 700;
 }
 
-/* Emerald Banner Card matching Reference UI */
+.lp-level-tab:not(.active) .lp-tab-pct {
+  background: rgba(42, 99, 232, 0.12);
+  color: var(--color-secondary, #2A63E8);
+}
+
+/* Banner Card matching Deutschup Theme */
 .lp-header-card {
-  background: linear-gradient(135deg, #05855e 0%, #0d9668 100%);
-  border-radius: 22px;
-  padding: 24px 30px;
-  box-shadow: 0 10px 30px rgba(5, 133, 94, 0.25);
+  background: linear-gradient(135deg, #2A63E8 0%, #1d4ed8 100%);
+  border-radius: 24px;
+  padding: 26px 32px;
+  box-shadow: 0 12px 32px rgba(42, 99, 232, 0.25);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -117,70 +196,73 @@
 }
 
 .lp-banner-avatar {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  font-size: 2.2rem;
+  border: 3px solid rgba(255, 255, 255, 0.4);
   flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
 }
 
 .lp-level-tag {
   font-size: 0.8rem;
   font-weight: 800;
-  color: #a7f3d0;
-  letter-spacing: 0.5px;
+  color: #93c5fd;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 .lp-header-title {
-  font-size: 1.8rem;
-  font-weight: 900;
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
   margin: 0 0 6px 0;
   color: #ffffff;
+  letter-spacing: 0.5px;
 }
 
 .lp-header-title .highlight {
-  color: #ffffff;
+  color: #FFF2B7;
   text-decoration: underline;
-  text-decoration-color: #6ee7b7;
+  text-decoration-color: #fde047;
 }
 
 .lp-header-desc {
-  color: #e6f4f0;
-  font-size: 0.92rem;
+  color: #e0f2fe;
+  font-size: 0.95rem;
   margin: 0;
   max-width: 440px;
   line-height: 1.5;
 }
 
 .lp-header-progress-box {
-  background: rgba(4, 38, 32, 0.45);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  padding: 16px 20px;
-  min-width: 240px;
+  background: rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  padding: 18px 22px;
+  min-width: 250px;
 }
 
 .lp-progress-box-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 800;
   margin-bottom: 10px;
-  color: #a7f3d0;
+  color: #93c5fd;
 }
 
 .lp-progress-track {
   height: 10px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 9999px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -205,12 +287,12 @@
    UNIT SECTION & MARKER
    -------------------------------------------------- */
 .lp-unit-section {
-  margin-bottom: 56px;
-  background: #072621;
-  border: 1px solid rgba(16, 185, 129, 0.18);
-  border-radius: 22px;
-  padding: 24px 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  margin-bottom: 40px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 26px 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .lp-unit-marker {
@@ -219,39 +301,43 @@
   gap: 12px;
   margin-bottom: 28px;
   padding-bottom: 16px;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.15);
+  border-bottom: 2px dashed #e2e8f0;
 }
 
 .lp-marker-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: #00e699;
-  box-shadow: 0 0 10px #00e699;
+  background: var(--color-primary, #D90000);
+  box-shadow: 0 0 12px rgba(217, 0, 0, 0.4);
 }
 
 .lp-unit-label {
-  font-size: 0.9rem;
-  font-weight: 900;
-  color: #10b981;
+  font-size: 0.95rem;
+  font-weight: 800;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  color: var(--color-primary, #D90000);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lp-unit-name-title {
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 800;
-  color: #ffffff;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  color: var(--color-dark, #080616);
   margin: 2px 0 0 0;
 }
 
 .lp-unit-count {
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--color-gray, #64748b);
   font-weight: 700;
+  font-family: var(--font-body, 'Varela Round', sans-serif);
 }
 
 /* --------------------------------------------------
-   SERPENTINE LESSON PATH & NODES
+   LESSON PATH & NODES
    -------------------------------------------------- */
 .lp-path-container {
   display: flex;
@@ -285,10 +371,10 @@
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Node Circle Button matching Reference UI */
+/* Node Circle Button */
 .lp-node-circle {
-  width: 76px;
-  height: 76px;
+  width: 78px;
+  height: 78px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
@@ -296,7 +382,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
   z-index: 3;
 }
 
@@ -310,27 +396,27 @@
 }
 
 .lp-node-icon {
-  font-size: 1.7rem;
+  font-size: 1.8rem;
 }
 
 /* Node States */
 .lp-node-circle.completed {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #ffffff;
-  border: 3px solid #34d399;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  border: 4px solid #ffffff;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
 .lp-node-circle.completed:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 28px rgba(16, 185, 129, 0.7);
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.6);
 }
 
 .lp-node-circle.current {
-  background: linear-gradient(135deg, #00e699 0%, #10b981 100%);
+  background: linear-gradient(135deg, var(--color-secondary, #2A63E8) 0%, #1d4ed8 100%);
   color: #ffffff;
   border: 4px solid #ffffff;
-  box-shadow: 0 0 30px rgba(0, 230, 153, 0.85);
+  box-shadow: 0 0 25px rgba(42, 99, 232, 0.65);
   transform: scale(1.08);
 }
 
@@ -339,26 +425,27 @@
 }
 
 .lp-node-circle.locked {
-  background: #0d3630;
-  color: #4b7a71;
-  border: 2px solid #195248;
+  background: #e2e8f0;
+  color: #94a3b8;
+  border: 3px solid #cbd5e1;
   cursor: not-allowed;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .lp-node-lock-badge {
   position: absolute;
   bottom: 0;
   right: 0;
-  background: #072621;
-  border: 1px solid #195248;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 0.7rem;
+  width: 24px;
+  height: 24px;
+  font-size: 0.72rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .lp-node-check-badge {
@@ -367,28 +454,29 @@
   right: 0;
   background: #10b981;
   color: #ffffff;
-  border: 2px solid #072621;
+  border: 2px solid #ffffff;
   border-radius: 50%;
-  width: 22px;
-  height: 22px;
-  font-size: 0.72rem;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 
 /* Floating BẮT ĐẦU Tooltip */
 .lp-node-start-tooltip {
   position: absolute;
-  top: -44px;
-  background: #00e699;
-  color: #041714;
+  top: -46px;
+  background: var(--color-secondary, #2A63E8);
+  color: #ffffff;
   border-radius: 12px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  font-weight: 900;
-  box-shadow: 0 4px 14px rgba(0, 230, 153, 0.4);
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(42, 99, 232, 0.4);
   white-space: nowrap;
   z-index: 12;
 }
@@ -402,24 +490,24 @@
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #00e699;
+  border-top: 6px solid var(--color-secondary, #2A63E8);
 }
 
 .lp-node-pulse {
   position: absolute;
-  width: 90px;
-  height: 90px;
+  width: 92px;
+  height: 92px;
   border-radius: 50%;
-  border: 2px solid #00e699;
-  animation: emerald-pulse 2s infinite ease-out;
+  border: 2px solid var(--color-secondary, #2A63E8);
+  animation: deutschup-pulse 2s infinite ease-out;
 }
 
-@keyframes emerald-pulse {
+@keyframes deutschup-pulse {
   0% { transform: scale(0.9); opacity: 0.9; }
   100% { transform: scale(1.35); opacity: 0; }
 }
 
-/* Sublabel Under Node matching Reference Image */
+/* Sublabel Under Node */
 .lp-node-sublabel {
   text-align: center;
   margin-top: 10px;
@@ -427,34 +515,34 @@
 }
 
 .lp-sublabel-step {
-  font-size: 0.76rem;
-  color: #71a89c;
+  font-size: 0.78rem;
+  color: var(--color-gray, #64748b);
   font-weight: 800;
   display: block;
 }
 
 .lp-sublabel-title {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--color-dark, #080616);
   margin: 2px 0 0 0;
   line-height: 1.3;
 }
 
 .lp-sublabel-title .check-mark {
-  color: #00e699;
+  color: #10b981;
 }
 
 /* Node Popover Card */
 .lp-node-card {
   position: absolute;
-  top: 90px;
-  width: 240px;
-  background: #082d27;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  top: 92px;
+  width: 250px;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.12);
   pointer-events: none;
   opacity: 0;
   transition: all 0.25s ease;
@@ -474,27 +562,29 @@
 }
 
 .lp-card-tag {
-  font-size: 0.72rem;
-  font-weight: 900;
-  color: #71a89c;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--color-secondary, #2A63E8);
+  text-transform: uppercase;
 }
 
 .lp-card-xp {
-  font-size: 0.8rem;
-  font-weight: 900;
-  color: #00e699;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--color-secondary, #2A63E8);
 }
 
 .lp-card-title {
-  font-size: 0.98rem;
+  font-size: 1rem;
   font-weight: 800;
-  color: #ffffff;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  color: var(--color-dark, #080616);
   margin: 0 0 6px 0;
 }
 
 .lp-card-desc {
-  font-size: 0.82rem;
-  color: #94a3b8;
+  font-size: 0.84rem;
+  color: var(--color-gray, #64748b);
   margin: 0 0 10px 0;
   line-height: 1.4;
 }
@@ -507,18 +597,18 @@
 }
 
 .lp-card-time {
-  color: #71a89c;
+  color: var(--color-gray, #64748b);
 }
 
 .lp-card-status-badge {
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 8px;
+  padding: 3px 10px;
+  border-radius: 9999px;
 }
 
-.lp-card-status-badge.completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-.lp-card-status-badge.current { background: rgba(0, 230, 153, 0.2); color: #00e699; }
-.lp-card-status-badge.locked { background: rgba(255, 255, 255, 0.05); color: #64748b; }
+.lp-card-status-badge.completed { background: #dcfce7; color: #166534; }
+.lp-card-status-badge.current { background: #dbeafe; color: #1e40af; }
+.lp-card-status-badge.locked { background: #f1f5f9; color: #64748b; }
 
 /* End of Path Crown Banner */
 .lp-path-end-flag {
@@ -526,10 +616,11 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 12px 20px;
+  background: #ffffff;
+  border: 2px solid #fde047;
+  padding: 14px 22px;
   border-radius: 20px;
+  box-shadow: 0 6px 20px rgba(253, 224, 71, 0.3);
 }
 
 .lp-end-crown-circle {
@@ -558,19 +649,19 @@
 }
 
 .lp-end-title {
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--color-dark, #080616);
 }
 
 .lp-end-xp {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  color: #00e699;
+  color: var(--color-secondary, #2A63E8);
 }
 
 /* --------------------------------------------------
-   RIGHT SIDEBAR MATCHING REFERENCE UI
+   RIGHT SIDEBAR
    -------------------------------------------------- */
 .lp-sidebar {
   display: flex;
@@ -579,12 +670,12 @@
 }
 
 .lp-sidebar-card {
-  background: #072621;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 20px;
-  padding: 20px;
-  color: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 22px;
+  color: var(--color-dark, #080616);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .lp-sidebar-card-header {
@@ -601,19 +692,20 @@
 }
 
 .lp-card-header-title h4 {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  color: var(--color-dark, #080616);
   margin: 0;
 }
 
 .lp-header-icon {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
 }
 
 .lp-header-link {
-  font-size: 0.75rem;
-  color: #10b981;
+  font-size: 0.78rem;
+  color: var(--color-secondary, #2A63E8);
   font-weight: 800;
   cursor: pointer;
 }
@@ -627,10 +719,10 @@
 }
 
 .lp-ring-chart {
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
-  background: conic-gradient(#00e699 var(--ring-pct, 60%), rgba(255, 255, 255, 0.1) 0%);
+  background: conic-gradient(var(--color-secondary, #2A63E8) var(--ring-pct, 60%), #e2e8f0 0%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -642,40 +734,40 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #072621;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .lp-ring-num {
-  font-size: 1.2rem;
-  color: #ffffff;
+  font-size: 1.25rem;
+  color: var(--color-dark, #080616);
 }
 
 .lp-ring-denom {
   font-size: 0.85rem;
-  color: #71a89c;
+  color: var(--color-gray, #64748b);
 }
 
 .lp-goal-title {
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 800;
   margin: 0 0 2px 0;
-  color: #ffffff;
+  color: var(--color-dark, #080616);
 }
 
 .lp-goal-desc {
-  font-size: 0.8rem;
-  color: #71a89c;
+  font-size: 0.82rem;
+  color: var(--color-gray, #64748b);
   margin: 0;
 }
 
 .lp-reward-box {
-  background: #041a17;
-  border: 1px solid rgba(16, 185, 129, 0.25);
-  border-radius: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
@@ -695,14 +787,14 @@
 .lp-reward-label {
   display: block;
   font-size: 0.75rem;
-  color: #71a89c;
+  color: var(--color-gray, #64748b);
   font-weight: 700;
 }
 
 .lp-reward-val {
   font-size: 0.95rem;
-  font-weight: 900;
-  color: #00e699;
+  font-weight: 800;
+  color: var(--color-secondary, #2A63E8);
 }
 
 .lp-reward-check {
@@ -722,7 +814,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
 }
 
 .lp-stat-row.vertical {
@@ -741,32 +833,33 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #94a3b8;
+  color: var(--color-gray, #64748b);
   font-weight: 700;
 }
 
 .lp-stat-value {
-  font-weight: 900;
-  color: #ffffff;
+  font-weight: 800;
+  color: var(--color-dark, #080616);
 }
 
 .lp-stat-progress-track {
   height: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
   border-radius: 9999px;
   overflow: hidden;
 }
 
 .lp-stat-progress-fill {
   height: 100%;
-  background: #00e699;
+  background: var(--color-secondary, #2A63E8);
   border-radius: 9999px;
 }
 
-/* Mascot Card */
+/* Mascot Card (Deutschup Red Gradient) */
 .lp-card-mascot {
-  background: linear-gradient(135deg, #072e28 0%, #0a3d35 100%);
-  border-color: rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, var(--color-primary, #D90000) 0%, #b91c1c 100%);
+  border: none;
+  box-shadow: 0 10px 30px rgba(217, 0, 0, 0.2);
 }
 
 .lp-mascot-content {
@@ -776,28 +869,29 @@
 }
 
 .lp-mascot-avatar {
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: #05855e;
+  background: rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
   flex-shrink: 0;
-  border: 2px solid #34d399;
+  border: 2px solid rgba(255, 255, 255, 0.4);
 }
 
 .lp-mascot-title {
-  font-size: 1.05rem;
-  font-weight: 900;
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
   color: #ffffff;
   margin: 0 0 4px 0;
 }
 
 .lp-mascot-desc {
-  font-size: 0.82rem;
-  color: #a7f3d0;
+  font-size: 0.84rem;
+  color: #ffe4e6;
   line-height: 1.4;
   margin: 0;
 }
@@ -809,9 +903,10 @@
 .lp-error-state {
   text-align: center;
   padding: 60px 24px;
-  background: #072621;
-  border-radius: 20px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  background: #ffffff;
+  border-radius: 24px;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .lp-empty-icon,
@@ -823,24 +918,25 @@
 .lp-empty-title,
 .lp-error-title {
   font-size: 1.4rem;
-  font-weight: 900;
-  color: #ffffff;
+  font-weight: 800;
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  color: var(--color-dark, #080616);
   margin: 0 0 8px 0;
 }
 
 .lp-empty-desc,
 .lp-error-desc {
-  color: #94a3b8;
+  color: var(--color-gray, #64748b);
   font-size: 0.95rem;
   margin: 0 0 24px 0;
 }
 
 .lp-retry-btn {
-  background: #10b981;
+  background: var(--color-secondary, #2A63E8);
   color: #ffffff;
   border: none;
-  padding: 10px 24px;
-  border-radius: 12px;
+  padding: 12px 28px;
+  border-radius: 9999px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -850,7 +946,7 @@
 }
 
 .lp-skeleton-box {
-  background: linear-gradient(90deg, #072621 25%, #0b362f 50%, #072621 75%);
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   animation: skeleton-shimmer 1.5s infinite;
   border-radius: 12px;
@@ -859,22 +955,24 @@
 .lp-skeleton-box.tab {
   width: 100px;
   height: 40px;
-  border-radius: 14px;
+  border-radius: 9999px;
 }
 
 .lp-skeleton-card {
   height: 180px;
-  background: #072621;
-  border-radius: 20px;
+  background: #ffffff;
+  border-radius: 24px;
   padding: 24px;
   margin-top: 20px;
+  border: 2px solid #e2e8f0;
 }
 
 .lp-skeleton-node-circle {
-  width: 76px;
-  height: 76px;
+  width: 78px;
+  height: 78px;
   border-radius: 50%;
-  background: #072621;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
   margin: 16px auto;
 }
 
