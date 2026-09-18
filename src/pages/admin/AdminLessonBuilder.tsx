@@ -307,8 +307,10 @@ export const AdminLessonBuilder: React.FC = () => {
   const handleOpenEditExerciseModal = (ex: LessonExercise) => {
     setEditingExercise(ex)
     setExerciseStep(2)
-    const exType = (ex.type as ExerciseType) || 'multiple_choice'
-    setExerciseType(exType)
+    const rawType = (ex.type as string) || 'multiple_choice'
+    const canonicalType: ExerciseType = rawType === 'word_arrangement' ? 'sentence_arrangement' : (rawType as ExerciseType)
+    setExerciseType(canonicalType)
+
     setExerciseVocabularyId(ex.vocabularyId || '')
     setExerciseXp(ex.xp || 5)
     setExerciseStatus(ex.status || 'active')
@@ -346,8 +348,20 @@ export const AdminLessonBuilder: React.FC = () => {
     setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
 
     // Populate Sentence Arrangement
-    setArrangeWords(Array.isArray(content.words) ? (content.words as string[]) : ['', '', ''])
-    setArrangeCorrectSentence(typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '')
+    const wordsArr = Array.isArray(content.words)
+      ? (content.words as string[])
+      : Array.isArray(ex.wordTokens)
+      ? ex.wordTokens
+      : ['', '', '']
+    setArrangeWords(wordsArr.length > 0 ? wordsArr : ['', '', ''])
+
+    const correctSentenceVal =
+      (typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '') ||
+      (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
+      (Array.isArray(answer.correct_answer) ? answer.correct_answer.join(' ') : '') ||
+      ex.correctAnswer ||
+      ''
+    setArrangeCorrectSentence(correctSentenceVal)
 
     setIsExerciseModalOpen(true)
   }
@@ -492,9 +506,9 @@ export const AdminLessonBuilder: React.FC = () => {
         return
       }
 
-      questionText = `Sắp xếp các từ thành câu đúng: ${validWords.join(' / ')}`
-      contentObj = { words: validWords }
-      answerObj = { correct_sentence: arrangeCorrectSentence }
+      questionText = mcQuestion.trim() || `Sắp xếp các từ thành câu đúng: ${validWords.join(' / ')}`
+      contentObj = { words: validWords, question: questionText }
+      answerObj = { correct_sentence: arrangeCorrectSentence.trim(), correct_answer: arrangeCorrectSentence.trim() }
     }
 
     const payload: Partial<LessonExercise> = {
@@ -518,21 +532,18 @@ export const AdminLessonBuilder: React.FC = () => {
         setExercises((prev) =>
           prev.map((item) => (item._id === editingExercise._id ? { ...item, ...updated, ...payload } : item)),
         )
-        toast.success('Đã cập nhật bài tập thành công!')
+        toast.success('Cập nhật bài tập thành công!')
       } else {
         const created = await adminService.createLessonExercise(lessonId, payload)
-        const newEx: LessonExercise = {
-          _id: created?._id || `ex_${Date.now()}`,
-          ...payload,
-        } as LessonExercise
-        setExercises((prev) => [...prev, newEx])
-        toast.success('Đã tạo bài tập mới thành công!')
+        setExercises((prev) => [...prev, created])
+        toast.success('Tạo bài tập mới thành công!')
       }
+
       setIsExerciseModalOpen(false)
       setEditingExercise(null)
       await fetchLessonData()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Thao tác thất bại.'
+      const msg = err instanceof Error ? err.message : 'Lưu bài tập thất bại.'
       toast.error(msg)
     } finally {
       setIsSavingExercise(false)
@@ -556,7 +567,7 @@ export const AdminLessonBuilder: React.FC = () => {
     }
   }
 
-  const handleMoveExercise = (index: number, direction: 'up' | 'down') => {
+  const handleMoveExercise = async (index: number, direction: 'up' | 'down') => {
     if (direction === 'up' && index === 0) return
     if (direction === 'down' && index === exercises.length - 1) return
 
@@ -580,8 +591,10 @@ export const AdminLessonBuilder: React.FC = () => {
       case 'translation':
         return '🌐 Translation'
       case 'fill_blank':
+      case 'fill_in_blank':
         return '✏️ Fill Blank'
       case 'sentence_arrangement':
+      case 'word_arrangement':
         return '🧩 Arrangement'
       default:
         return type

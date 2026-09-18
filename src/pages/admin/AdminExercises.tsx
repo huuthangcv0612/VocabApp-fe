@@ -90,13 +90,28 @@ export const AdminExercises: React.FC = () => {
   }, [fetchExercisesData])
 
   const filteredExercises = exercises.filter((ex) => {
-    const qText = ex.question || ex.content?.question || ex.content?.prompt || ex.content?.sentence || ''
+    const qText =
+      ex.question ||
+      ex.content?.question ||
+      ex.content?.prompt ||
+      ex.content?.sentence ||
+      (Array.isArray(ex.content?.words) ? ex.content.words.join(' ') : '') ||
+      (Array.isArray(ex.wordTokens) ? ex.wordTokens.join(' ') : '') ||
+      ''
     const vocabText = ex.vocabularyName || ''
     const matchesSearch =
       qText.toLowerCase().includes(search.toLowerCase()) ||
       vocabText.toLowerCase().includes(search.toLowerCase())
 
-    const matchesType = typeFilter === 'all' || ex.type === typeFilter
+    const isArrangement = ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement'
+    const isFillBlank = ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
+
+    const matchesType =
+      typeFilter === 'all' ||
+      ex.type === typeFilter ||
+      (typeFilter === 'sentence_arrangement' && isArrangement) ||
+      (typeFilter === 'fill_blank' && isFillBlank)
+
     return matchesSearch && matchesType
   })
 
@@ -131,8 +146,11 @@ export const AdminExercises: React.FC = () => {
     setEditingItem(ex)
     const exLessonId = (ex as LessonExercise & { lessonId?: string }).lessonId
     setSelectedLessonId(exLessonId || (lessons.length > 0 ? lessons[0]._id : ''))
-    const exType = (ex.type as ExerciseType) || 'multiple_choice'
-    setExerciseType(exType)
+
+    const rawType = (ex.type as string) || 'multiple_choice'
+    const canonicalType: ExerciseType = rawType === 'word_arrangement' ? 'sentence_arrangement' : (rawType as ExerciseType)
+    setExerciseType(canonicalType)
+
     setQuestion(ex.question || '')
     setXp(ex.xp || 5)
     setStatus(ex.status || 'active')
@@ -158,8 +176,21 @@ export const AdminExercises: React.FC = () => {
     setTranslationExpected(typeof answer.expected_answer === 'string' ? answer.expected_answer : '')
     setFillSentence((typeof content.sentence === 'string' ? content.sentence : '') || ex.question || '')
     setFillAnswer(typeof answer.blank_answer === 'string' ? answer.blank_answer : '')
-    setArrangeWords(Array.isArray(content.words) ? (content.words as string[]) : ['', '', ''])
-    setArrangeCorrectSentence(typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '')
+
+    const wordsArr = Array.isArray(content.words)
+      ? (content.words as string[])
+      : Array.isArray(ex.wordTokens)
+      ? ex.wordTokens
+      : ['', '', '']
+    setArrangeWords(wordsArr.length > 0 ? wordsArr : ['', '', ''])
+
+    const correctSentenceVal =
+      (typeof answer.correct_sentence === 'string' ? answer.correct_sentence : '') ||
+      (typeof answer.correct_answer === 'string' ? answer.correct_answer : '') ||
+      (Array.isArray(answer.correct_answer) ? answer.correct_answer.join(' ') : '') ||
+      ex.correctAnswer ||
+      ''
+    setArrangeCorrectSentence(correctSentenceVal)
 
     setIsModalOpen(true)
   }
@@ -226,9 +257,9 @@ export const AdminExercises: React.FC = () => {
         toast.error('Vui lòng nhập ít nhất 2 từ và câu hoàn chỉnh đúng!')
         return
       }
-      finalQuestionText = `Sắp xếp các từ: ${validWords.join(' / ')}`
-      contentObj = { words: validWords }
-      answerObj = { correct_sentence: arrangeCorrectSentence }
+      finalQuestionText = question.trim() || `Sắp xếp các từ: ${validWords.join(' / ')}`
+      contentObj = { words: validWords, question: finalQuestionText }
+      answerObj = { correct_sentence: arrangeCorrectSentence.trim(), correct_answer: arrangeCorrectSentence.trim() }
     }
 
     const payload: Partial<LessonExercise> = {
@@ -295,6 +326,7 @@ export const AdminExercises: React.FC = () => {
       case 'fill_in_blank':
         return '✏️ Fill Blank'
       case 'sentence_arrangement':
+      case 'word_arrangement':
         return '🧩 Arrangement'
       default:
         return type
@@ -365,7 +397,14 @@ export const AdminExercises: React.FC = () => {
                 {filteredExercises.map((ex) => (
                   <tr key={ex._id}>
                     <td style={{ fontWeight: 700, maxWidth: '320px' }}>
-                      {ex.question || ex.content?.question || ex.content?.prompt || ex.content?.sentence || (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id.word : '') || 'Multiple Choice Exercise'}
+                      {ex.question ||
+                        ex.content?.question ||
+                        ex.content?.prompt ||
+                        ex.content?.sentence ||
+                        (Array.isArray(ex.content?.words) ? `Sắp xếp: ${ex.content.words.join(' / ')}` : '') ||
+                        (Array.isArray(ex.wordTokens) ? `Sắp xếp: ${ex.wordTokens.join(' / ')}` : '') ||
+                        (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id.word : '') ||
+                        (ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement' ? 'Sentence Arrangement' : 'Exercise')}
                     </td>
                     <td>
                       <span className="badge-pill badge-a1">{renderTypeLabel(ex.type)}</span>
@@ -553,9 +592,19 @@ export const AdminExercises: React.FC = () => {
           {exerciseType === 'sentence_arrangement' && (
             <div>
               <div className="form-group">
+                <label className="form-label">Tên / Tiêu Đề Bài Tập (Tùy chọn)</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ví dụ: Sắp xếp các từ thành câu hoàn chỉnh"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Các Từ Rời Rạc (Words) *</label>
                 {arrangeWords.map((word, wIdx) => (
-                  <div key={wIdx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <div key={wIdx} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
                     <input
                       type="text"
                       className="form-input"
@@ -566,6 +615,17 @@ export const AdminExercises: React.FC = () => {
                         setArrangeWords(arrangeWords.map((w, idx) => (idx === wIdx ? val : w)))
                       }}
                     />
+                    {arrangeWords.length > 2 && (
+                      <button
+                        type="button"
+                        className="btn-admin-danger"
+                        style={{ padding: '6px 10px', fontSize: '0.8rem' }}
+                        onClick={() => setArrangeWords(arrangeWords.filter((_, idx) => idx !== wIdx))}
+                        title="Xóa từ này"
+                      >
+                        ❌
+                      </button>
+                    )}
                   </div>
                 ))}
                 <button
