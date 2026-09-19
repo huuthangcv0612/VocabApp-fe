@@ -129,6 +129,32 @@
   color: var(--auth-accent);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0 1rem;
+  color: var(--auth-muted);
+  font-size: 0.875rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--auth-border);
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+}
+
+.auth-google-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1.25rem;
+}
+
 @media (max-width: 520px) {
   .auth-page {
     padding: 1.5rem 0.75rem;
