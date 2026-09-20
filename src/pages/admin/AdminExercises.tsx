@@ -8,7 +8,7 @@ import Modal from '../../components/admin/Modal'
 import SearchableSelect from '../../components/admin/SearchableSelect'
 import { adminService } from '../../services/adminService'
 import type { LessonExercise, LessonItem, StatusType, ExerciseType } from '../../types/admin'
-import { cleanFillBlankText, extractExerciseFormState } from '../../utils/exerciseAdapter'
+import { cleanFillBlankText, extractExerciseFormState, getFillBlankQuestion } from '../../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 
 export const AdminExercises: React.FC = () => {
@@ -388,7 +388,7 @@ export const AdminExercises: React.FC = () => {
                   <tr key={ex._id}>
                     <td style={{ fontWeight: 700, maxWidth: '320px' }}>
                       {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
-                        ? cleanFillBlankText((typeof ex.content?.sentence === 'string' ? ex.content.sentence : '') || ex.question || '')
+                        ? getFillBlankQuestion(ex)
                         : (ex.question ||
                           ex.content?.question ||
                           ex.content?.prompt ||

@@ -8,7 +8,7 @@ import { aiConversationService } from '../features/ai-conversation/services/aiCo
 import type { LessonDetailData, LessonItem, LessonPreviewVocabulary } from '../types/lesson'
 import type { LessonExercise } from '../types/exercise'
 import type { LessonLearningStep } from '../types/student'
-import { formatSubmitAnswer, cleanFillBlankText } from '../utils/exerciseAdapter'
+import { formatSubmitAnswer, getFillBlankQuestion } from '../utils/exerciseAdapter'
 import { MatchingExercise } from '../components/exercise/MatchingExercise'
 import { toast } from 'react-hot-toast'
 import '../styles/pages/lesson.css'
@@ -570,8 +570,7 @@ export const LessonLearnPage: React.FC = () => {
 
               {currentExercise.type === 'fill_blank' && (() => {
                 const contentObj = (currentExercise.content || {}) as Record<string, unknown>
-                const rawQuestion = (typeof contentObj.question === 'string' && contentObj.question.trim().length > 0 ? contentObj.question : '') || currentExercise.question || (typeof contentObj.sentence === 'string' ? contentObj.sentence : '') || ''
-                const questionText = cleanFillBlankText(rawQuestion) || 'Điền từ còn thiếu vào chỗ trống'
+                const questionText = getFillBlankQuestion(currentExercise)
                 const hintText = currentExercise.hint || (typeof contentObj.hint === 'string' ? contentObj.hint : '') || currentExercise.sentence_translation || (typeof contentObj.sentence_translation === 'string' ? contentObj.sentence_translation : '')
 
                 return (

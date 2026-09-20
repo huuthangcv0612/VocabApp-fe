@@ -227,6 +227,42 @@ export const runExerciseAdapterTests = () => {
     assert(payload === 'schwester', `Expected payload 'schwester', got '${payload}'`)
   })
 
+  // Test 8b: fill_blank with generic instruction question extracts sentence or fallback
+  testCase('fill_blank with generic instruction question extracts sentence or fallback', () => {
+    const fillExGeneric: LessonExercise = {
+      _id: 'ex_generic_1',
+      lesson_id: 'l123',
+      type: 'fill_blank',
+      order: 1,
+      xp: 2,
+      question: 'Điền từ còn thiếu vào chỗ trống',
+      content: {
+        question: 'Điền từ còn thiếu vào chỗ trống',
+        sentence: 'Das ___ ist neu.',
+        hint: 'Bệnh viện',
+      },
+    }
+
+    const norm1 = normalizeExercise(fillExGeneric)
+    assert(norm1.question === 'Das ___ ist neu.', `Expected question 'Das ___ ist neu.', got '${norm1.question}'`)
+
+    const fillExOnlyInstruction: LessonExercise = {
+      _id: 'ex_generic_2',
+      lesson_id: 'l123',
+      type: 'fill_blank',
+      order: 2,
+      xp: 2,
+      question: 'Điền từ còn thiếu vào chỗ trống',
+      content: {
+        question: 'Điền từ còn thiếu vào chỗ trống',
+        hint: 'Bệnh viện',
+      },
+    }
+
+    const norm2 = normalizeExercise(fillExOnlyInstruction)
+    assert(norm2.question === '___', `Expected fallback question '___', got '${norm2.question}'`)
+  })
+
   // Test 9: word_arrangement canonical structure normalization & wordTokens extraction
   testCase('word_arrangement canonical structure normalization & wordTokens extraction', () => {
     const rawWords = ['Ich', 'habe', 'einen', 'Bruder']

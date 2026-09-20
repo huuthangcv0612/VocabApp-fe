@@ -17,7 +17,7 @@ import type {
   ExerciseType,
 } from '../../types/admin'
 import type { ExerciseContentPayload, ExerciseAnswerPayload } from '../../types/exercise'
-import { cleanFillBlankText, extractExerciseFormState } from '../../utils/exerciseAdapter'
+import { cleanFillBlankText, extractExerciseFormState, getFillBlankQuestion } from '../../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 
 export const AdminLessonBuilder: React.FC = () => {
@@ -770,7 +770,7 @@ export const AdminLessonBuilder: React.FC = () => {
                     </td>
                     <td style={{ fontWeight: 700, color: '#0f172a', maxWidth: '280px' }}>
                       {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
-                        ? cleanFillBlankText((typeof ex.content?.sentence === 'string' ? ex.content.sentence : '') || ex.question || '')
+                        ? getFillBlankQuestion(ex)
                         : ex.question}
                     </td>
                     <td>
@@ -1430,7 +1430,7 @@ export const AdminLessonBuilder: React.FC = () => {
               <strong>Yêu cầu / Câu hỏi:</strong>
               <h4 style={{ margin: '6px 0', color: '#0f172a' }}>
                 {viewingExercise.type === 'fill_blank' || viewingExercise.type === 'fill_in_blank'
-                  ? cleanFillBlankText((typeof viewingExercise.content?.sentence === 'string' ? viewingExercise.content.sentence : '') || viewingExercise.question || '')
+                  ? getFillBlankQuestion(viewingExercise)
                   : viewingExercise.question}
               </h4>
             </div>
@@ -1467,7 +1467,7 @@ export const AdminLessonBuilder: React.FC = () => {
 
             {viewingExercise.type === 'fill_blank' && (
               <div>
-                <div><strong>Sentence:</strong> {cleanFillBlankText((typeof viewingExercise.content?.sentence === 'string' ? viewingExercise.content.sentence : '') || viewingExercise.question || '')}</div>
+                <div><strong>Sentence:</strong> {getFillBlankQuestion(viewingExercise)}</div>
                 <div><strong>Blank Answer (Từ điền):</strong> <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.blank_answer || 'N/A')}</span></div>
               </div>
             )}

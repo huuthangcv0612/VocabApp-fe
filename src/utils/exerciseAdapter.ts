@@ -14,8 +14,37 @@ export interface NormalizedExercise extends LessonExercise {
 export const cleanFillBlankText = (text: string): string => {
   if (!text) return ''
   return text
-    .replace(/^Điền từ\s*(thích hợp|vào|còn thiếu)*\s*(vào)?\s*chỗ trống:?\s*/i, '')
+    .replace(/^(Điền từ|Điền|Fill in the blank[s]?)\s*(thích hợp|vào|còn thiếu)*\s*(vào)?\s*(chỗ trống)?:?\s*/i, '')
     .trim()
+}
+
+export const getFillBlankQuestion = (ex: LessonExercise | NormalizedExercise): string => {
+  const contentObj = (ex.content || {}) as Record<string, unknown>
+  const rootEx = (ex as unknown) as Record<string, unknown>
+  const vocabObj = typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id : null
+
+  const candidates = [
+    typeof contentObj.sentence === 'string' ? contentObj.sentence : '',
+    typeof contentObj.prompt === 'string' ? contentObj.prompt : '',
+    typeof contentObj.text === 'string' ? contentObj.text : '',
+    typeof contentObj.question === 'string' ? contentObj.question : '',
+    typeof ex.question === 'string' ? ex.question : '',
+    typeof rootEx.sentence === 'string' ? (rootEx.sentence as string) : '',
+  ]
+
+  for (const cand of candidates) {
+    if (!cand) continue
+    const cleaned = cleanFillBlankText(cand)
+    if (cleaned.length > 0) {
+      return cleaned
+    }
+  }
+
+  if (vocabObj && vocabObj.word) {
+    return `___ (${vocabObj.word})`
+  }
+
+  return '___'
 }
 
 export interface ExtractedExerciseFormState {
@@ -221,16 +250,17 @@ export const normalizeExercise = (ex: LessonExercise): NormalizedExercise => {
 
   // 1. Question extraction
   const vocabObj = typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id : null
-  let questionText =
-    (typeof contentObj.question === 'string' && contentObj.question.trim().length > 0 ? contentObj.question.trim() : '') ||
-    ex.question ||
-    (typeof contentObj.prompt === 'string' ? contentObj.prompt : '') ||
-    (typeof contentObj.sentence === 'string' ? contentObj.sentence : '') ||
-    (vocabObj ? `Câu hỏi từ vựng: "${vocabObj.word}" (${vocabObj.meaning || ''})` : '') ||
-    'Bài tập'
-
+  let questionText = ''
   if (ex.type === 'fill_blank' || (ex.type as string) === 'fill_in_blank') {
-    questionText = cleanFillBlankText(questionText)
+    questionText = getFillBlankQuestion(ex)
+  } else {
+    questionText =
+      (typeof contentObj.question === 'string' && contentObj.question.trim().length > 0 ? contentObj.question.trim() : '') ||
+      ex.question ||
+      (typeof contentObj.prompt === 'string' ? contentObj.prompt : '') ||
+      (typeof contentObj.sentence === 'string' ? contentObj.sentence : '') ||
+      (vocabObj ? `Câu hỏi từ vựng: "${vocabObj.word}" (${vocabObj.meaning || ''})` : '') ||
+      'Bài tập'
   }
 
   // 2. Options list extraction (always string[])
