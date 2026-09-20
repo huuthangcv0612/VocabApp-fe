@@ -381,5 +381,36 @@ export const runExerciseAdapterTests = () => {
     assert(state.fillAnswer === 'der Vater', `Expected fillAnswer 'der Vater', got '${state.fillAnswer}'`)
   })
 
+  // Test 16: matching exercise formatSubmitAnswer returns pair array
+  testCase('formatSubmitAnswer for matching exercise type returns array of pairs', () => {
+    const rawMatching: LessonExercise = {
+      _id: 'ex_match_1',
+      order: 1,
+      type: 'matching',
+      xp: 10,
+      question: 'Ghép các cặp từ tương ứng',
+      content: {
+        pairs: [
+          { id: 'pair_1', left: 'có chuyện gì vậy', right: 'was ist los' },
+          { id: 'pair_2', left: 'không', right: 'nicht' },
+        ],
+      },
+    }
+
+    const userAns = [
+      { left: 'có chuyện gì vậy', right: 'was ist los' },
+      { left: 'không', right: 'nicht' },
+    ]
+
+    const formatted = formatSubmitAnswer(rawMatching, userAns)
+    assert(Array.isArray(formatted), 'Expected formatted answer to be an array')
+    assert((formatted as Array<{ left: string; right: string }>).length === 2, 'Expected formatted answer length to be 2')
+    assert(
+      (formatted as Array<{ left: string; right: string }>)[0].left === 'có chuyện gì vậy' &&
+        (formatted as Array<{ left: string; right: string }>)[0].right === 'was ist los',
+      'Expected first pair to match user answer',
+    )
+  })
+
   return results
 }

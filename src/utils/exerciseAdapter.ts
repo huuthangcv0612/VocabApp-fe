@@ -348,13 +348,20 @@ export const normalizeExercise = (ex: LessonExercise): NormalizedExercise => {
  */
 export const formatSubmitAnswer = (
   exercise: LessonExercise | NormalizedExercise,
-  selectedAnswer: string | string[],
-): string | number | string[] => {
+  selectedAnswer: string | string[] | Array<{ left: string; right: string }>,
+): string | number | string[] | Array<{ left: string; right: string }> => {
   const normEx = 'optionsList' in exercise && exercise.optionsList ? (exercise as NormalizedExercise) : normalizeExercise(exercise)
+
+  if (normEx.type === 'matching') {
+    if (Array.isArray(selectedAnswer)) {
+      return selectedAnswer as Array<{ left: string; right: string }>
+    }
+    return []
+  }
 
   if (normEx.type === 'word_arrangement' || normEx.rawAnswerFormat === 'array') {
     if (Array.isArray(selectedAnswer)) {
-      return [...selectedAnswer]
+      return (selectedAnswer as string[]).map((item) => (typeof item === 'string' ? item : JSON.stringify(item)))
     }
     if (typeof selectedAnswer === 'string') {
       return selectedAnswer ? [selectedAnswer] : []

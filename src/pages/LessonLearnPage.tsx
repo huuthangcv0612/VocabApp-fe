@@ -9,6 +9,7 @@ import type { LessonDetailData, LessonItem, LessonPreviewVocabulary } from '../t
 import type { LessonExercise } from '../types/exercise'
 import type { LessonLearningStep } from '../types/student'
 import { formatSubmitAnswer, cleanFillBlankText } from '../utils/exerciseAdapter'
+import { MatchingExercise } from '../components/exercise/MatchingExercise'
 import { toast } from 'react-hot-toast'
 import '../styles/pages/lesson.css'
 
@@ -30,7 +31,7 @@ export const LessonLearnPage: React.FC = () => {
 
   // Exercise mode states
   const [exerciseIndex, setExerciseIndex] = useState(0)
-  const [userAnswer, setUserAnswer] = useState<string | number | string[]>('')
+  const [userAnswer, setUserAnswer] = useState<string | number | string[] | Array<{ left: string; right: string }>>('')
 
   // Word Arrangement token instance state (UI-only IDs)
   interface TokenInstance {
@@ -197,9 +198,15 @@ export const LessonLearnPage: React.FC = () => {
     const currentEx = lessonData.exercises[exerciseIndex]
     if (!currentEx) return
 
-    let finalAnswer: string | number | string[] = userAnswer
+    let finalAnswer: string | number | string[] | Array<{ left: string; right: string }> = userAnswer
 
-    if (currentEx.type === 'word_arrangement' || currentEx.type === 'sentence_arrangement') {
+    if (currentEx.type === 'matching') {
+      if (!Array.isArray(userAnswer) || userAnswer.length === 0) {
+        toast.error('Vui lòng ghép đầy đủ tất cả các cặp từ.')
+        return
+      }
+      finalAnswer = formatSubmitAnswer(currentEx, userAnswer as Array<{ left: string; right: string }>)
+    } else if (currentEx.type === 'word_arrangement' || currentEx.type === 'sentence_arrangement') {
       if (selectedTokens.length === 0) {
         toast.error('Vui lòng chọn các từ để tạo câu.')
         return
@@ -227,7 +234,7 @@ export const LessonLearnPage: React.FC = () => {
       (typeof finalAnswer === 'string' && !finalAnswer.trim()) ||
       (Array.isArray(finalAnswer) && finalAnswer.length === 0)
     ) {
-      toast.error('Vui lòng chọn các từ để tạo câu.')
+      toast.error(currentEx.type === 'matching' ? 'Vui lòng ghép đầy đủ các cặp từ.' : 'Vui lòng hoàn thành bài tập.')
       return
     }
 
@@ -679,13 +686,35 @@ export const LessonLearnPage: React.FC = () => {
                 </div>
               )}
 
+              {currentExercise.type === 'matching' && (
+                <MatchingExercise
+                  exercise={currentExercise}
+                  disabled={isSubmitting || Boolean(submissionResult)}
+                  submissionResult={submissionResult}
+                  onAnswerChange={(matchedPairs, isComplete) => {
+                    if (isComplete) {
+                      setUserAnswer(matchedPairs)
+                    } else {
+                      setUserAnswer([])
+                    }
+                  }}
+                />
+              )}
+
               {!submissionResult && (
                 <div style={{ marginTop: '32px' }}>
                   <button
                     onClick={handleSubmitAnswer}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || (currentExercise.type === 'matching' && (!Array.isArray(userAnswer) || userAnswer.length === 0))}
                     className="btn-admin-primary"
-                    style={{ width: '100%', padding: '16px', borderRadius: '9999px', fontSize: '1.1rem', opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                    style={{
+                      width: '100%',
+                      padding: '16px',
+                      borderRadius: '9999px',
+                      fontSize: '1.1rem',
+                      opacity: isSubmitting || (currentExercise.type === 'matching' && (!Array.isArray(userAnswer) || userAnswer.length === 0)) ? 0.6 : 1,
+                      cursor: isSubmitting || (currentExercise.type === 'matching' && (!Array.isArray(userAnswer) || userAnswer.length === 0)) ? 'not-allowed' : 'pointer',
+                    }}
                   >
                     {isSubmitting ? 'Đang kiểm tra...' : 'Kiểm Tra Đáp Án ✓'}
                   </button>

@@ -7,6 +7,17 @@ export type ExerciseType =
   | 'fill_blank'
   | 'sentence_arrangement'
   | 'word_arrangement'
+  | 'matching'
+
+export interface MatchingPair {
+  id: string
+  left: string
+  right: string
+}
+
+export interface MatchingContent {
+  pairs: MatchingPair[]
+}
 
 export interface ExerciseContentPayload {
   question?: string
@@ -17,6 +28,7 @@ export interface ExerciseContentPayload {
   options?: string[]
   hint?: string
   sentence_translation?: string
+  pairs?: MatchingPair[]
   [key: string]: unknown
 }
 
@@ -49,6 +61,7 @@ export interface LessonExercise {
   explanation?: string
   hint?: string
   sentence_translation?: string
+  pairs?: MatchingPair[]
 
   // Normalized internal format fields for FE
   optionsList?: string[]

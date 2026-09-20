@@ -565,6 +565,8 @@ export const AdminLessonBuilder: React.FC = () => {
       case 'sentence_arrangement':
       case 'word_arrangement':
         return '🧩 Arrangement'
+      case 'matching':
+        return '🔗 Matching'
       default:
         return type
     }

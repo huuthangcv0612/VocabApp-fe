@@ -354,6 +354,7 @@ export const AdminExercises: React.FC = () => {
           <option value="translation">Translation (Dịch câu)</option>
           <option value="fill_blank">Fill Blank (Điền từ)</option>
           <option value="sentence_arrangement">Sentence Arrangement (Sắp xếp câu)</option>
+          <option value="matching">Matching (Ghép cặp)</option>
         </select>
       </div>
 

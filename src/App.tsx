@@ -27,6 +27,7 @@ import PricingPage from './pages/PricingPage'
 import SubscriptionPage from './pages/SubscriptionPage'
 import PaymentPage from './pages/PaymentPage'
 import PaymentResultPage from './pages/PaymentResultPage'
+import PolicyAndTerms from './pages/PolicyAndTerms'
 
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminLevels from './pages/admin/AdminLevels'
@@ -55,6 +56,7 @@ function App() {
           <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/policy-and-terms" element={<PolicyAndTerms />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />

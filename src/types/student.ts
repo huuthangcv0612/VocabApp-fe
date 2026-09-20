@@ -1,7 +1,7 @@
 export interface ExerciseSubmitPayload {
   lessonId: string
   exerciseId: string
-  answer: string | number | string[]
+  answer: string | number | string[] | Array<{ left: string; right: string }>
 }
 
 export interface ExerciseSubmitResponse {

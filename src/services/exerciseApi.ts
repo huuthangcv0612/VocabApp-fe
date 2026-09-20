@@ -72,7 +72,11 @@ export const exerciseApi = {
     await api.delete(`/exercises/${encodeURIComponent(exerciseId)}`)
   },
 
-  submitAnswer: async (lessonId: string, exerciseId: string, answer: string | number | string[]): Promise<ExerciseSubmitResponse> => {
+  submitAnswer: async (
+    lessonId: string,
+    exerciseId: string,
+    answer: string | number | string[] | Array<{ left: string; right: string }>,
+  ): Promise<ExerciseSubmitResponse> => {
     const rawData = await progressService.submitExerciseAnswer(lessonId, exerciseId, answer) as { is_correct?: boolean; correct?: boolean; xp_earned?: number; xp?: number; explanation?: string; feedback?: string } | undefined
 
     const isCorrect = rawData?.is_correct ?? rawData?.correct ?? false

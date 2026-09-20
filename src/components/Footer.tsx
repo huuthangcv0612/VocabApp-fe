@@ -120,8 +120,7 @@ const Footer = () => {
               </div>
 
               <div className="footer-bottom-meta">
-                <a href="#terms" className="footer-legal-link">Term & Condition</a>
-                <a href="#privacy" className="footer-legal-link">Privacy Policy</a>
+                <Link to="/policy-and-terms" className="footer-legal-link">Policy and Terms</Link>
                 <div className="footer-copyright-text">
                   © 2026 DeutschUp
                 </div>
