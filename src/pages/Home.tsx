@@ -5,7 +5,7 @@ import Footer from '../components/Footer'
 import { levelApi } from '../services/levelApi'
 import { subscriptionService } from '../services/subscriptionService'
 import type { LevelItem } from '../types/level'
-import type { SubscriptionPackage } from '../types/gamification'
+import type { Plan } from '../types/plan'
 import '../styles/pages/home.css'
 
 // Asset Imports
@@ -62,6 +62,81 @@ const defaultFaqData: FAQItem[] = [
   },
 ]
 
+const sortPlans = (plansList: Plan[]): Plan[] => {
+  const order: Record<string, number> = { FREE: 0, PREMIUM: 1, CUSTOM: 2 }
+
+  return [...plansList]
+    .filter((plan) => plan.isActive !== false)
+    .sort((a, b) => {
+      const typeOrderA = order[a.planType] ?? 99
+      const typeOrderB = order[b.planType] ?? 99
+      if (typeOrderA !== typeOrderB) return typeOrderA - typeOrderB
+      return (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+    })
+}
+
+const defaultHomePlans: Plan[] = [
+  {
+    _id: 'default_free',
+    id: 'default_free',
+    name: 'STARTER',
+    code: 'FREE',
+    price: 0,
+    durationDays: 0,
+    description: 'Start building your German vocabulary with essential learning content.',
+    features: [
+      'Essential vocabulary',
+      'Selected lessons',
+      'Interactive exercises',
+      'Learning progress',
+    ],
+    permissions: [],
+    planType: 'FREE',
+    badge: 'FREE',
+    sortOrder: 0,
+  },
+  {
+    _id: 'default_premium',
+    id: 'default_premium',
+    name: 'COMPLETE',
+    code: 'PREMIUM',
+    price: 10000,
+    durationDays: 30,
+    description: 'Unlock more lessons, exercises and learning features for a complete learning experience.',
+    features: [
+      'Full learning path',
+      'More lessons',
+      'More exercises',
+      'AI learning features',
+      'Learning progress',
+      'Review activities',
+    ],
+    permissions: [],
+    planType: 'PREMIUM',
+    badge: 'PREMIUM',
+    sortOrder: 1,
+  },
+  {
+    _id: 'default_custom',
+    id: 'default_custom',
+    name: 'BEST VALUE',
+    code: 'CUSTOM',
+    price: 0,
+    durationDays: 365,
+    description: 'Get the full DeutschUp learning experience with yearly access.',
+    features: [
+      'Full learning path',
+      'Yearly access discount',
+      'All exercises & AI features',
+      'Dedicated support',
+    ],
+    permissions: [],
+    planType: 'CUSTOM',
+    badge: 'YEARLY',
+    sortOrder: 2,
+  },
+]
+
 // Fallback Levels mapping
 const fallbackLevels = [
   { code: 'A1.1', title: 'STARTER', desc: 'Build your foundation with everyday German vocabulary, basic expressions and simple communication.', icon: BookIcon, theme: 'red', btnText: 'START A1.1' },
@@ -72,7 +147,7 @@ const fallbackLevels = [
 const Home = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [, setApiLevels] = useState<LevelItem[]>([])
-  const [, setPlans] = useState<SubscriptionPackage[]>([])
+  const [plans, setPlans] = useState<Plan[]>([])
 
   useEffect(() => {
     let isMounted = true
@@ -277,76 +352,43 @@ const Home = () => {
           <h2 className="home-section-title">CHOOSE YOUR LEARNING PLAN</h2>
 
           <div className="plans-grid">
-            {/* FREE PLAN */}
-            <div className="plan-card plan-card--blue">
-              <div className="plan-card__decor">
-                <img src={PencilIcon} alt="Pencil" className="plan-icon" />
-              </div>
-              <div className="plan-card__badge">FREE</div>
-              <h3 className="plan-card__title">STARTER</h3>
-              <p className="plan-card__desc">
-                Start building your German vocabulary with essential learning content.
-              </p>
+            {(plans.length > 0 ? sortPlans(plans) : defaultHomePlans).map((plan, index) => {
+              const isPopular = plan.planType === 'PREMIUM' || plan.badge === 'POPULAR' || index === 1
+              const cardClass = `plan-card ${isPopular ? 'plan-card--red plan-card--popular' : 'plan-card--blue'}`
 
-              <ul className="plan-card__features">
-                <li>✓ Essential vocabulary</li>
-                <li>✓ Selected lessons</li>
-                <li>✓ Interactive exercises</li>
-                <li>✓ Learning progress</li>
-              </ul>
+              let planIcon = PencilIcon
+              if (index === 1 || plan.planType === 'PREMIUM') planIcon = BookIcon
+              else if (index === 2 || plan.planType === 'CUSTOM') planIcon = AppleIcon
 
-              <Link to="/register" className="plan-card__btn">
-                START FREE
-              </Link>
-            </div>
+              let subtitle = 'Flexible planning'
+              if (isPopular) subtitle = 'Easier budgeting'
+              else if (index === 2 || plan.planType === 'CUSTOM') subtitle = 'Best value'
 
-            {/* PREMIUM PLAN */}
-            <div className="plan-card plan-card--red plan-card--popular">
-              <div className="plan-card__decor">
-                <img src={BookIcon} alt="Book" className="plan-icon" />
-              </div>
-              <div className="plan-card__badge">PREMIUM</div>
-              <h3 className="plan-card__title">COMPLETE</h3>
-              <p className="plan-card__desc">
-                Unlock more lessons, exercises and learning features for a complete learning experience.
-              </p>
+              const btnText = 'VIEW DETAIL'
 
-              <ul className="plan-card__features">
-                <li>✓ Full learning path</li>
-                <li>✓ More lessons</li>
-                <li>✓ More exercises</li>
-                <li>✓ AI learning features</li>
-                <li>✓ Learning progress</li>
-                <li>✓ Review activities</li>
-              </ul>
+              return (
+                <div key={plan._id || plan.id || index} className={cardClass}>
+                  {isPopular && (
+                    <div className="plan-card__badge-floating">Best choice</div>
+                  )}
 
-              <Link to="/pricing" className="plan-card__btn">
-                GET PREMIUM
-              </Link>
-            </div>
+                  <div className="plan-card__decor">
+                    <img src={planIcon} alt={plan.name} className="plan-icon" />
+                  </div>
 
-            {/* YEARLY PLAN */}
-            <div className="plan-card plan-card--blue">
-              <div className="plan-card__decor">
-                <img src={AppleIcon} alt="Apple" className="plan-icon" />
-              </div>
-              <div className="plan-card__badge">YEARLY</div>
-              <h3 className="plan-card__title">BEST VALUE</h3>
-              <p className="plan-card__desc">
-                Get the full DeutschUp learning experience with yearly access.
-              </p>
+                  <h3 className="plan-card__title">{plan.name}</h3>
+                  <div className="plan-card__subtitle">{subtitle}</div>
 
-              <ul className="plan-card__features">
-                <li>✓ Full learning path</li>
-                <li>✓ Yearly access discount</li>
-                <li>✓ All exercises & AI features</li>
-                <li>✓ Dedicated support</li>
-              </ul>
+                  <p className="plan-card__desc">
+                    {plan.description || 'Build your German skills with our learning path.'}
+                  </p>
 
-              <Link to="/pricing" className="plan-card__btn">
-                CHOOSE YEARLY
-              </Link>
-            </div>
+                  <Link to="/pricing" className="plan-card__btn">
+                    {btnText}
+                  </Link>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>

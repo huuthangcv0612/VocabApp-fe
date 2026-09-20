@@ -10,6 +10,8 @@ import type { Plan, PlanItem, PlansResponseData } from '../types/plan'
 
 export type { Plan, PlanItem, PlansResponseData }
 
+import { getBankDisplayName } from '../utils/bankHelper'
+
 export interface BackendOrderResponse {
   order: {
     id: string
@@ -26,6 +28,7 @@ export interface BackendOrderResponse {
     accountName: string
     accountNumber: string
     bankId?: string
+    bankName?: string
     transferContent: string
   }
 }
@@ -47,6 +50,12 @@ export const subscriptionService = {
     const response = await api.post<ApiResponse<BackendOrderResponse>>('/orders', { planId })
     const resData = response.data.data
 
+    const rawBank =
+      resData.payment.bankName ||
+      resData.payment.bankId ||
+      (resData.payment as Record<string, unknown>).bin ||
+      (resData.payment as Record<string, unknown>).bank
+
     return {
       order: {
         id: resData.order.id || resData.order._id || '',
@@ -59,7 +68,7 @@ export const subscriptionService = {
         qrCodeUrl: resData.payment.qrCodeUrl,
         accountName: resData.payment.accountName,
         accountNumber: resData.payment.accountNumber,
-        bankName: resData.payment.bankId || 'Ngân Hàng',
+        bankName: getBankDisplayName(rawBank),
         transferContent: resData.payment.transferContent,
       },
     }
@@ -68,6 +77,12 @@ export const subscriptionService = {
   getOrder: async (orderId: string): Promise<CreateOrderResponse> => {
     const response = await api.get<ApiResponse<BackendOrderResponse>>(`/orders/${encodeURIComponent(orderId)}`)
     const resData = response.data.data
+
+    const rawBank =
+      resData.payment.bankName ||
+      resData.payment.bankId ||
+      (resData.payment as Record<string, unknown>).bin ||
+      (resData.payment as Record<string, unknown>).bank
 
     return {
       order: {
@@ -81,7 +96,7 @@ export const subscriptionService = {
         qrCodeUrl: resData.payment.qrCodeUrl,
         accountName: resData.payment.accountName,
         accountNumber: resData.payment.accountNumber,
-        bankName: resData.payment.bankId || 'Ngân Hàng',
+        bankName: getBankDisplayName(rawBank),
         transferContent: resData.payment.transferContent,
       },
     }

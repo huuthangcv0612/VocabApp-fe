@@ -5,6 +5,8 @@ import Footer from '../components/Footer'
 import { subscriptionService } from '../services/subscriptionService'
 import type { CreateOrderResponse } from '../types/gamification'
 import { toast } from 'react-hot-toast'
+import { getBankDisplayName } from '../utils/bankHelper'
+import cloudSvg from '../assets/Cloud.svg'
 import '../styles/pages/pricing.css'
 
 export const PaymentPage: React.FC = () => {
@@ -18,6 +20,7 @@ export const PaymentPage: React.FC = () => {
   )
   const [loading, setLoading] = useState(!orderData && Boolean(targetOrderId))
   const [checkingStatus, setCheckingStatus] = useState(false)
+  const [copiedField, setCopiedField] = useState<string | null>(null)
 
   // Initial load: fetch existing order details by targetOrderId
   useEffect(() => {
@@ -111,9 +114,13 @@ export const PaymentPage: React.FC = () => {
     }
   }, [orderData?.order.id, orderData?.order.orderCode, orderData?.order.status, handlePaymentSuccess])
 
-  const copyTransferContent = (content: string) => {
-    navigator.clipboard.writeText(content)
-    toast.success('Đã sao chép nội dung chuyển khoản!')
+  const copyToClipboard = (text: string, fieldName: string, label: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(fieldName)
+    toast.success(`Đã sao chép ${label}!`)
+    setTimeout(() => {
+      setCopiedField(null)
+    }, 2000)
   }
 
   const handleCheckPaymentStatus = async () => {
@@ -148,89 +155,145 @@ export const PaymentPage: React.FC = () => {
     <div className="pricing-page">
       <Header />
 
-      <main className="pricing-main-section" style={{ paddingTop: '60px', paddingBottom: '80px' }}>
-        <div className="pricing-container">
+      <main className="payment-page-main">
+        {/* Floating Clouds Background Decor */}
+        <img src={cloudSvg} alt="" className="payment-decor-cloud payment-decor-cloud--left" aria-hidden="true" />
+        <img src={cloudSvg} alt="" className="payment-decor-cloud payment-decor-cloud--right" aria-hidden="true" />
+
+        <div className="payment-container">
+          <div className="payment-header-section">
+            <h1 className="payment-page-title">
+              Thanh Toán {orderData?.order.planName || 'Premium'}
+            </h1>
+            <p className="payment-page-subtitle">
+              Quét mã VietQR hoặc chuyển khoản theo thông tin bên dưới để kích hoạt gói dịch vụ DeutschUp
+            </p>
+          </div>
+
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-              <p>Đang tải thông tin thanh toán...</p>
+            <div className="payment-state-card">
+              <div className="payment-spinner"></div>
+              <p style={{ color: '#0F274D', fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>
+                Đang tải thông tin thanh toán...
+              </p>
             </div>
           ) : orderData ? (
-            <div className="payment-card-container">
-              <h1 className="payment-card-title">
-                Thanh toán {orderData.order.planName || 'Premium'}
-              </h1>
+            <div className="payment-main-card">
+              <div className="payment-grid-layout">
+                {/* Left Column: QR Code & Plan Amount */}
+                <div className="payment-col-qr">
+                  <div className="payment-plan-badge">
+                    <span>⚡ GÓI {orderData.order.planName || 'PREMIUM'}</span>
+                  </div>
 
-              <div className="payment-card-amount">
-                {formatPrice(orderData.order.amount)}
-              </div>
+                  <div className="payment-amount-display">
+                    {formatPrice(orderData.order.amount)}
+                  </div>
 
-              {orderData.payment.qrCodeUrl && (
-                <div className="payment-qr-wrapper">
-                  <img
-                    src={orderData.payment.qrCodeUrl}
-                    alt="Mã QR Thanh Toán"
-                    className="payment-qr-image"
-                  />
+                  {orderData.payment.qrCodeUrl && (
+                    <div className="payment-qr-card">
+                      <img
+                        src={orderData.payment.qrCodeUrl}
+                        alt="Mã QR Thanh Toán VietQR"
+                        className="payment-qr-img"
+                      />
+                      <div className="payment-qr-instruction">
+                        <span>📱</span> Mở app ngân hàng để quét mã QR
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              <table className="payment-info-table">
-                <tbody>
-                  <tr>
-                    <td className="label">Ngân hàng</td>
-                    <td className="value">{orderData.payment.bankName || 'Techcombank'}</td>
-                  </tr>
-                  <tr>
-                    <td className="label">Số tài khoản</td>
-                    <td className="value">{orderData.payment.accountNumber}</td>
-                  </tr>
-                  <tr>
-                    <td className="label">Chủ tài khoản</td>
-                    <td className="value">{orderData.payment.accountName}</td>
-                  </tr>
-                </tbody>
-              </table>
+                {/* Right Column: Details & Actions */}
+                <div className="payment-col-info">
+                  <h2 className="payment-info-header">Thông tin chuyển khoản</h2>
 
-              <div className="transfer-content-box">
-                <div className="transfer-content-header">Nội dung</div>
-                <div className="transfer-content-row">
-                  <span className="transfer-content-code">
-                    {orderData.payment.transferContent}
-                  </span>
+                  <div className="payment-details-list">
+                    <div className="payment-detail-row">
+                      <span className="payment-detail-label">Ngân hàng</span>
+                      <span className="payment-detail-value">
+                        {getBankDisplayName(orderData.payment.bankName)}
+                      </span>
+                    </div>
+
+                    <div className="payment-detail-row">
+                      <span className="payment-detail-label">Số tài khoản</span>
+                      <div className="payment-detail-value">
+                        <span>{orderData.payment.accountNumber}</span>
+                        <button
+                          type="button"
+                          className="payment-btn-copy payment-btn-copy--sm"
+                          onClick={() => copyToClipboard(orderData.payment.accountNumber, 'accountNumber', 'số tài khoản')}
+                        >
+                          {copiedField === 'accountNumber' ? '✓ Đã chép' : '📋 Copy'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="payment-detail-row">
+                      <span className="payment-detail-label">Chủ tài khoản</span>
+                      <span className="payment-detail-value">
+                        {orderData.payment.accountName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Transfer Content Warning Box */}
+                  <div className="payment-transfer-box">
+                    <div className="payment-transfer-label">
+                      <span>⚠️</span> Nội dung chuyển khoản (Bắt buộc chính xác):
+                    </div>
+                    <div className="payment-transfer-content-wrapper">
+                      <span className="payment-transfer-code">
+                        {orderData.payment.transferContent}
+                      </span>
+                      <button
+                        type="button"
+                        className="payment-btn-copy"
+                        onClick={() => copyToClipboard(orderData.payment.transferContent, 'transferContent', 'nội dung chuyển khoản')}
+                      >
+                        {copiedField === 'transferContent' ? '✓ Đã sao chép' : '📋 Sao chép nội dung'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Live Polling Status */}
+                  <div className="payment-status-badge">
+                    <div className="payment-status-dot"></div>
+                    <span>Đang chờ hệ thống ghi nhận thanh toán...</span>
+                  </div>
+
+                  {/* Manual Check Button */}
                   <button
                     type="button"
-                    className="btn-copy-code"
-                    onClick={() => copyTransferContent(orderData.payment.transferContent)}
+                    className="payment-btn-submit"
+                    disabled={checkingStatus}
+                    onClick={handleCheckPaymentStatus}
                   >
-                    Copy
+                    {checkingStatus ? 'ĐANG KIỂM TRA...' : 'TÔI ĐÃ THANH TOÁN'}
                   </button>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <button
+                      type="button"
+                      className="payment-back-link"
+                      onClick={() => navigate('/pricing')}
+                    >
+                      ← Quay lại chọn gói khác
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="payment-status-wrapper">
-                <div className="spinner-pulse"></div>
-                <span>Đang chờ thanh toán...</span>
-              </div>
-
-              <button
-                type="button"
-                className="btn-i-paid"
-                disabled={checkingStatus}
-                onClick={handleCheckPaymentStatus}
-              >
-                {checkingStatus ? 'Đang kiểm tra...' : '[Tôi đã thanh toán]'}
-              </button>
             </div>
           ) : (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p style={{ color: '#64748B', fontSize: '1.05rem', marginBottom: '16px' }}>
-                Không tìm thấy thông tin đơn hàng.
+            <div className="payment-state-card">
+              <p style={{ color: '#475569', fontSize: '1.05rem', marginBottom: '20px' }}>
+                Không tìm thấy thông tin đơn hàng thanh toán.
               </p>
               <button
                 type="button"
-                className="plan-action-button btn-upgrade"
-                style={{ maxWidth: '220px', margin: '0 auto' }}
+                className="payment-btn-submit"
+                style={{ maxWidth: '240px', margin: '0 auto', fontSize: '1rem', padding: '12px 20px' }}
                 onClick={() => navigate('/pricing')}
               >
                 Quay lại bảng giá
@@ -246,3 +309,4 @@ export const PaymentPage: React.FC = () => {
 }
 
 export default PaymentPage
+
