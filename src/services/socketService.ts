@@ -1,16 +1,13 @@
 import { io, Socket } from 'socket.io-client'
+import { API_BASE_URL } from './api'
 
 const STORAGE_TOKEN_KEY = 'vocabapp_token'
 
 const getSocketUrl = (): string => {
   if (import.meta.env.VITE_SOCKET_URL) {
-    return import.meta.env.VITE_SOCKET_URL
+    return import.meta.env.VITE_SOCKET_URL.trim().replace(/\/+$/, '')
   }
-  const apiUrl =
-    import.meta.env.VITE_API_URL ||
-    import.meta.env.VITE_API_BASE_URL ||
-    'http://localhost:3000/api'
-  return apiUrl.replace(/\/api\/?$/, '') || 'http://localhost:3000'
+  return API_BASE_URL.replace(/\/api\/?$/, '') || 'http://localhost:3000'
 }
 
 class SocketService {

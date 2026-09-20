@@ -8,7 +8,37 @@ const clearExpiredAuth = () => {
   delete api.defaults.headers.common.Authorization
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+/**
+ * Resolves the API base URL:
+ * - Priority: VITE_API_URL > VITE_API_BASE_URL > default fallback
+ * - Trims whitespace and trailing slashes
+ * - Automatically ensures `/api` suffix is present if omitted
+ * - Fallbacks to 'http://localhost:3000/api' for local development
+ * - In production mode, warns if environment variables are missing
+ */
+export const getApiBaseUrl = (): string => {
+  const envUrl = (
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    ''
+  ).trim()
+
+  if (!envUrl) {
+    if (import.meta.env.PROD) {
+      console.warn(
+        '[API] Warning: Neither VITE_API_URL nor VITE_API_BASE_URL is configured in this production build. ' +
+        'Defaulting to "http://localhost:3000/api". ' +
+        'Please configure VITE_API_URL in your hosting provider settings (e.g. Vercel) and redeploy.'
+      )
+    }
+    return 'http://localhost:3000/api'
+  }
+
+  const sanitized = envUrl.replace(/\/+$/, '')
+  return sanitized.endsWith('/api') ? sanitized : `${sanitized}/api`
+}
+
+export const API_BASE_URL = getApiBaseUrl()
 
 const api = axios.create({
   baseURL: API_BASE_URL,

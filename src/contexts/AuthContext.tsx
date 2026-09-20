@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import { authService } from '../services/authService'
 import { setAuthToken, clearAuthToken } from '../services/api'
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('auth:logout', handleLogout)
   }, [])
 
-  const login = async (email: string, password: string): Promise<AuthUser> => {
+  const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     console.log('AuthContext login called:', { email })
     const response = await authService.login(email, password)
     console.log('AuthContext login response:', response)
@@ -93,62 +93,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(STORAGE_USER, JSON.stringify(response.user))
     console.log('AuthContext login saved to storage')
     return response.user
-  }
+  }, [])
 
-  const register = async (name: string, email: string, password: string, passwordConfirm: string, username?: string) => {
+  const register = useCallback(async (name: string, email: string, password: string, passwordConfirm: string, username?: string) => {
     console.log('AuthContext register called:', { name, email, username })
     await authService.register(name, email, password, passwordConfirm, username)
     console.log('AuthContext register completed without auto-login')
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null)
     setUser(null)
     localStorage.removeItem(STORAGE_TOKEN)
     localStorage.removeItem(STORAGE_USER)
     clearAuthToken()
-  }
+  }, [])
 
-  const verifyEmail = async (verifyToken: string) => {
+  const verifyEmail = useCallback(async (verifyToken: string) => {
     await authService.verifyEmail(verifyToken)
-  }
+  }, [])
 
-  const resendVerification = async (email: string) => {
+  const resendVerification = useCallback(async (email: string) => {
     await authService.resendVerification(email)
-  }
+  }, [])
 
-  const forgotPassword = async (email: string) => {
+  const forgotPassword = useCallback(async (email: string) => {
     await authService.forgotPassword(email)
-  }
+  }, [])
 
-  const resetPassword = async (resetToken: string, password: string, confirmPassword: string) => {
+  const resetPassword = useCallback(async (resetToken: string, password: string, confirmPassword: string) => {
     await authService.resetPassword(resetToken, password, confirmPassword)
-  }
+  }, [])
 
-  const changePassword = async (oldPassword: string, newPassword: string, confirmPassword: string) => {
+  const changePassword = useCallback(async (oldPassword: string, newPassword: string, confirmPassword: string) => {
     await authService.changePassword(oldPassword, newPassword, confirmPassword)
-  }
+  }, [])
 
-  const googleLogin = async (idToken: string): Promise<AuthUser> => {
+  const googleLogin = useCallback(async (idToken: string): Promise<AuthUser> => {
     const response = await authService.googleLogin(idToken)
     setToken(response.token)
     setUser(response.user)
     localStorage.setItem(STORAGE_TOKEN, response.token)
     localStorage.setItem(STORAGE_USER, JSON.stringify(response.user))
     return response.user
-  }
+  }, [])
 
-  const updateProfileState = (updatedUser: AuthUser) => {
+  const updateProfileState = useCallback((updatedUser: AuthUser) => {
     setUser(updatedUser)
     localStorage.setItem(STORAGE_USER, JSON.stringify(updatedUser))
-  }
+  }, [])
 
-  const refreshUser = async (): Promise<AuthUser> => {
+  const refreshUser = useCallback(async (): Promise<AuthUser> => {
     const currentUser = await authService.getCurrentUser()
     setUser(currentUser)
     localStorage.setItem(STORAGE_USER, JSON.stringify(currentUser))
     return currentUser
-  }
+  }, [])
 
   const value = useMemo(
     () => ({
@@ -168,7 +168,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       updateProfileState,
       refreshUser,
     }),
-    [loading, token, user],
+    [
+      loading,
+      token,
+      user,
+      login,
+      register,
+      logout,
+      verifyEmail,
+      resendVerification,
+      forgotPassword,
+      resetPassword,
+      changePassword,
+      googleLogin,
+      updateProfileState,
+      refreshUser,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

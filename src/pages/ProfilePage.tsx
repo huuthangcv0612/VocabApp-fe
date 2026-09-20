@@ -14,7 +14,8 @@ const PRESET_AVATARS = ['👧', '👦', '🦜', '🦁', '🐻', '🚀', '🎓', 
 export const ProfilePage: React.FC = () => {
   const { user: contextUser, updateProfileState } = useAuth()
   const [profile, setProfile] = useState<AuthUser | null>(contextUser)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!contextUser)
+  const [error, setError] = useState<string | null>(null)
 
   // Active Tab: 'info' | 'verification' | 'password'
   const [activeTab, setActiveTab] = useState<'info' | 'verification' | 'password'>('info')
@@ -42,30 +43,42 @@ export const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true
+
     const fetchProfile = async () => {
       try {
-        setLoading(true)
+        setError(null)
+        if (!contextUser) {
+          setLoading(true)
+        }
+
         const data = await userService.getProfile()
-        if (isMounted) {
+
+        if (!isMounted) return
+
+        if (data) {
           setProfile(data)
           setName(data.name || '')
           setUsername(data.username || '')
           setAvatar(data.avatar || '')
           setDateOfBirth(data.dateOfBirth || '')
           setGender(data.gender || 'male')
+
           updateProfileState(data)
         }
       } catch (err: unknown) {
-        if (isMounted) {
-          const msg = err instanceof Error ? err.message : 'Không thể tải thông tin hồ sơ.'
-          toast.error(msg)
-        }
+        if (!isMounted) return
+
+        console.error('Failed to load profile:', err)
+        setError('Không thể tải thông tin hồ sơ.')
       } finally {
-        if (isMounted) setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
     void fetchProfile()
+
     return () => {
       isMounted = false
     }
@@ -238,7 +251,13 @@ export const ProfilePage: React.FC = () => {
           </button>
         </div>
 
-        {loading ? (
+        {error && (
+          <div style={{ margin: '0 0 20px 0', padding: '14px 20px', borderRadius: '12px', background: '#fef2f2', border: '1px solid #fecaca', color: '#b91c1c', fontSize: '0.95rem' }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        {loading && !profile ? (
           <div className="profile-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
             <p style={{ fontSize: '1.1rem', color: '#64748b' }}>Đang tải thông tin hồ sơ cá nhân...</p>
           </div>

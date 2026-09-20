@@ -1,23 +1,14 @@
 import api from './api'
-import type { ApiResponse } from '../types/api'
+import { authApi, normalizeAuthUser } from './authApi'
 import type { AuthUser } from '../types/auth'
 
 export const userService = {
   getProfile: async (): Promise<AuthUser> => {
-    const response = await api.get<ApiResponse<AuthUser | { user: AuthUser }>>('/users/profile')
-    const resData = response.data.data
-    if (resData && typeof resData === 'object' && 'user' in resData) {
-      return (resData as { user: AuthUser }).user
-    }
-    return resData as AuthUser
+    return await authApi.getCurrentUser()
   },
 
   updateProfile: async (payload: Partial<AuthUser>): Promise<AuthUser> => {
-    const response = await api.put<ApiResponse<AuthUser | { user: AuthUser }>>('/users/profile', payload)
-    const resData = response.data.data
-    if (resData && typeof resData === 'object' && 'user' in resData) {
-      return (resData as { user: AuthUser }).user
-    }
-    return resData as AuthUser
+    const response = await api.put('/users/profile', payload)
+    return normalizeAuthUser(response.data)
   },
 }

@@ -58,6 +58,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/policy-and-terms" element={<PolicyAndTerms />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/plans" element={<PricingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
