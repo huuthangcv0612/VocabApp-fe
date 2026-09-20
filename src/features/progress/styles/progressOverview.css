@@ -1,0 +1,925 @@
+/* ==================================================
+   PROGRESS OVERVIEW - DEUTSCHUP THEME
+   Features: Card-based, friendly, Duolingo-like, pure CSS
+   ================================================== */
+
+.po-container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* --------------------------------------------------
+   HERO BANNER ENHANCEMENTS
+   -------------------------------------------------- */
+.po-hero-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.po-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-dark, #080616);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.po-hero-badge--streak {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+
+.po-hero-badge--level {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.po-hero-badge--progress {
+  background-color: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+/* --------------------------------------------------
+   LAYOUT GRIDS
+   -------------------------------------------------- */
+.po-main-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 40px 0 80px 0;
+}
+
+.po-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.po-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.po-column {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* --------------------------------------------------
+   REUSABLE CARD STYLES
+   -------------------------------------------------- */
+.po-card {
+  background-color: #ffffff;
+  border-radius: 24px;
+  padding: 28px;
+  border: 1px solid var(--color-gray-light, #e2e8f0);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.po-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+.po-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.po-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.po-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.po-icon-blue { background-color: #eff6ff; color: #2563eb; }
+.po-icon-green { background-color: #ecfdf5; color: #059669; }
+.po-icon-orange { background-color: #fff7ed; color: #ea580c; }
+.po-icon-red { background-color: #fff1f2; color: #e11d48; }
+.po-icon-yellow { background-color: #fefce8; color: #ca8a04; }
+.po-icon-purple { background-color: #faf5ff; color: #9333ea; }
+
+.po-card-title {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-dark, #080616);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.po-card-subtitle {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 4px 0 0 0;
+}
+
+/* --------------------------------------------------
+   1. OVERVIEW METRICS GRID CARDS
+   -------------------------------------------------- */
+.po-metric-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 22px 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.po-metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.07);
+}
+
+.po-metric-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.po-metric-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.po-metric-label {
+  font-family: var(--font-body, 'Varela Round', sans-serif);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.po-metric-value-row {
+  margin-top: 14px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.po-metric-value {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.po-metric-total {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.po-metric-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin: 6px 0 0 0;
+  font-weight: 500;
+}
+
+.po-metric-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.po-metric-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------
+   2. CONTINUE LEARNING CARD
+   -------------------------------------------------- */
+.po-continue-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fdf8e6 100%);
+  border: 2px solid #fed7aa;
+  position: relative;
+}
+
+.po-continue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.po-continue-badge--in_progress {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.po-continue-badge--not_started {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.po-continue-content {
+  margin-top: 16px;
+}
+
+.po-continue-lesson-title {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  line-height: 1.2;
+}
+
+.po-continue-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.po-breadcrumb-chip {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.po-continue-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.po-continue-bar {
+  width: 100%;
+  height: 12px;
+  background-color: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.po-continue-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #d90000 0%, #f97316 100%);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.po-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-primary, #d90000);
+  color: #ffffff;
+  font-family: var(--font-body, 'Varela Round', sans-serif);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(217, 0, 0, 0.3);
+  cursor: pointer;
+  border: none;
+}
+
+.po-continue-btn:hover,
+.po-continue-btn:focus-visible {
+  background-color: #b90000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(217, 0, 0, 0.4);
+  outline: 3px solid rgba(217, 0, 0, 0.3);
+}
+
+/* Empty Continue Learning */
+.po-completed-card {
+  text-align: center;
+  padding: 36px 20px;
+}
+
+.po-completed-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.po-completed-title {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.po-completed-desc {
+  font-size: 0.92rem;
+  color: #64748b;
+  max-width: 440px;
+  margin: 0 auto 20px auto;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------
+   3. LEVEL PROGRESS SECTION
+   -------------------------------------------------- */
+.po-level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.po-level-item {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.po-level-item--current {
+  background-color: #f0f7ff;
+  border: 2px solid #2563eb;
+}
+
+.po-level-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.po-level-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.po-level-name {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.po-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #2563eb;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.po-level-count {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.po-level-pct {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.po-level-bar {
+  width: 100%;
+  height: 10px;
+  background-color: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.po-level-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #2563eb;
+  transition: width 0.5s ease;
+}
+
+.po-level-bar-fill--complete {
+  background: #10b981;
+}
+
+/* --------------------------------------------------
+   4. VOCABULARY MASTERY CARD
+   -------------------------------------------------- */
+.po-vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.po-vocab-item {
+  padding: 16px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.po-vocab-item--learned {
+  background-color: #f1f5f9;
+  border-left: 4px solid #64748b;
+}
+
+.po-vocab-item--mastered {
+  background-color: #ecfdf5;
+  border-left: 4px solid #10b981;
+}
+
+.po-vocab-item--learning {
+  background-color: #eff6ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.po-vocab-item--needReview {
+  background-color: #fff7ed;
+  border-left: 4px solid #f97316;
+}
+
+.po-vocab-item-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+.po-vocab-item-value {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 4px 0 2px 0;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.po-vocab-item-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.po-vocab-segmented-bar {
+  display: flex;
+  height: 14px;
+  background-color: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.po-vocab-seg {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.po-vocab-seg--mastered { background-color: #10b981; }
+.po-vocab-seg--learning { background-color: #3b82f6; }
+.po-vocab-seg--needReview { background-color: #f97316; }
+
+.po-vocab-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.po-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.po-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* --------------------------------------------------
+   5. EXERCISE PERFORMANCE CARD
+   -------------------------------------------------- */
+.po-perf-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: #f8fafc;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.po-perf-metric {
+  text-align: center;
+}
+
+.po-perf-metric-val {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.po-perf-metric-val--accuracy {
+  color: #16a34a;
+}
+
+.po-perf-metric-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.po-perf-types {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.po-perf-type-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.po-perf-type-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.88rem;
+}
+
+.po-perf-type-name {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.po-perf-type-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.po-perf-type-count {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.po-perf-type-pct {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.po-perf-type-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.po-perf-type-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* --------------------------------------------------
+   6. ACTIVITY HISTORY CARD
+   -------------------------------------------------- */
+.po-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.po-activity-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  padding: 12px 16px;
+  border: 1px solid #f1f5f9;
+}
+
+.po-activity-date-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.po-activity-date-icon {
+  font-size: 1.2rem;
+}
+
+.po-activity-date {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.po-activity-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.po-activity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.po-activity-tag--exercises {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.po-activity-tag--lessons {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+/* --------------------------------------------------
+   7. SKELETON LOADING
+   -------------------------------------------------- */
+@keyframes poPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.po-skeleton-box {
+  background-color: #e2e8f0;
+  border-radius: 8px;
+  animation: poPulse 1.6s ease-in-out infinite;
+}
+
+.po-skeleton-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.po-skeleton-card {
+  height: 120px;
+  border-radius: 20px;
+}
+
+.po-skeleton-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-top: 32px;
+}
+
+.po-skeleton-large {
+  height: 320px;
+  border-radius: 24px;
+}
+
+/* --------------------------------------------------
+   8. ERROR & EMPTY STATES
+   -------------------------------------------------- */
+.po-state-container {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: #ffffff;
+  border-radius: 28px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  max-width: 560px;
+  margin: 40px auto;
+}
+
+.po-state-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+
+.po-state-title {
+  font-family: var(--font-heading, 'Oswald', sans-serif);
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+}
+
+.po-state-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.po-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-primary, #d90000);
+  color: #ffffff;
+  font-family: var(--font-body, 'Varela Round', sans-serif);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 28px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(217, 0, 0, 0.25);
+}
+
+.po-btn-primary:hover,
+.po-btn-primary:focus-visible {
+  background-color: #b90000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(217, 0, 0, 0.35);
+  outline: 3px solid rgba(217, 0, 0, 0.3);
+}
+
+/* --------------------------------------------------
+   RESPONSIVE DESIGN BREAKPOINTS
+   -------------------------------------------------- */
+
+/* TABLET (max-width: 768px) */
+@media screen and (max-width: 768px) {
+  .po-container {
+    padding: 0 20px;
+  }
+
+  .po-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .po-content-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .po-card {
+    padding: 22px 20px;
+  }
+
+  .po-skeleton-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .po-skeleton-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* MOBILE (max-width: 390px) */
+@media screen and (max-width: 390px) {
+  .po-container {
+    padding: 0 14px;
+  }
+
+  .po-main-layout {
+    gap: 20px;
+    padding: 24px 0 60px 0;
+  }
+
+  .po-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .po-metric-card {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .po-metric-value {
+    font-size: 1.7rem;
+  }
+
+  .po-card {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .po-card-title {
+    font-size: 1.2rem;
+  }
+
+  .po-card-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+  }
+
+  .po-continue-lesson-title {
+    font-size: 1.35rem;
+  }
+
+  .po-continue-btn {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+  }
+
+  .po-vocab-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .po-perf-summary {
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+  }
+
+  .po-activity-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .po-skeleton-metrics {
+    grid-template-columns: 1fr;
+  }
+}

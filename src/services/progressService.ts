@@ -4,8 +4,18 @@ import type {
   UserProgressData,
   DashboardProgressOverview,
 } from '../types/progress'
+import type { ProgressOverviewData } from '../features/progress/types/progressOverview'
 
 export const progressService = {
+  getProgressOverview: async (): Promise<ProgressOverviewData> => {
+    const response = await api.get<ApiResponse<ProgressOverviewData>>('/progress/overview')
+    const resData = response.data
+    if (resData && typeof resData === 'object' && 'data' in resData && (resData as { data?: ProgressOverviewData }).data) {
+      return (resData as { data: ProgressOverviewData }).data
+    }
+    return resData as unknown as ProgressOverviewData
+  },
+
   getUserProgressOverview: async (): Promise<UserProgressData> => {
     const response = await api.get<ApiResponse<UserProgressData>>('/progress')
     return response.data.data
