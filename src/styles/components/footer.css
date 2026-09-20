@@ -25,9 +25,10 @@
 .footer-sky-section {
   position: relative;
   background-color: #2A63E8;
-  padding: 160px 24px 60px 24px;
+  padding: 150px 24px 50px 24px;
   overflow: hidden;
-  height: 85vh;
+  min-height: 85vh;
+  height: auto;
 }
 
 /* Floating Sky SVGs */
@@ -90,15 +91,15 @@
 .footer-card {
   position: relative;
   z-index: 2;
-  max-width: 1160px;
-  margin: 200px auto 25px auto;
+  max-width: 1200px;
+  margin: 170px auto 25px auto;
   background-color: #FFFFFF;
   border-radius: 36px;
   padding: 44px 52px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: flex-end;
-  gap: 48px;
+  gap: 60px;
 }
 
 /* Kid Image Wrapper */
@@ -109,7 +110,7 @@
 }
 
 .footer-kid-img {
-  width: 250px;
+  width: 315px;
   height: auto;
   display: block;
 }
@@ -120,6 +121,7 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
+  padding-left: 16px;
 }
 
 /* 3 Nav Columns */
@@ -240,13 +242,23 @@
 
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
+  .footer-sky-section {
+    padding: 120px 20px 40px 20px;
+    min-height: 70vh;
+  }
+
   .footer-card {
     padding: 36px 36px;
-    gap: 32px;
+    gap: 44px;
+    margin: 130px auto 20px auto;
   }
 
   .footer-kid-img {
-    width: 200px;
+    width: 260px;
+  }
+
+  .footer-main-content {
+    padding-left: 10px;
   }
 
   .footer-logo-img {
@@ -256,11 +268,41 @@
   .footer-nav-columns {
     gap: 24px;
   }
+
+  .deco-sun {
+    width: 85px;
+    top: 40px;
+    right: 25%;
+  }
+
+  .deco-balloon {
+    width: 48px;
+    top: 105px;
+    left: 35%;
+  }
+
+  .deco-plane {
+    width: 75px;
+    top: 195px;
+    right: 15%;
+  }
+
+  .deco-cloud-4 {
+    top: 195px;
+    left: 52%;
+    width: 85px;
+  }
+
+  .deco-cloud-3 {
+    top: 160px;
+    width: 120px;
+  }
 }
 
 @media (max-width: 768px) {
   .footer-sky-section {
-    padding: 120px 16px 40px 16px;
+    padding: 90px 16px 36px 16px;
+    min-height: auto;
   }
 
   .footer-card {
@@ -270,15 +312,17 @@
     border-radius: 28px;
     text-align: center;
     gap: 28px;
+    margin: 36px auto 16px auto;
   }
 
   .footer-kid-img {
-    width: 180px;
+    width: 210px;
   }
 
   .footer-main-content {
     width: 100%;
     align-items: center;
+    padding-left: 0;
   }
 
   .footer-nav-columns {
@@ -331,8 +375,84 @@
 }
 
 @media (max-width: 480px) {
+  .footer-sky-section {
+    padding: 80px 12px 30px 12px;
+  }
+
+  .footer-card {
+    padding: 28px 16px;
+    margin: 28px auto 12px auto;
+  }
+
+  .footer-kid-img {
+    width: 175px;
+  }
+
   .footer-nav-columns {
     grid-template-columns: 1fr;
     gap: 20px;
+  }
+}
+
+/* Height-based media query for short displays (laptops, landscape tablets, resized windows) */
+@media (max-height: 720px) and (min-width: 769px) {
+  .footer-sky-section {
+    padding-top: 90px;
+    padding-bottom: 30px;
+    min-height: auto;
+  }
+
+  .footer-card {
+    margin-top: 110px;
+    margin-bottom: 15px;
+    padding: 28px 32px;
+    gap: 36px;
+  }
+
+  .footer-kid-img {
+    width: 220px;
+  }
+
+  .footer-main-content {
+    padding-left: 10px;
+  }
+
+  .footer-logo-img {
+    height: 46px;
+  }
+
+  .deco-sun {
+    top: 25px;
+    width: 75px;
+  }
+
+  .deco-balloon {
+    top: 80px;
+    width: 42px;
+  }
+
+  .deco-plane {
+    top: 150px;
+    width: 68px;
+  }
+
+  .deco-cloud-4 {
+    top: 150px;
+    width: 75px;
+  }
+
+  .deco-cloud-3 {
+    top: 120px;
+    width: 100px;
+  }
+
+  .deco-cloud-2 {
+    top: 40px;
+    width: 130px;
+  }
+
+  .deco-cloud-1 {
+    top: 35px;
+    width: 85px;
   }
 }

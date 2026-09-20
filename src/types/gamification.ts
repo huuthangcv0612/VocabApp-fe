@@ -1,4 +1,6 @@
-export type SubscriptionPlanId = 'free' | 'premium' | 'pro'
+import type { PlanType } from './plan'
+
+export type SubscriptionPlanId = 'free' | 'premium' | 'custom' | 'pro' | string
 
 export type SubscriptionStatus = 'active' | 'expired' | 'canceled'
 
@@ -23,11 +25,16 @@ export interface AchievementItem {
 
 export interface SubscriptionPackage {
   id: SubscriptionPlanId | string
+  _id?: string
   name: string
+  code?: string
   price: number
   currency?: 'VND' | 'USD' | string
+  durationDays?: number
   duration_months?: number
   features: string[]
+  permissions?: string[]
+  planType?: PlanType
   badge?: string
 }
 
@@ -39,7 +46,12 @@ export interface UserSubscription {
   end_date: string
   features: string[]
   isPremium?: boolean
+  isCustom?: boolean
+  hasCustomPlan?: boolean
+  canManageClasses?: boolean
+  can_create_class?: boolean
   daysRemaining?: number
+  [key: string]: unknown
 }
 
 export interface PaymentTransaction {

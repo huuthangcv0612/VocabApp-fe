@@ -7,7 +7,7 @@ export const userService = {
     const response = await api.get<ApiResponse<AuthUser | { user: AuthUser }>>('/users/profile')
     const resData = response.data.data
     if (resData && typeof resData === 'object' && 'user' in resData) {
-      return resData.user
+      return (resData as { user: AuthUser }).user
     }
     return resData as AuthUser
   },
@@ -16,7 +16,7 @@ export const userService = {
     const response = await api.put<ApiResponse<AuthUser | { user: AuthUser }>>('/users/profile', payload)
     const resData = response.data.data
     if (resData && typeof resData === 'object' && 'user' in resData) {
-      return resData.user
+      return (resData as { user: AuthUser }).user
     }
     return resData as AuthUser
   },

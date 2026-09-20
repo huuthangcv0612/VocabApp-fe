@@ -183,5 +183,6 @@ export { questionApi } from './questionApi'
 export { testService } from './testService'
 export { paymentService } from './paymentService'
 export { subscriptionService } from './subscriptionService'
+export { interactiveClassService } from './interactiveClassService'
 
 export default api

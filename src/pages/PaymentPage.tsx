@@ -9,17 +9,17 @@ import '../styles/pages/pricing.css'
 
 export const PaymentPage: React.FC = () => {
   const { planId, orderId } = useParams<{ planId?: string; orderId?: string }>()
-  const idParam = orderId || planId || 'premium'
+  const targetOrderId = orderId || planId || ''
   const navigate = useNavigate()
   const location = useLocation()
 
   const [orderData, setOrderData] = useState<CreateOrderResponse | null>(
     (location.state as CreateOrderResponse) || null
   )
-  const [loading, setLoading] = useState(!orderData)
+  const [loading, setLoading] = useState(!orderData && Boolean(targetOrderId))
   const [checkingStatus, setCheckingStatus] = useState(false)
 
-  // Initial load: create order or fetch existing order details
+  // Initial load: fetch existing order details by targetOrderId
   useEffect(() => {
     let isMounted = true
 
@@ -28,14 +28,15 @@ export const PaymentPage: React.FC = () => {
         setLoading(false)
         return
       }
+
+      if (!targetOrderId) {
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
-        let res: CreateOrderResponse
-        if (idParam.startsWith('DUMS') || idParam.startsWith('ord_') || idParam.length > 10) {
-          res = await subscriptionService.getOrder(idParam)
-        } else {
-          res = await subscriptionService.createOrder(idParam)
-        }
+        const res = await subscriptionService.getOrder(targetOrderId)
         if (isMounted) {
           setOrderData(res)
         }
@@ -51,12 +52,12 @@ export const PaymentPage: React.FC = () => {
       }
     }
 
-    loadData()
+    void loadData()
 
     return () => {
       isMounted = false
     }
-  }, [idParam, orderData])
+  }, [targetOrderId, orderData])
 
   // Process payment success
   const handlePaymentSuccess = useCallback(async () => {
@@ -223,7 +224,17 @@ export const PaymentPage: React.FC = () => {
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>Không tìm thấy thông tin đơn hàng.</p>
+              <p style={{ color: '#64748B', fontSize: '1.05rem', marginBottom: '16px' }}>
+                Không tìm thấy thông tin đơn hàng.
+              </p>
+              <button
+                type="button"
+                className="plan-action-button btn-upgrade"
+                style={{ maxWidth: '220px', margin: '0 auto' }}
+                onClick={() => navigate('/pricing')}
+              >
+                Quay lại bảng giá
+              </button>
             </div>
           )}
         </div>

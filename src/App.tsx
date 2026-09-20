@@ -57,6 +57,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/policy-and-terms" element={<PolicyAndTerms />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
@@ -75,9 +76,8 @@ function App() {
             <Route path="/levels/:levelId/lessons" element={<LevelDetail />} />
             <Route path="/levels/:levelId/topics/:topicId" element={<LevelDetail />} />
             <Route path="/progress" element={<ProgressPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
-            <Route path="/payment/:planId" element={<PaymentPage />} />
+            <Route path="/payment/:orderId" element={<PaymentPage />} />
             <Route path="/payment/order/:orderId" element={<PaymentPage />} />
             <Route path="/payment/result" element={<PaymentResultPage />} />
             <Route path="/unit/:unitId" element={<UnitPage />} />

@@ -2,22 +2,13 @@ import api from './api'
 import { vocabularyApi } from './vocabularyApi'
 import type { ApiResponse } from '../types/api'
 import type {
-  SubscriptionPackage,
   UserSubscription,
   CreateOrderResponse,
 } from '../types/gamification'
 
-export interface PlanItem {
-  _id: string
-  name: string
-  code?: string
-  price: number
-  durationDays?: number
-  description?: string
-  features?: string[]
-  badge?: string
-  isActive?: boolean
-}
+import type { Plan, PlanItem, PlansResponseData } from '../types/plan'
+
+export type { Plan, PlanItem, PlansResponseData }
 
 export interface BackendOrderResponse {
   order: {
@@ -119,18 +110,32 @@ export const subscriptionService = {
     return []
   },
 
-  getPlans: async (): Promise<SubscriptionPackage[]> => {
-    const response = await api.get<ApiResponse<PlanItem[]>>('/plans')
-    const plans = Array.isArray(response.data.data) ? response.data.data : []
+  getPlans: async (): Promise<Plan[]> => {
+    const response = await api.get<ApiResponse<PlansResponseData>>('/plans')
+    const rawData = response.data?.data
+    let plansList: Plan[] = []
 
-    return plans.map((plan) => ({
-      id: plan._id,
+    if (rawData && typeof rawData === 'object' && 'plans' in rawData && Array.isArray(rawData.plans)) {
+      plansList = rawData.plans
+    } else if (Array.isArray(rawData)) {
+      plansList = rawData as Plan[]
+    }
+
+    return plansList.map((plan) => ({
+      _id: plan._id,
       name: plan.name,
+      code: plan.code,
       price: plan.price,
-      currency: 'VND',
-      duration_months: Math.round((plan.durationDays || 30) / 30),
-      features: plan.features || (plan.description ? [plan.description] : []),
+      durationDays: plan.durationDays ?? 0,
+      description: plan.description || '',
+      features: Array.isArray(plan.features) ? plan.features : [],
+      permissions: Array.isArray(plan.permissions) ? plan.permissions : [],
+      planType: plan.planType,
+      isActive: plan.isActive !== false,
+      sortOrder: plan.sortOrder ?? 0,
       badge: plan.badge,
+      id: plan._id,
+      duration_months: plan.durationDays ? Math.round(plan.durationDays / 30) : 0,
     }))
   },
 
@@ -143,7 +148,7 @@ export const subscriptionService = {
     return data as PlanItem
   },
 
-  getPackages: async (): Promise<SubscriptionPackage[]> => {
+  getPackages: async (): Promise<Plan[]> => {
     return subscriptionService.getPlans()
   },
 
@@ -176,14 +181,26 @@ export const subscriptionService = {
 
     const planObj = typeof sub?.planId === 'object' && sub?.planId !== null ? sub.planId : null
 
+    const planId = planObj?._id || (typeof sub?.planId === 'string' ? sub.planId : 'free')
+    const planName = planObj?.name || (isPremium ? 'Premium' : 'Gói Miễn Phí')
+    const rawRes = resData as unknown as Record<string, unknown>
+    const isCustom =
+      planId.toLowerCase().includes('custom') ||
+      planName.toLowerCase().includes('custom') ||
+      rawRes?.isCustom === true ||
+      rawRes?.hasCustomPlan === true
+
     return {
-      plan_id: planObj?._id || (typeof sub?.planId === 'string' ? sub.planId : 'free'),
-      plan_name: planObj?.name || (isPremium ? 'Premium' : 'Gói Miễn Phí'),
+      plan_id: planId,
+      plan_name: planName,
       status: sub?.status || 'active',
       start_date: sub?.startDate || new Date().toISOString(),
       end_date: sub?.endDate || new Date().toISOString(),
       features: planObj?.features || (planObj?.description ? [planObj.description] : []),
       isPremium,
+      isCustom,
+      hasCustomPlan: isCustom,
+      canManageClasses: isCustom,
       daysRemaining,
     }
   },
