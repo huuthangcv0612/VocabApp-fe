@@ -12,8 +12,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<AuthUser>
   register: (name: string, email: string, password: string, passwordConfirm: string, username?: string) => Promise<void>
   logout: () => void
-  verifyEmail: (token: string) => Promise<void>
-  resendVerification: (email: string) => Promise<void>
+  verifyEmail: (token: string) => Promise<string>
+  resendVerification: (email: string) => Promise<string>
   forgotPassword: (email: string) => Promise<void>
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>
   changePassword: (oldPassword: string, newPassword: string, confirmPassword: string) => Promise<void>
@@ -109,12 +109,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     clearAuthToken()
   }, [])
 
-  const verifyEmail = useCallback(async (verifyToken: string) => {
-    await authService.verifyEmail(verifyToken)
+  const verifyEmail = useCallback(async (verifyToken: string): Promise<string> => {
+    return await authService.verifyEmail(verifyToken)
   }, [])
 
-  const resendVerification = useCallback(async (email: string) => {
-    await authService.resendVerification(email)
+  const resendVerification = useCallback(async (email: string): Promise<string> => {
+    return await authService.resendVerification(email)
   }, [])
 
   const forgotPassword = useCallback(async (email: string) => {

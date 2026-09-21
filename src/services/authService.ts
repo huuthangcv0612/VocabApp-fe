@@ -7,12 +7,32 @@ interface AuthResult {
   user: AuthUser
 }
 
-const getAuthErrorMessage = (error: unknown): string => {
+export class AuthApiError extends Error {
+  status?: number
+  code?: string
+
+  constructor(message: string, status?: number, code?: string) {
+    super(message)
+    this.name = 'AuthApiError'
+    this.status = status
+    this.code = code
+  }
+}
+
+export const getAuthErrorInfo = (error: unknown): { message: string; status?: number } => {
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data as { message?: string; error?: string } | undefined
-    return responseData?.message || responseData?.error || error.message || 'Thao tác thất bại'
+    const message = responseData?.message || responseData?.error || error.message || 'Thao tác thất bại'
+    return { message, status: error.response?.status }
   }
-  return error instanceof Error ? error.message : 'Thao tác thất bại'
+  return {
+    message: error instanceof Error ? error.message : 'Thao tác thất bại',
+    status: undefined,
+  }
+}
+
+export const getAuthErrorMessage = (error: unknown): string => {
+  return getAuthErrorInfo(error).message
 }
 
 export const authService = {
@@ -20,31 +40,37 @@ export const authService = {
     try {
       return await authApi.login(email, password)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
-  register: async (name: string, email: string, password: string, passwordConfirm: string, username?: string): Promise<void> => {
+  register: async (name: string, email: string, password: string, passwordConfirm: string, username?: string): Promise<{ message?: string }> => {
     try {
-      await authApi.register(name, email, password, passwordConfirm, username)
+      return await authApi.register(name, email, password, passwordConfirm, username)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
-  verifyEmail: async (token: string): Promise<void> => {
+  verifyEmail: async (token: string): Promise<string> => {
     try {
-      await authApi.verifyEmail(token)
+      const res = await authApi.verifyEmail(token)
+      return res.message || 'Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.'
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
-  resendVerification: async (email: string): Promise<void> => {
+  resendVerification: async (email: string): Promise<string> => {
     try {
-      await authApi.resendVerification(email)
+      const res = await authApi.resendVerification(email)
+      return res.message || 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.'
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -52,7 +78,8 @@ export const authService = {
     try {
       await authApi.forgotPassword(email)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -60,7 +87,8 @@ export const authService = {
     try {
       await authApi.validateResetToken(token)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -68,7 +96,8 @@ export const authService = {
     try {
       await authApi.resetPassword(token, password, confirmPassword)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -76,7 +105,8 @@ export const authService = {
     try {
       await authApi.changePassword(oldPassword, newPassword, confirmPassword)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -84,7 +114,8 @@ export const authService = {
     try {
       return await authApi.googleLogin(idToken)
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 
@@ -92,7 +123,8 @@ export const authService = {
     try {
       return await authApi.getCurrentUser()
     } catch (error) {
-      throw new Error(getAuthErrorMessage(error))
+      const { message, status } = getAuthErrorInfo(error)
+      throw new AuthApiError(message, status)
     }
   },
 }

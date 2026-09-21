@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google'
 import { useAuth } from '../../contexts/AuthContext'
+import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
@@ -12,6 +13,9 @@ const Login = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [isUnverified, setIsUnverified] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
   const { login, googleLogin, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -34,6 +38,8 @@ const Login = () => {
     if (loading || googleLoading) return
 
     setError('')
+    setIsUnverified(false)
+    setResendMessage('')
     setLoading(true)
 
     const trimmedEmail = email.trim()
@@ -67,8 +73,35 @@ const Login = () => {
       console.error('Setting error:', errorMessage)
       setError(errorMessage)
       toast.error(errorMessage)
+
+      const status = (err as { status?: number })?.status
+      const unverified = status === 403 || /xác nhận email|verify email/i.test(errorMessage)
+      if (unverified) {
+        setIsUnverified(true)
+      }
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      toast.error('Vui lòng nhập địa chỉ email.')
+      return
+    }
+
+    setResendLoading(true)
+    try {
+      const msg = await authService.resendVerification(trimmedEmail)
+      const successMsg = msg || 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.'
+      setResendMessage(successMsg)
+      toast.success(successMsg)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Không thể gửi lại email xác thực.'
+      toast.error(msg)
+    } finally {
+      setResendLoading(false)
     }
   }
 
@@ -138,6 +171,44 @@ const Login = () => {
           />
 
           {error && <p className="auth-form__error">{error}</p>}
+
+          {isUnverified && (
+            <div
+              style={{
+                padding: '0.85rem 1rem',
+                borderRadius: '16px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                textAlign: 'center',
+              }}
+            >
+              <p style={{ fontSize: '0.9rem', color: '#1e40af', marginBottom: '0.5rem' }}>
+                Tài khoản chưa được kích hoạt. Bạn cần gửi lại link xác thực?
+              </p>
+              {resendMessage ? (
+                <p style={{ fontSize: '0.88rem', color: '#166534', fontWeight: 500 }}>
+                  {resendMessage}
+                </p>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#2563eb',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  {resendLoading ? 'Đang gửi lại...' : 'Gửi lại email xác nhận'}
+                </button>
+              )}
+            </div>
+          )}
 
           <button
             type="submit"

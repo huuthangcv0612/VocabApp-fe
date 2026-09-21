@@ -54,9 +54,9 @@ const Register = () => {
 
     try {
       await register(trimmedName, trimmedEmail, password, passwordConfirm, trimmedUsername)
-      toast.success('Đăng ký thành công. Vui lòng kiểm tra email để xác thực tài khoản.')
+      toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.')
       console.log('Register successful, navigating to verify email pending state')
-      navigate('/verify-email/pending', { replace: true })
+      navigate('/verify-email/pending', { replace: true, state: { email: trimmedEmail } })
     } catch (err) {
       console.error('Register page catch error:', err)
       const errorMessage = err instanceof Error ? err.message : 'Đăng ký thất bại'

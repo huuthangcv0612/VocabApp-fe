@@ -64,7 +64,7 @@ export const normalizeAuthUser = (resData: unknown): AuthUser => {
 export const authApi = {
   register: async (name: string, email: string, password: string, passwordConfirm: string, username?: string) => {
     const finalUsername = username || (email ? email.split('@')[0] : '') || name.toLowerCase().replace(/\s+/g, '')
-    const response = await api.post<AuthResponse<AuthUser>>('/auth/register', {
+    const response = await api.post<AuthResponse<{ isEmailVerified?: boolean; emailVerified?: boolean; [key: string]: unknown }>>('/auth/register', {
       name,
       username: finalUsername,
       email,
@@ -72,19 +72,15 @@ export const authApi = {
       passwordConfirm,
     })
 
-    const isSuccess = response.status === 200 || response.status === 201 || response.data.success === true
+    const isSuccess = response.status === 200 || response.status === 201 || response.data?.success !== false
     if (!isSuccess) {
-      throw new Error(response.data.error || response.data.message || 'Đăng ký thất bại, vui lòng thử lại.')
-    }
-
-    const user = normalizeAuthUser(response.data)
-    if (!user || !user._id) {
-      throw new Error('Đăng ký thất bại: không nhận được dữ liệu user.')
+      throw new Error(response.data?.error || response.data?.message || 'Đăng ký thất bại, vui lòng thử lại.')
     }
 
     return {
-      token: response.data.token || (typeof response.data.data === 'object' && response.data.data !== null && 'token' in response.data.data ? (response.data.data as { token?: string }).token : '') || '',
-      user,
+      success: true,
+      message: response.data?.message || 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.',
+      user: response.data?.user || (typeof response.data?.data === 'object' ? response.data.data : undefined),
     }
   },
 
@@ -111,16 +107,26 @@ export const authApi = {
   },
 
   verifyEmail: async (token: string) => {
-    const response = await api.get<AuthResponse<null>>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
-    if (!response.data.success) {
-      throw new Error(response.data.error || response.data.message || 'Xác thực email thất bại.')
+    const response = await api.get<AuthResponse<null>>('/auth/verify-email', {
+      params: { token },
+    })
+    if (response.data?.success === false) {
+      throw new Error(response.data?.error || response.data?.message || 'Xác thực email thất bại.')
+    }
+    return {
+      success: true,
+      message: response.data?.message || 'Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.',
     }
   },
 
   resendVerification: async (email: string) => {
     const response = await api.post<AuthResponse<null>>('/auth/resend-verification', { email })
-    if (!response.data.success) {
-      throw new Error(response.data.error || response.data.message || 'Không thể gửi lại email xác thực.')
+    if (response.data?.success === false) {
+      throw new Error(response.data?.error || response.data?.message || 'Không thể gửi lại email xác thực.')
+    }
+    return {
+      success: true,
+      message: response.data?.message || 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.',
     }
   },
 
