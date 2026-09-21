@@ -41,6 +41,9 @@ export interface AIConversationSession {
   target_vocabulary: AITargetVocabulary[]
   ai_message: AIMessage
   turn_count: number
+  userTurnCount?: number
+  isCompleted?: boolean
+  scenario?: string
   status: AIConversationStatus
   messages?: ConversationTurn[]
   // Fields for completion summary from backend
@@ -56,7 +59,8 @@ export interface AIConversationSession {
 }
 
 export interface StartConversationRequest {
-  lesson_id: string
+  lessonId: string
+  lesson_id?: string
 }
 
 export interface StartConversationResponseData {
@@ -65,6 +69,9 @@ export interface StartConversationResponseData {
   target_vocabulary: AITargetVocabulary[]
   ai_message: AIMessage
   turn_count: number
+  userTurnCount?: number
+  isCompleted?: boolean
+  scenario?: string
   status: AIConversationStatus
 }
 
@@ -73,15 +80,19 @@ export interface SendMessageRequest {
 }
 
 export interface SendMessageResponseData {
-  session_id: string
-  user_message: AIMessage
+  session_id?: string
+  user_message?: AIMessage
   ai_message: AIMessage
   feedback?: AIFeedback
   used_vocabulary?: AITargetVocabulary[] | string[]
-  turn_count: number
-  status: AIConversationStatus
+  turn_count?: number
+  userTurnCount?: number
+  isCompleted?: boolean
+  scenario?: string
+  status?: AIConversationStatus
 }
 
 export type CompleteConversationResponseData = Record<string, unknown>
 
 export type GetConversationResponseData = Record<string, unknown>
+

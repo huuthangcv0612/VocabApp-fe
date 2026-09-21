@@ -3,23 +3,31 @@ import type { AILesson } from '../types/aiConversation'
 
 interface AIConversationHeaderProps {
   lesson: AILesson
-  turnCount: number
+  turnCount?: number
+  userTurnCount?: number
   maxTurns?: number
   onComplete?: () => void
   onExit?: () => void
   isCompleting?: boolean
   status?: string
+  isCompleted?: boolean
 }
 
 export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
   lesson,
-  turnCount,
-  maxTurns = 10,
+  turnCount = 0,
+  userTurnCount,
+  maxTurns = 3,
   onComplete,
   onExit,
   isCompleting = false,
   status = 'active',
+  isCompleted = false,
 }) => {
+  const effectiveTurnCount = typeof userTurnCount === 'number'
+    ? userTurnCount
+    : Math.min(turnCount, maxTurns)
+
   return (
     <div className="ai-header-card">
       <div className="ai-header-info">
@@ -28,11 +36,27 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
       </div>
 
       <div className="ai-header-progress">
-        <span className="ai-turn-badge">
-          Turn {turnCount} / {maxTurns}
-        </span>
+        <div
+          className="ai-turn-progress-wrapper"
+          title={`Tiến trình hội thoại: ${effectiveTurnCount}/${maxTurns} câu trả lời`}
+        >
+          <span className="ai-turn-badge">
+            <span className="ai-turn-label">Antworten: </span>
+            <span className="ai-turn-numbers">
+              <strong>{effectiveTurnCount}</strong> / {maxTurns}
+            </span>
+          </span>
+          <div className="ai-turn-dots" aria-label={`Tiến trình ${effectiveTurnCount} trên ${maxTurns}`}>
+            {Array.from({ length: maxTurns }).map((_, idx) => (
+              <span
+                key={idx}
+                className={`ai-turn-dot ${idx < effectiveTurnCount ? 'active' : ''}`}
+              />
+            ))}
+          </div>
+        </div>
 
-        {status === 'active' && onComplete && (
+        {status === 'active' && !isCompleted && effectiveTurnCount < maxTurns && onComplete && (
           <button
             onClick={onComplete}
             disabled={isCompleting}
@@ -60,6 +84,7 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
               cursor: 'pointer',
               fontWeight: 600,
             }}
+            aria-label="Thoát khỏi hội thoại"
           >
             Thoát ✕
           </button>
@@ -68,5 +93,6 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
     </div>
   )
 }
+
 
 export default AIConversationHeader

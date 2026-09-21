@@ -6,11 +6,19 @@ interface UserMessageBubbleProps {
 }
 
 export const UserMessageBubble: React.FC<UserMessageBubbleProps> = ({ message }) => {
+  const content =
+    typeof message === 'string'
+      ? message
+      : message?.content ||
+        (message as unknown as { message?: string; text?: string })?.message ||
+        (message as unknown as { message?: string; text?: string })?.text ||
+        ''
+
   return (
     <div className="ai-msg-row user">
       <div className="ai-avatar user">👤</div>
       <div className="ai-bubble user">
-        {message.content}
+        {content}
       </div>
     </div>
   )

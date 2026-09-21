@@ -1,37 +1,81 @@
 import { useMemo, type MouseEvent } from 'react'
 import { useSpeech } from '../../hooks/useSpeech'
 
-interface SpeakerButtonProps {
-  word: string
+export interface SpeakerButtonProps {
+  word?: string
+  text?: string
+  onSpeak?: (text: string) => void
+  isPlaying?: boolean
+  isLoading?: boolean
+  disabled?: boolean
+  className?: string
+  title?: string
+  size?: 'sm' | 'md' | 'lg'
 }
 
-export function SpeakerButton({ word }: SpeakerButtonProps) {
+export function SpeakerButton({
+  word,
+  text,
+  onSpeak,
+  isPlaying = false,
+  isLoading = false,
+  disabled = false,
+  className = '',
+  title,
+  size = 'md',
+}: SpeakerButtonProps) {
   const { speak, stop } = useSpeech()
   const isSupported = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window, [])
+
+  const contentToSpeak = text || word || ''
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
 
-    if (!word) return
+    if (!contentToSpeak || disabled || isLoading) return
 
+    // If custom onSpeak handler is provided (e.g. Azure TTS in AI Conversation)
+    if (onSpeak) {
+      onSpeak(contentToSpeak)
+      return
+    }
+
+    // Default Browser Speech fallback
     if (!isSupported) {
       stop()
       return
     }
 
-    speak(word, { lang: 'de-DE', rate: 0.95, pitch: 1, volume: 1 })
+    speak(contentToSpeak, { lang: 'de-DE', rate: 0.95, pitch: 1, volume: 1 })
   }
+
+  const isButtonDisabled = disabled || (onSpeak ? false : !isSupported)
+
+  const defaultTitle = isPlaying
+    ? 'Đang phát âm thanh...'
+    : isLoading
+    ? 'Đang tải âm thanh...'
+    : isSupported || onSpeak
+    ? `Phát âm: ${contentToSpeak}`
+    : 'Trình duyệt không hỗ trợ phát âm'
 
   return (
     <button
       type="button"
-      className="speaker-button"
+      className={`speaker-button ${isPlaying ? 'playing' : ''} ${isLoading ? 'loading' : ''} ${size} ${className}`.trim()}
       onClick={handleClick}
-      disabled={!isSupported}
-      aria-label={`Phát âm từ ${word}`}
-      title={isSupported ? `Phát âm: ${word}` : 'Trình duyệt không hỗ trợ phát âm'}
+      disabled={isButtonDisabled}
+      aria-label={title || defaultTitle}
+      title={title || defaultTitle}
     >
-      🔊
+      {isLoading ? (
+        <span className="speaker-spinner" aria-hidden="true">⏳</span>
+      ) : isPlaying ? (
+        <span className="speaker-wave" aria-hidden="true">🔊</span>
+      ) : (
+        <span aria-hidden="true">🔊</span>
+      )}
     </button>
   )
 }
+

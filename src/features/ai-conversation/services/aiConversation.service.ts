@@ -12,16 +12,33 @@ import type {
 export const aiConversationService = {
   /**
    * Start a new AI conversation session for a given lesson ID
-   * POST /api/ai/conversations/start
+   * POST /api/ai/conversation/start
    */
   startConversation: async (lessonId: string): Promise<StartConversationResponseData> => {
-    const payload: StartConversationRequest = { lesson_id: lessonId }
-    const response = await apiClient.post<ApiResponse<StartConversationResponseData>>(
-      '/ai/conversations/start',
-      payload,
-    )
-    return response.data.data
+    const payload: StartConversationRequest = {
+      lessonId,
+      lesson_id: lessonId,
+    }
+    try {
+      const response = await apiClient.post<ApiResponse<StartConversationResponseData>>(
+        '/ai/conversation/start',
+        payload,
+      )
+      return response.data.data
+    } catch (err: unknown) {
+      // Alias fallback in case backend only listens on plural route
+      const axiosErr = err as { response?: { status?: number } }
+      if (axiosErr?.response?.status === 404) {
+        const fallbackRes = await apiClient.post<ApiResponse<StartConversationResponseData>>(
+          '/ai/conversations/start',
+          payload,
+        )
+        return fallbackRes.data.data
+      }
+      throw err
+    }
   },
+
 
   /**
    * Send a user message in an active AI conversation session
@@ -58,4 +75,23 @@ export const aiConversationService = {
     )
     return response.data.data
   },
+
+  /**
+   * Synthesize speech using Azure TTS for AI conversation text
+   * POST /api/ai/conversation/tts
+   * Body: { text: string }
+   * Response: Binary MP3 Blob (audio/mpeg)
+   */
+  textToSpeech: async (text: string, signal?: AbortSignal): Promise<Blob> => {
+    const response = await apiClient.post<Blob>(
+      '/ai/conversation/tts',
+      { text },
+      {
+        responseType: 'blob',
+        signal,
+      },
+    )
+    return response.data
+  },
 }
+

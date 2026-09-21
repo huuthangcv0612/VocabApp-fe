@@ -62,8 +62,9 @@ export const LessonLearnPage: React.FC = () => {
       setIsStartingAI(true)
       const data = await aiConversationService.startConversation(activeLessonId)
       if (data && data.session_id) {
-        navigate(`/ai-conversation/${data.session_id}`)
+        navigate(`/ai-conversation/${data.session_id}`, { state: { sessionData: data } })
       } else {
+
         toast.error('Không thể tạo phiên hội thoại AI.')
       }
     } catch (err: unknown) {
