@@ -1,0 +1,52 @@
+{
+  "checkout": {
+    "title": "Thanh Toán Gói {{name}}",
+    "subtitle": "Quét mã VietQR hoặc chuyển khoản theo thông tin bên dưới để kích hoạt gói dịch vụ DeutschUp",
+    "loading": "Đang tải thông tin thanh toán...",
+    "planBadge": "⚡ GÓI {{name}}",
+    "openBankingApp": "Mở app ngân hàng để quét mã QR",
+    "bankInfoTitle": "Thông tin chuyển khoản",
+    "bankName": "Ngân hàng",
+    "accountNumber": "Số tài khoản",
+    "accountName": "Chủ tài khoản",
+    "transferWarning": "⚠️ Nội dung chuyển khoản (Bắt buộc chính xác):",
+    "copy": "📋 Copy",
+    "copyContent": "📋 Sao chép nội dung",
+    "copied": "✓ Đã chép",
+    "copiedContent": "✓ Đã sao chép",
+    "waitingStatus": "Đang chờ hệ thống ghi nhận thanh toán...",
+    "checkStatusBtn": "TÔI ĐÃ THANH TOÁN",
+    "checkingStatus": "ĐANG KIỂM TRA...",
+    "backToPricing": "← Quay lại chọn gói khác",
+    "orderNotFound": "Không tìm thấy thông tin đơn hàng thanh toán.",
+    "returnToPricing": "Quay lại bảng giá",
+    "cancelOrderBtn": "✕ Hủy đơn hàng này",
+    "orderCancelled": "Đơn hàng đã được hủy thành công.",
+    "orderExpired": "Đơn hàng này đã hết hạn thanh toán. Vui lòng tạo đơn mới.",
+    "paymentSuccessToast": "Thanh toán thành công!",
+    "waitingWebhookToast": "Hệ thống đang chờ ngân hàng xác nhận giao dịch... Vui lòng đợi trong giây lát.",
+    "checkStatusError": "Không thể kiểm tra trạng thái thanh toán. Thử lại sau."
+  },
+  "result": {
+    "heroTitle": "KẾT QUẢ XÁC MINH THANH TOÁN",
+    "heroSubtitle": "Kết quả xác minh giao dịch được trả về trực tiếp từ Backend API.",
+    "backToProfile": "← Về trang tài khoản",
+    "successHeading": "Kích Hoạt Gói Dịch Vụ Thành Công!",
+    "failedHeading": "Chưa Nhận Được Xác Minh Thanh Toán",
+    "successDesc": "Chúc mừng bạn! Backend đã xác minh thành công giao dịch và nâng cấp tài khoản của bạn lên Gói {{name}}. Tất cả các tính năng AI và bài tập nâng cao đã được mở khóa.",
+    "failedDesc": "Backend chưa thể khớp lệnh giao dịch thanh toán này. Nếu bạn đã thực hiện chuyển khoản, vui lòng đợi ít phút hoặc nhấn xác minh lại.",
+    "viewSubscription": "Xem Trạng Thái Gói",
+    "startAdvancedLearning": "Bắt Đầu Học Bài Nâng Cao ➔",
+    "backToPricing": "Quay Lại Bảng Giá",
+    "tryAgainLater": "Thử Lại Sau"
+  },
+  "status": {
+    "pending": "Đang chờ thanh toán",
+    "paid": "Đã thanh toán",
+    "success": "Thanh toán thành công",
+    "failed": "Thanh toán thất bại",
+    "expired": "Đã hết hạn",
+    "cancelled": "Đã hủy bỏ",
+    "active": "Đang hoạt động"
+  }
+}

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface LearningPathSidebarProps {
   completedLessonsCount: number
@@ -13,6 +14,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
   progressPercentage,
   totalXp,
 }) => {
+  const { t } = useTranslation('learning')
   // Compute daily goal metric dynamically (e.g. 3 out of 5)
   const dailyTarget = 5
   const dailyCurrent = Math.min(completedLessonsCount, dailyTarget)
@@ -25,9 +27,9 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
         <div className="lp-sidebar-card-header">
           <div className="lp-card-header-title">
             <span className="lp-header-icon">🎯</span>
-            <h4>Mục tiêu hôm nay</h4>
+            <h4>{t('path.dailyGoal')}</h4>
           </div>
-          <span className="lp-header-link">Xem chi tiết ➔</span>
+          <span className="lp-header-link">{t('path.viewDetail')}</span>
         </div>
 
         <div className="lp-goal-body">
@@ -40,8 +42,8 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
           </div>
 
           <div className="lp-goal-info">
-            <h5 className="lp-goal-title">Hoàn thành {dailyTarget} bài học</h5>
-            <p className="lp-goal-desc">Để nhận thêm 50 XP thưởng</p>
+            <h5 className="lp-goal-title">{t('path.completeDaily', { count: dailyTarget })}</h5>
+            <p className="lp-goal-desc">{t('path.toEarnBonus', { xp: 50 })}</p>
           </div>
         </div>
 
@@ -50,7 +52,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
           <div className="lp-reward-left">
             <span className="lp-reward-icon">🎁</span>
             <div>
-              <span className="lp-reward-label">Phần thưởng hôm nay</span>
+              <span className="lp-reward-label">{t('path.rewardToday')}</span>
               <span className="lp-reward-val">+50 XP</span>
             </div>
           </div>
@@ -63,7 +65,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
         <div className="lp-sidebar-card-header">
           <div className="lp-card-header-title">
             <span className="lp-header-icon">📊</span>
-            <h4>Thống kê tiến độ</h4>
+            <h4>{t('path.statsTitle')}</h4>
           </div>
         </div>
 
@@ -71,7 +73,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
           <div className="lp-stat-row">
             <div className="lp-stat-label-group">
               <span className="lp-stat-icon">⚡</span>
-              <span>Tổng số bài học</span>
+              <span>{t('path.totalLessons')}</span>
             </div>
             <span className="lp-stat-value">{completedLessonsCount} / {totalLessonsCount}</span>
           </div>
@@ -79,7 +81,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
           <div className="lp-stat-row">
             <div className="lp-stat-label-group">
               <span className="lp-stat-icon">🛡️</span>
-              <span>Tổng XP</span>
+              <span>{t('path.totalXp')}</span>
             </div>
             <span className="lp-stat-value">{totalXp} XP</span>
           </div>
@@ -88,7 +90,7 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
             <div className="lp-stat-row-top">
               <div className="lp-stat-label-group">
                 <span className="lp-stat-icon">❤️</span>
-                <span>Tỷ lệ hoàn thành</span>
+                <span>{t('path.completionRate')}</span>
               </div>
               <span className="lp-stat-value">{progressPercentage}%</span>
             </div>
@@ -106,9 +108,9 @@ export const LearningPathSidebar: React.FC<LearningPathSidebarProps> = ({
             <span className="lp-mascot-emoji">🦜</span>
           </div>
           <div className="lp-mascot-text">
-            <h5 className="lp-mascot-title">Cố lên!</h5>
+            <h5 className="lp-mascot-title">{t('path.cheerTitle')}</h5>
             <p className="lp-mascot-desc">
-              Bạn đang tiến bộ rất tốt. Hãy tiếp tục nhé! ✨
+              {t('path.cheerDesc')}
             </p>
           </div>
         </div>

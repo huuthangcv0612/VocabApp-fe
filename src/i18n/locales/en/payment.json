@@ -1,0 +1,52 @@
+{
+  "checkout": {
+    "title": "Payment for {{name}} Plan",
+    "subtitle": "Scan the VietQR code or transfer funds with the information below to activate your DeutschUp plan",
+    "loading": "Loading payment information...",
+    "planBadge": "⚡ {{name}} PLAN",
+    "openBankingApp": "Open your banking app to scan the QR code",
+    "bankInfoTitle": "Transfer Information",
+    "bankName": "Bank",
+    "accountNumber": "Account Number",
+    "accountName": "Account Name",
+    "transferWarning": "⚠️ Transfer Memo (Exact text required):",
+    "copy": "📋 Copy",
+    "copyContent": "📋 Copy Memo",
+    "copied": "✓ Copied",
+    "copiedContent": "✓ Copied",
+    "waitingStatus": "Waiting for payment confirmation...",
+    "checkStatusBtn": "I HAVE PAID",
+    "checkingStatus": "CHECKING...",
+    "backToPricing": "← Back to select another plan",
+    "orderNotFound": "Payment order details not found.",
+    "returnToPricing": "Return to Pricing",
+    "cancelOrderBtn": "✕ Cancel this order",
+    "orderCancelled": "Order cancelled successfully.",
+    "orderExpired": "This payment order has expired. Please create a new order.",
+    "paymentSuccessToast": "Payment successful!",
+    "waitingWebhookToast": "Waiting for bank confirmation... Please wait a moment.",
+    "checkStatusError": "Unable to verify payment status. Please try again."
+  },
+  "result": {
+    "heroTitle": "PAYMENT VERIFICATION RESULT",
+    "heroSubtitle": "Transaction verification result returned directly from backend API.",
+    "backToProfile": "← Back to subscription",
+    "successHeading": "Plan Activated Successfully!",
+    "failedHeading": "Payment Not Yet Verified",
+    "successDesc": "Congratulations! The backend has verified your payment and upgraded your account to the {{name}} plan. All AI and advanced learning exercises are now unlocked.",
+    "failedDesc": "Backend could not match this payment transaction yet. If you have already transferred, please wait a minute or re-check.",
+    "viewSubscription": "View Plan Status",
+    "startAdvancedLearning": "Start Advanced Lessons ➔",
+    "backToPricing": "Back to Pricing",
+    "tryAgainLater": "Try Again Later"
+  },
+  "status": {
+    "pending": "Pending Payment",
+    "paid": "Paid",
+    "success": "Payment Successful",
+    "failed": "Payment Failed",
+    "expired": "Expired",
+    "cancelled": "Cancelled",
+    "active": "Active"
+  }
+}

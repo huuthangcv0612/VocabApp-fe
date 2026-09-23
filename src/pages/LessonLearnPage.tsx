@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
@@ -14,6 +15,7 @@ import { toast } from 'react-hot-toast'
 import '../styles/pages/lesson.css'
 
 export const LessonLearnPage: React.FC = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId
   const navigate = useNavigate()
@@ -64,11 +66,10 @@ export const LessonLearnPage: React.FC = () => {
       if (data && data.session_id) {
         navigate(`/ai-conversation/${data.session_id}`, { state: { sessionData: data } })
       } else {
-
-        toast.error('Không thể tạo phiên hội thoại AI.')
+        toast.error(t('exercises.createAiSessionError'))
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Không thể bắt đầu hội thoại AI.'
+      const msg = err instanceof Error ? err.message : t('exercises.startAiError')
       toast.error(msg)
     } finally {
       setIsStartingAI(false)
@@ -84,14 +85,14 @@ export const LessonLearnPage: React.FC = () => {
         const data = await studentLearningService.getLessonLearningData(activeLessonId)
         setLessonData(data)
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Không thể tải bài học.'
+        const msg = err instanceof Error ? err.message : t('exercises.loadError')
         setError(msg)
       } finally {
         setLoading(false)
       }
     }
     fetchLesson()
-  }, [activeLessonId])
+  }, [activeLessonId, t])
 
   // Reset exercise-specific user input when moving to a new exercise
   useEffect(() => {
@@ -157,7 +158,7 @@ export const LessonLearnPage: React.FC = () => {
       setStep('exercise')
       setExerciseIndex(0)
     } else {
-      toast.error('Bài học này chưa có từ vựng hoặc bài tập.')
+      toast.error(t('exercises.noContentError'))
     }
   }
 
@@ -203,13 +204,13 @@ export const LessonLearnPage: React.FC = () => {
 
     if (currentEx.type === 'matching') {
       if (!Array.isArray(userAnswer) || userAnswer.length === 0) {
-        toast.error('Vui lòng ghép đầy đủ tất cả các cặp từ.')
+        toast.error(t('exercises.matchingIncompleteError'))
         return
       }
       finalAnswer = formatSubmitAnswer(currentEx, userAnswer as Array<{ left: string; right: string }>)
     } else if (currentEx.type === 'word_arrangement' || currentEx.type === 'sentence_arrangement') {
       if (selectedTokens.length === 0) {
-        toast.error('Vui lòng chọn các từ để tạo câu.')
+        toast.error(t('exercises.selectWordsError'))
         return
       }
       const tokenStrings = selectedTokens.map((t) => t.text)
@@ -221,7 +222,7 @@ export const LessonLearnPage: React.FC = () => {
     } else if (currentEx.type === 'fill_blank') {
       const textAns = typeof userAnswer === 'string' ? userAnswer : String(userAnswer || '')
       if (!textAns.trim()) {
-        toast.error('Vui lòng nhập câu trả lời.')
+        toast.error(t('exercises.enterAnswerError'))
         return
       }
       finalAnswer = formatSubmitAnswer(currentEx, textAns)
@@ -235,7 +236,7 @@ export const LessonLearnPage: React.FC = () => {
       (typeof finalAnswer === 'string' && !finalAnswer.trim()) ||
       (Array.isArray(finalAnswer) && finalAnswer.length === 0)
     ) {
-      toast.error(currentEx.type === 'matching' ? 'Vui lòng ghép đầy đủ các cặp từ.' : 'Vui lòng hoàn thành bài tập.')
+      toast.error(currentEx.type === 'matching' ? t('exercises.matchingIncompleteError') : t('exercises.completeExerciseError'))
       return
     }
 
@@ -274,7 +275,7 @@ export const LessonLearnPage: React.FC = () => {
         setTotalXpEarned((prev) => prev + xpEarned)
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Gửi câu trả lời thất bại.'
+      const msg = err instanceof Error ? err.message : t('exercises.submitFailed')
       toast.error(msg)
     } finally {
       setIsSubmitting(false)
@@ -302,7 +303,7 @@ export const LessonLearnPage: React.FC = () => {
         <Header />
         <div style={{ textAlign: 'center', padding: '80px 20px', minHeight: '60vh' }}>
           <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-          <p style={{ fontWeight: 600, color: '#475569' }}>Đang tải bài học...</p>
+          <p style={{ fontWeight: 600, color: '#475569' }}>{t('exercises.loadingLesson')}</p>
         </div>
         <Footer />
       </div>
@@ -314,9 +315,9 @@ export const LessonLearnPage: React.FC = () => {
       <div className="lesson">
         <Header />
         <div style={{ textAlign: 'center', padding: '60px 20px', minHeight: '60vh', color: '#dc2626' }}>
-          <p>{error || 'Không thể tải bài học.'}</p>
+          <p>{error || t('exercises.loadError')}</p>
           <button className="btn-admin-primary" onClick={() => navigate('/learning-path')}>
-            Về Lộ Trình Học
+            {t('exercises.backToPathSimple')}
           </button>
         </div>
         <Footer />
@@ -340,7 +341,7 @@ export const LessonLearnPage: React.FC = () => {
             className="btn-admin-secondary"
             style={{ fontSize: '0.88rem', padding: '6px 16px', borderRadius: '9999px', cursor: 'pointer' }}
           >
-            ← Quay lại Lộ Trình Học
+            {t('exercises.backToPathSimple')}
           </button>
         </div>
         {step === 'intro' && (
@@ -350,7 +351,7 @@ export const LessonLearnPage: React.FC = () => {
               {lesson.title || lesson.lektion_name}
             </h1>
             <p style={{ color: '#475569', fontSize: '1rem', marginBottom: '24px', lineHeight: 1.6 }}>
-              {lesson.description || 'Chào mừng bạn đến với bài học! Tích lũy từ vựng và tham gia các bài tập tương tác ngay bây giờ.'}
+              {lesson.description || t('exercises.introDescDefault')}
             </p>
 
             <div
@@ -363,22 +364,22 @@ export const LessonLearnPage: React.FC = () => {
             >
               <div style={{ background: '#e0f2fe', padding: '16px', borderRadius: '16px', color: '#0369a1' }}>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{vocabularies.length}</div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>📚 Từ Vựng</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>📚 {t('lektion.vocab')}</div>
               </div>
 
               <div style={{ background: '#fae8ff', padding: '16px', borderRadius: '16px', color: '#86198f' }}>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{exercises.length}</div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>✍️ Bài Tập</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>✍️ {t('lektion.exercise')}</div>
               </div>
 
               <div style={{ background: '#dcfce7', padding: '16px', borderRadius: '16px', color: '#15803d' }}>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{lesson.estimated_minutes || 15}</div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>⏱️ Phút Học</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>⏱️ {t('lektion.studyTime')}</div>
               </div>
 
               <div style={{ background: '#fef3c7', padding: '16px', borderRadius: '16px', color: '#b45309' }}>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800 }}>{lesson.xp || 20}</div>
-                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>⚡ Điểm XP</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>⚡ {t('lektion.xpPoints')}</div>
               </div>
             </div>
 
@@ -387,7 +388,7 @@ export const LessonLearnPage: React.FC = () => {
               className="btn-admin-primary"
               style={{ width: '100%', padding: '16px', fontSize: '1.1rem', borderRadius: '9999px', boxShadow: '0 4px 14px rgba(42,99,232,0.35)' }}
             >
-              Bắt Đầu Học Ngay ▶
+              {t('exercises.startNow')}
             </button>
           </div>
         )}
@@ -396,7 +397,7 @@ export const LessonLearnPage: React.FC = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <span style={{ fontWeight: 700, color: '#64748b', fontSize: '0.9rem' }}>
-                📖 VOCABULARY PREVIEW: <strong>{vocabIndex + 1} / {vocabularies.length}</strong>
+                📖 {t('exercises.vocabPreviewTitle', { current: vocabIndex + 1, total: vocabularies.length })}
               </span>
 
               {exercises.length > 0 && (
@@ -408,7 +409,7 @@ export const LessonLearnPage: React.FC = () => {
                     setExerciseIndex(0)
                   }}
                 >
-                  Bỏ Qua Preview ➔ Start Exercises
+                  {t('exercises.skipPreview')}
                 </button>
               )}
             </div>
@@ -426,7 +427,7 @@ export const LessonLearnPage: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
                 {currentVocab.gender && <span className="badge-pill badge-a1">{currentVocab.gender}</span>}
                 <span className={`badge-pill ${currentVocab.is_new !== false ? 'badge-a2' : 'badge-draft'}`}>
-                  {currentVocab.is_new !== false ? '✨ Từ Mới' : '🔄 Ôn Tập'}
+                  {currentVocab.is_new !== false ? t('exercises.newWord') : t('exercises.reviewWord')}
                 </span>
               </div>
 
@@ -445,12 +446,12 @@ export const LessonLearnPage: React.FC = () => {
                 className="btn-admin-secondary"
                 style={{ borderRadius: '9999px', padding: '8px 20px', marginBottom: '24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                🔊 Phát Âm Thanh
+                {t('exercises.listenAudio')}
               </button>
 
               <div style={{ backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px', margin: '0 auto 24px auto', maxWidth: '440px' }}>
                 <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-                  NGHĨA TIẾNG VIỆT
+                  {t('exercises.meaningLabel')}
                 </div>
                 <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
                   {currentVocab.meaning}
@@ -464,7 +465,7 @@ export const LessonLearnPage: React.FC = () => {
                   onClick={handlePrevVocab}
                   style={{ flex: 1, padding: '12px' }}
                 >
-                  ◀ Từ Trước
+                  {t('exercises.prevWord')}
                 </button>
 
                 <button
@@ -472,7 +473,7 @@ export const LessonLearnPage: React.FC = () => {
                   onClick={handleNextVocab}
                   style={{ flex: 1, padding: '12px' }}
                 >
-                  {vocabIndex < vocabularies.length - 1 ? 'Từ Tiếp Theo ▶' : 'Bắt Đầu Làm Bài Tập ✍️'}
+                  {vocabIndex < vocabularies.length - 1 ? t('exercises.nextWord') : t('exercises.startExercises')}
                 </button>
               </div>
             </div>
@@ -483,7 +484,7 @@ export const LessonLearnPage: React.FC = () => {
           <div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 700, color: '#64748b', marginBottom: '8px' }}>
-                <span>EXERCISE {exerciseIndex + 1} / {exercises.length}</span>
+                <span>{t('exercises.exerciseCounter', { current: exerciseIndex + 1, total: exercises.length })}</span>
                 <span>⚡ {currentExercise.xp || 5} XP</span>
               </div>
               <div style={{ height: '12px', backgroundColor: '#e2e8f0', borderRadius: '999px', overflow: 'hidden' }}>
@@ -513,7 +514,7 @@ export const LessonLearnPage: React.FC = () => {
                         className="btn-admin-primary"
                         style={{ padding: '14px 28px', borderRadius: '9999px', fontSize: '1.05rem' }}
                       >
-                        🔊 phát âm thanh bài tập
+                        {t('exercises.playExerciseAudio')}
                       </button>
                     </div>
                   )}
@@ -552,7 +553,7 @@ export const LessonLearnPage: React.FC = () => {
               {currentExercise.type === 'translation' && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
-                    🌐 Dịch câu sau sang tiếng Đức:
+                    {t('exercises.translatePrompt')}
                   </h3>
                   <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#2a63e8', marginBottom: '20px', background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
                     "{currentExercise.content?.prompt || currentExercise.question}"
@@ -560,7 +561,7 @@ export const LessonLearnPage: React.FC = () => {
                   <input
                     type="text"
                     className="form-input"
-                    placeholder="Nhập câu dịch tiếng Đức tại đây..."
+                    placeholder={t('exercises.translatePlaceholder')}
                     value={typeof userAnswer === 'string' ? userAnswer : ''}
                     onChange={(e) => setUserAnswer(e.target.value)}
                     disabled={Boolean(submissionResult)}
@@ -577,7 +578,7 @@ export const LessonLearnPage: React.FC = () => {
                 return (
                   <div>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-                      ✏️ Điền từ còn thiếu vào chỗ trống:
+                      {t('exercises.fillBlankPrompt')}
                     </h3>
                     <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0f172a', marginBottom: '16px', background: '#f8fafc', padding: '18px 20px', borderRadius: '16px', border: '1px solid #cbd5e1', lineHeight: 1.5 }}>
                       {questionText}
@@ -586,7 +587,7 @@ export const LessonLearnPage: React.FC = () => {
                     {hintText && (
                       <div style={{ marginBottom: '20px', padding: '12px 16px', backgroundColor: '#f0f9ff', borderLeft: '4px solid #0284c7', borderRadius: '10px' }}>
                         <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0369a1', display: 'block', textTransform: 'uppercase', marginBottom: '2px' }}>
-                          💡 Gợi ý:
+                          💡 {t('exercises.hint')}
                         </span>
                         <span style={{ fontSize: '1rem', color: '#0c4a6e', fontWeight: 500 }}>
                           {hintText}
@@ -597,7 +598,7 @@ export const LessonLearnPage: React.FC = () => {
                     <input
                       type="text"
                       className="form-input"
-                      placeholder="Nhập câu trả lời..."
+                      placeholder={t('exercises.fillBlankPlaceholder')}
                       value={typeof userAnswer === 'string' ? userAnswer : ''}
                       onChange={(e) => setUserAnswer(e.target.value)}
                       onKeyDown={(e) => {
@@ -619,7 +620,7 @@ export const LessonLearnPage: React.FC = () => {
               {(currentExercise.type === 'word_arrangement' || currentExercise.type === 'sentence_arrangement') && (
                 <div>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-                    🧩 {currentExercise.question || (currentExercise.content?.question as string) || 'Sắp xếp các từ thành câu đúng:'}
+                    🧩 {currentExercise.question || (currentExercise.content?.question as string) || t('exercises.arrangePrompt')}
                   </h3>
 
                   <div
@@ -638,7 +639,7 @@ export const LessonLearnPage: React.FC = () => {
                   >
                     {selectedTokens.length === 0 ? (
                       <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '0.95rem' }}>
-                        Chạm vào các từ bên dưới để ghép câu...
+                        {t('exercises.arrangePlaceholder')}
                       </span>
                     ) : (
                       selectedTokens.map((token) => (
@@ -716,7 +717,7 @@ export const LessonLearnPage: React.FC = () => {
                       cursor: isSubmitting || (currentExercise.type === 'matching' && (!Array.isArray(userAnswer) || userAnswer.length === 0)) ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    {isSubmitting ? 'Đang kiểm tra...' : 'Kiểm Tra Đáp Án ✓'}
+                    {isSubmitting ? t('exercises.checking') : t('exercises.checkAnswer')}
                   </button>
                 </div>
               )}
@@ -741,7 +742,7 @@ export const LessonLearnPage: React.FC = () => {
                   <div style={{ fontSize: '2.5rem' }}>{submissionResult.correct ? '🎉' : '❌'}</div>
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', color: submissionResult.correct ? '#15803d' : '#b91c1c' }}>
-                      {submissionResult.correct ? '✓ Chính xác!' : '✗ Chưa chính xác'}
+                      {submissionResult.correct ? t('exercises.correct') : t('exercises.incorrect')}
                     </h4>
                     <p style={{ margin: 0, color: submissionResult.correct ? '#166534' : '#991b1b', fontSize: '0.92rem' }}>
                       {submissionResult.correct
@@ -749,7 +750,7 @@ export const LessonLearnPage: React.FC = () => {
                         : submissionResult.feedback
                         ? submissionResult.feedback
                         : currentExercise.correctAnswer
-                        ? `Đáp án đúng là: ${currentExercise.correctAnswer}`
+                        ? `${t('exercises.correctAnswerIs')} ${currentExercise.correctAnswer}`
                         : ''}
                     </p>
                   </div>
@@ -764,7 +765,7 @@ export const LessonLearnPage: React.FC = () => {
                     borderRadius: '9999px',
                   }}
                 >
-                  Tiếp Tục ➔
+                  {t('exercises.continueBtn')}
                 </button>
               </div>
             )}
@@ -775,10 +776,10 @@ export const LessonLearnPage: React.FC = () => {
           <div className="admin-card" style={{ padding: '40px', borderRadius: '24px', textAlign: 'center' }}>
             <div style={{ fontSize: '4rem', marginBottom: '12px' }}>🏆</div>
             <h1 style={{ fontSize: '2.2rem', fontWeight: 800, color: '#15803d', margin: '0 0 8px 0' }}>
-              Lesson Complete!
+              {t('exercises.lessonComplete')}
             </h1>
             <p style={{ color: '#64748b', fontSize: '1rem', marginBottom: '32px' }}>
-              Chúc mừng bạn đã hoàn thành bài học <strong>{lessonTitle}</strong>!
+              {t('exercises.congrats', { title: lessonTitle })}
             </p>
 
             <div
@@ -793,19 +794,19 @@ export const LessonLearnPage: React.FC = () => {
                 <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
                   {correctCount} / {exercises.length}
                 </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>✓ Câu Trả Lời Đúng</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>✓ {t('exercises.correctCountLabel')}</div>
               </div>
 
               <div style={{ background: '#fef3c7', padding: '20px', borderRadius: '20px', color: '#b45309' }}>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>+{totalXpEarned} XP</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>⚡ Điểm Thưởng</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>⚡ {t('exercises.xpEarnedLabel')}</div>
               </div>
 
               <div style={{ background: '#e0f2fe', padding: '20px', borderRadius: '20px', color: '#0369a1' }}>
                 <div style={{ fontSize: '1.8rem', fontWeight: 800 }}>
                   {Math.round((Date.now() - startTime) / 1000)}s
                 </div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>⏱️ Thời Gian Học</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 700 }}>⏱️ {t('exercises.timeSpentLabel')}</div>
               </div>
             </div>
 
@@ -815,7 +816,7 @@ export const LessonLearnPage: React.FC = () => {
                 style={{ padding: '14px 24px', borderRadius: '9999px' }}
                 onClick={() => navigate('/learning-path')}
               >
-                🏠 Quay lại Lộ Trình Học
+                {t('exercises.backToPath')}
               </button>
 
               <button
@@ -829,7 +830,7 @@ export const LessonLearnPage: React.FC = () => {
                 disabled={isStartingAI}
                 onClick={handleStartAIConversation}
               >
-                {isStartingAI ? '🤖 Đang khởi tạo AI...' : '🤖 Luyện tập với AI'}
+                {isStartingAI ? t('exercises.startingAI') : t('exercises.practiceAI')}
               </button>
 
               <button
@@ -843,7 +844,7 @@ export const LessonLearnPage: React.FC = () => {
                   }
                 }}
               >
-                Tiếp Tục Khóa Học ➔
+                {t('exercises.continueCourse')}
               </button>
             </div>
           </div>

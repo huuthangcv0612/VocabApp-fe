@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AILesson } from '../types/aiConversation'
 
 interface AIConversationHeaderProps {
@@ -24,6 +25,7 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
   status = 'active',
   isCompleted = false,
 }) => {
+  const { t } = useTranslation('ai')
   const effectiveTurnCount = typeof userTurnCount === 'number'
     ? userTurnCount
     : Math.min(turnCount, maxTurns)
@@ -38,15 +40,15 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
       <div className="ai-header-progress">
         <div
           className="ai-turn-progress-wrapper"
-          title={`Tiến trình hội thoại: ${effectiveTurnCount}/${maxTurns} câu trả lời`}
+          title={`${t('conversation.answers')} ${effectiveTurnCount}/${maxTurns}`}
         >
           <span className="ai-turn-badge">
-            <span className="ai-turn-label">Antworten: </span>
+            <span className="ai-turn-label">{t('conversation.answers')} </span>
             <span className="ai-turn-numbers">
               <strong>{effectiveTurnCount}</strong> / {maxTurns}
             </span>
           </span>
-          <div className="ai-turn-dots" aria-label={`Tiến trình ${effectiveTurnCount} trên ${maxTurns}`}>
+          <div className="ai-turn-dots" aria-label={`${t('conversation.answers')} ${effectiveTurnCount} / ${maxTurns}`}>
             {Array.from({ length: maxTurns }).map((_, idx) => (
               <span
                 key={idx}
@@ -69,7 +71,7 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
               fontWeight: 600,
             }}
           >
-            {isCompleting ? 'Đang hoàn thành...' : 'Hoàn thành 🏁'}
+            {isCompleting ? t('conversation.completing') : t('conversation.completeBtn')}
           </button>
         )}
 
@@ -84,15 +86,14 @@ export const AIConversationHeader: React.FC<AIConversationHeaderProps> = ({
               cursor: 'pointer',
               fontWeight: 600,
             }}
-            aria-label="Thoát khỏi hội thoại"
+            aria-label={t('conversation.exitBtn')}
           >
-            Thoát ✕
+            {t('conversation.exitBtn')}
           </button>
         )}
       </div>
     </div>
   )
 }
-
 
 export default AIConversationHeader

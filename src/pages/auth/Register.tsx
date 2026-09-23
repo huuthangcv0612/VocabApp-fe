@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import { FormInput } from '../../components/auth/FormInput'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const Register = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -26,41 +28,37 @@ const Register = () => {
     const trimmedName = name.trim()
     const trimmedEmail = email.trim()
     const trimmedUsername = username.trim() || undefined
-    console.log('Register form submitted:', { name: trimmedName, email: trimmedEmail, username: trimmedUsername })
 
     if (trimmedName.length < 2) {
-      setError('Vui lòng nhập họ tên hợp lệ.')
+      setError(t('validation.nameMin', { defaultValue: 'Vui lòng nhập họ tên hợp lệ.' }))
       setLoading(false)
       return
     }
 
     if (!validateEmail(trimmedEmail)) {
-      setError('Vui lòng nhập địa chỉ email hợp lệ.')
+      setError(t('validation.invalidEmail', { defaultValue: 'Vui lòng nhập địa chỉ email hợp lệ.' }))
       setLoading(false)
       return
     }
 
     if (password.length < 8) {
-      setError('Mật khẩu phải có ít nhất 8 ký tự.')
+      setError(t('validation.passwordMin', { defaultValue: 'Mật khẩu phải có ít nhất 8 ký tự.' }))
       setLoading(false)
       return
     }
 
     if (password !== passwordConfirm) {
-      setError('Mật khẩu và xác nhận mật khẩu phải trùng khớp.')
+      setError(t('validation.passwordMismatch', { defaultValue: 'Mật khẩu và xác nhận mật khẩu phải trùng khớp.' }))
       setLoading(false)
       return
     }
 
     try {
       await register(trimmedName, trimmedEmail, password, passwordConfirm, trimmedUsername)
-      toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.')
-      console.log('Register successful, navigating to verify email pending state')
+      toast.success(t('register.successToast'))
       navigate('/verify-email/pending', { replace: true, state: { email: trimmedEmail } })
     } catch (err) {
-      console.error('Register page catch error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Đăng ký thất bại'
-      console.error('Setting error:', errorMessage)
+      const errorMessage = err instanceof Error ? err.message : t('register.fail', { defaultValue: 'Đăng ký thất bại' })
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -72,69 +70,69 @@ const Register = () => {
     <main className="auth-page">
       <section className="auth-page__container">
         <div className="auth-page__header">
-          <h1 className="auth-page__title">Đăng ký</h1>
-          <p className="auth-page__subtitle">Tạo tài khoản để bắt đầu hành trình học tiếng Đức.</p>
+          <h1 className="auth-page__title">{t('register.title')}</h1>
+          <p className="auth-page__subtitle">{t('register.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
-        <FormInput
-          label="Họ tên"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          autoComplete="name"
-          required
-        />
-        <FormInput
-          label="Tên tài khoản (Username)"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          autoComplete="username"
-          placeholder="Tùy chọn (Tự tạo từ Email nếu bỏ trống)"
-        />
-        <FormInput
-          label="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          required
-        />
-        <FormInput
-          label="Mật khẩu"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
-        <FormInput
-          label="Xác nhận mật khẩu"
-          type="password"
-          value={passwordConfirm}
-          onChange={(e) => setPasswordConfirm(e.target.value)}
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
+          <FormInput
+            label={t('register.name')}
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoComplete="name"
+            required
+          />
+          <FormInput
+            label={t('register.username')}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoComplete="username"
+            placeholder={t('register.usernamePlaceholder')}
+          />
+          <FormInput
+            label={t('register.email')}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            required
+          />
+          <FormInput
+            label={t('register.password')}
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            minLength={8}
+            required
+          />
+          <FormInput
+            label={t('register.passwordConfirm')}
+            type="password"
+            value={passwordConfirm}
+            onChange={(e) => setPasswordConfirm(e.target.value)}
+            autoComplete="new-password"
+            minLength={8}
+            required
+          />
 
-        {error && <p className="auth-form__error">{error}</p>}
+          {error && <p className="auth-form__error">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="auth-form__submit"
-        >
-          {loading ? 'Đang tạo tài khoản...' : 'Đăng ký'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="auth-form__submit"
+          >
+            {loading ? t('register.submitting') : t('register.submit')}
+          </button>
+        </form>
 
-      <p className="auth-form__footer">
-          Đã có tài khoản?{' '}
+        <p className="auth-form__footer">
+          {t('register.hasAccount')}{' '}
           <Link to="/login" className="font-semibold text-slate-900 hover:text-slate-700">
-            Đăng nhập
+            {t('register.loginNow')}
           </Link>
         </p>
       </section>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AITargetVocabulary as TargetVocabType } from '../types/aiConversation'
 
 interface AITargetVocabularyProps {
@@ -6,6 +7,7 @@ interface AITargetVocabularyProps {
 }
 
 export const AITargetVocabulary: React.FC<AITargetVocabularyProps> = ({ vocabularies }) => {
+  const { t } = useTranslation('ai')
   const [isOpen, setIsOpen] = useState(true)
 
   if (!vocabularies || vocabularies.length === 0) return null
@@ -14,10 +16,10 @@ export const AITargetVocabulary: React.FC<AITargetVocabularyProps> = ({ vocabula
     <div className="ai-vocab-card">
       <div className="ai-vocab-header" onClick={() => setIsOpen((prev) => !prev)}>
         <span className="ai-vocab-title">
-          📚 Từ vựng gợi ý cho bài học ({vocabularies.length})
+          {t('conversation.targetVocabTitle', { count: vocabularies.length })}
         </span>
         <span style={{ fontSize: '0.8rem', color: '#0369a1', fontWeight: 700 }}>
-          {isOpen ? 'Thu gọn ▲' : 'Mở rộng ▼'}
+          {isOpen ? t('conversation.collapse') : t('conversation.expand')}
         </span>
       </div>
 

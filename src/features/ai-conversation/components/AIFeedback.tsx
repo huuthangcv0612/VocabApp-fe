@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { AIFeedback as AIFeedbackType } from '../types/aiConversation'
 
 interface AIFeedbackProps {
@@ -6,12 +7,13 @@ interface AIFeedbackProps {
 }
 
 export const AIFeedback: React.FC<AIFeedbackProps> = ({ feedback }) => {
+  const { t } = useTranslation('ai')
   if (!feedback) return null
 
   if (feedback.is_correct) {
     return (
       <div className="ai-feedback-box correct">
-        ✓ Sehr gut!
+        {t('conversation.sehrGut')}
       </div>
     )
   }
@@ -20,12 +22,12 @@ export const AIFeedback: React.FC<AIFeedbackProps> = ({ feedback }) => {
     <div className="ai-feedback-box incorrect">
       {feedback.correction && (
         <div className="ai-feedback-correction">
-          ✏️ Correction: {feedback.correction}
+          {t('conversation.correction')} {feedback.correction}
         </div>
       )}
       {feedback.explanation && (
         <div className="ai-feedback-explanation">
-          💡 Explanation: {feedback.explanation}
+          {t('conversation.explanation')} {feedback.explanation}
         </div>
       )}
     </div>

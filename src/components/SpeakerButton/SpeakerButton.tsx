@@ -1,4 +1,5 @@
 import { useMemo, type MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSpeech } from '../../hooks/useSpeech'
 
 export interface SpeakerButtonProps {
@@ -24,6 +25,7 @@ export function SpeakerButton({
   title,
   size = 'md',
 }: SpeakerButtonProps) {
+  const { t } = useTranslation('common')
   const { speak, stop } = useSpeech()
   const isSupported = useMemo(() => typeof window !== 'undefined' && 'speechSynthesis' in window, [])
 
@@ -52,12 +54,12 @@ export function SpeakerButton({
   const isButtonDisabled = disabled || (onSpeak ? false : !isSupported)
 
   const defaultTitle = isPlaying
-    ? 'Đang phát âm thanh...'
+    ? t('speaker.playing')
     : isLoading
-    ? 'Đang tải âm thanh...'
+    ? t('speaker.loading')
     : isSupported || onSpeak
-    ? `Phát âm: ${contentToSpeak}`
-    : 'Trình duyệt không hỗ trợ phát âm'
+    ? `${t('speaker.pronounce')} ${contentToSpeak}`
+    : t('speaker.unsupported')
 
   return (
     <button
@@ -78,4 +80,3 @@ export function SpeakerButton({
     </button>
   )
 }
-

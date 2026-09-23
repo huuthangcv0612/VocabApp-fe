@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { testService } from '../services/testService'
@@ -11,6 +12,7 @@ import type {
 import '../styles/pages/test.css'
 
 export const QuickTestPage = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const [searchParams] = useSearchParams()
   const levelParam = (searchParams.get('level') as LevelType) || 'A1'
 
@@ -29,7 +31,7 @@ export const QuickTestPage = () => {
         const data = await testService.getQuickTest(levelParam)
         setTestData(data)
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Không thể tải đề test.'
+        const msg = err instanceof Error ? err.message : t('test.notFound')
         setError(msg)
       } finally {
         setLoading(false)
@@ -37,7 +39,7 @@ export const QuickTestPage = () => {
     }
 
     fetchTest()
-  }, [levelParam])
+  }, [levelParam, t])
 
   const handleSelectOption = (questionId: string, optionIdx: number) => {
     setAnswers((prev) => ({
@@ -64,7 +66,7 @@ export const QuickTestPage = () => {
       })
       setResult(res)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Lỗi khi nộp bài test.'
+      const msg = err instanceof Error ? err.message : t('common.states.error')
       alert(msg)
     } finally {
       setSubmitting(false)
@@ -76,7 +78,7 @@ export const QuickTestPage = () => {
       <>
         <Header />
         <div className="test-page" style={{ textAlign: 'center', paddingTop: '80px' }}>
-          <h2>Đang tải đề thi {levelParam}...</h2>
+          <h2>{t('test.loading', { level: levelParam })}</h2>
         </div>
         <Footer />
       </>
@@ -88,9 +90,9 @@ export const QuickTestPage = () => {
       <>
         <Header />
         <div className="test-page" style={{ textAlign: 'center', paddingTop: '80px' }}>
-          <h2>{error || 'Không tìm thấy đề thi phù hợp.'}</h2>
+          <h2>{error || t('test.notFound')}</h2>
           <Link to="/levels" className="btn-test-nav btn-test-next" style={{ display: 'inline-block', marginTop: '20px' }}>
-            Quay Lại Cấp Độ
+            {t('test.backToLevels')}
           </Link>
         </div>
         <Footer />
@@ -114,7 +116,7 @@ export const QuickTestPage = () => {
                   <h2 className="test-title">{testData.testName}</h2>
                 </div>
                 <div className="test-timer">
-                  Câu {currentIndex + 1} / {testData.questions.length}
+                  {t('test.questionCount', { current: currentIndex + 1, total: testData.questions.length })}
                 </div>
               </div>
 
@@ -148,7 +150,7 @@ export const QuickTestPage = () => {
                   disabled={currentIndex === 0}
                   onClick={() => setCurrentIndex((prev) => Math.max(prev - 1, 0))}
                 >
-                  ← Câu Trước
+                  {t('test.prevQuestion')}
                 </button>
 
                 {currentIndex < testData.questions.length - 1 ? (
@@ -156,7 +158,7 @@ export const QuickTestPage = () => {
                     className="btn-test-nav btn-test-next"
                     onClick={() => setCurrentIndex((prev) => Math.min(prev + 1, testData.questions.length - 1))}
                   >
-                    Câu Tiếp →
+                    {t('test.nextQuestion')}
                   </button>
                 ) : (
                   <button
@@ -164,7 +166,7 @@ export const QuickTestPage = () => {
                     disabled={submitting}
                     onClick={handleSubmit}
                   >
-                    {submitting ? 'Đang Chấm Điểm...' : '🚀 Nộp Bài Thi'}
+                    {submitting ? t('test.grading') : t('test.submitTest')}
                   </button>
                 )}
               </div>
@@ -174,12 +176,12 @@ export const QuickTestPage = () => {
               <div className="result-header-badge">
                 <div className="score-circle">
                   <span className="percentage">{result.percentage}%</span>
-                  <span className="label">{result.score} / {result.total} ĐÚNG</span>
+                  <span className="label">{result.score} / {result.total} {t('test.correct')}</span>
                 </div>
                 <h2 style={{ fontFamily: "'Oswald', sans-serif", fontSize: '1.8rem', color: '#0f172a', margin: '0 0 8px 0' }}>
-                  KẾT QUẢ ĐÁNH GIÁ: CẤP ĐỘ {result.evaluatedLevel}
+                  {t('test.resultTitle', { level: result.evaluatedLevel })}
                 </h2>
-                <p style={{ color: '#64748b' }}>Hệ thống đã tự động chấm điểm và phân tích năng lực tiếng Đức của bạn.</p>
+                <p style={{ color: '#64748b' }}>{t('test.resultDesc')}</p>
               </div>
 
               {(() => {
@@ -196,10 +198,10 @@ export const QuickTestPage = () => {
                 return (
                   <div className="weakness-alert" style={{ background: '#fef2f2', borderLeft: '4px solid #ef4444', padding: '16px 20px', borderRadius: '12px', marginBottom: '24px' }}>
                     <h4 style={{ margin: '0 0 6px 0', fontSize: '1.05rem', fontWeight: 800, color: '#991b1b' }}>
-                      ⚠️ Cảnh Báo Điểm Yếu (Kỹ năng &lt; 60%):
+                      {t('test.weaknessAlert')}
                     </h4>
                     <p style={{ margin: '0 0 12px 0', fontSize: '0.94rem', color: '#7f1d1d' }}>
-                      Bạn đạt điểm yếu ở các kỹ năng: <strong style={{ textTransform: 'uppercase' }}>{weakSkills.join(', ')}</strong>. Hãy chọn bài học tương ứng bên dưới để rèn luyện lại nhé!
+                      {t('test.weaknessDesc', { skills: weakSkills.join(', ') })}
                     </p>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       {weakSkills.map((sk) => (
@@ -219,7 +221,7 @@ export const QuickTestPage = () => {
                             textDecoration: 'none',
                           }}
                         >
-                          📚 Ôn tập {sk.toUpperCase()} →
+                          {t('test.reviewSkill', { skill: sk.toUpperCase() })}
                         </Link>
                       ))}
                     </div>
@@ -227,7 +229,7 @@ export const QuickTestPage = () => {
                 )
               })()}
 
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>📊 Phân Tích Theo Kỹ Năng:</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>{t('test.skillBreakdown')}</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '32px' }}>
                 {result.skillBreakdown &&
                   Object.entries(result.skillBreakdown).map(([skill, data]) => {
@@ -244,7 +246,7 @@ export const QuickTestPage = () => {
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '0.88rem', textTransform: 'capitalize', marginBottom: '6px' }}>
                           <span style={{ color: isWeak ? '#b91c1c' : '#0f172a' }}>
-                            {skill} {isWeak && <span style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 800 }}>(⚠️ Yếu)</span>}
+                            {skill} {isWeak && <span style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: 800 }}>(⚠️)</span>}
                           </span>
                           <span style={{ color: isWeak ? '#dc2626' : '#2563eb' }}>
                             {data?.percentage}% ({data?.correct}/{data?.total})
@@ -266,36 +268,36 @@ export const QuickTestPage = () => {
                   })}
               </div>
 
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>📝 Chi Tiết Đáp Án & Giải Thích:</h3>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, margin: '24px 0 16px 0' }}>{t('test.answerDetails')}</h3>
               {result.answers && result.answers.length > 0 ? (
                 result.answers.map((ans, idx) => (
                   <div key={idx} className={`review-item ${ans.isCorrect ? 'correct' : 'incorrect'}`}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, marginBottom: '6px' }}>
                       <span>Câu {idx + 1}</span>
                       <span style={{ color: ans.isCorrect ? '#16a34a' : '#dc2626' }}>
-                        {ans.isCorrect ? '✓ CHÍNH XÁC' : '✕ CHƯA ĐÚNG'}
+                        {ans.isCorrect ? t('test.correct') : t('test.incorrect')}
                       </span>
                     </div>
                     <p style={{ margin: '0 0 8px 0', fontSize: '0.92rem', color: '#475569' }}>
-                      Đáp án đúng: <strong style={{ color: '#16a34a' }}>{ans.correctAnswer}</strong>
+                      {t('test.correctAnswerLabel')} <strong style={{ color: '#16a34a' }}>{ans.correctAnswer}</strong>
                     </p>
                     {ans.explanation && (
                       <p style={{ margin: 0, fontSize: '0.88rem', color: '#64748b', fontStyle: 'italic', background: '#ffffff', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                        📖 Giải thích: {ans.explanation}
+                        📖 {ans.explanation}
                       </p>
                     )}
                   </div>
                 ))
               ) : (
-                <p style={{ color: '#64748b' }}>Đã ghi nhận bài nộp thành công.</p>
+                <p style={{ color: '#64748b' }}>{t('test.resultDesc')}</p>
               )}
 
               <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '32px' }}>
                 <Link to="/levels" className="btn-test-nav btn-test-next">
-                  Trở Về Cấp Độ
+                  {t('test.backToLevels')}
                 </Link>
                 <Link to="/interactive-room" className="btn-test-nav btn-test-prev">
-                  Phòng Học Tương Tác
+                  {t('test.interactiveRoom')}
                 </Link>
               </div>
             </div>

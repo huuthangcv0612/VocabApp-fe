@@ -47,6 +47,8 @@ import { ErrorBoundary } from './components/ErrorBoundary'
 
 import LearningPathPage from './features/learning-path/pages/LearningPathPage'
 import AIConversationPage from './features/ai-conversation/pages/AIConversationPage'
+import AIFaqChatbot from './components/faq-chatbot/AIFaqChatbot'
+import LanguageSwitcher from './components/LanguageSwitcher'
 
 function App() {
   return (
@@ -120,6 +122,8 @@ function App() {
             <Route path="/admin/plans" element={<AdminPlans />} />
           </Route>
         </Routes>
+        <AIFaqChatbot />
+        <LanguageSwitcher />
       </Router>
     </AuthProvider>
     </ErrorBoundary>

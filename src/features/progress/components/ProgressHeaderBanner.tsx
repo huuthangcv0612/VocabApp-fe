@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import CloudIcon from '../../../assets/Cloud.svg'
 import type { CurrentLevel } from '../types/progressOverview'
 
@@ -14,37 +15,38 @@ export const ProgressHeaderBanner: React.FC<ProgressHeaderBannerProps> = ({
   levelCompletionPercentage = 0,
   streak = 0,
 }) => {
+  const { t } = useTranslation('learning')
   return (
-    <section className="progress-hero-section" aria-label="Tiến độ học tập">
+    <section className="progress-hero-section" aria-label={t('progress.heroTitle')}>
       <img src={CloudIcon} alt="" className="hero-cloud cloud-1" aria-hidden="true" />
       <img src={CloudIcon} alt="" className="hero-cloud cloud-2" aria-hidden="true" />
 
       <div className="progress-hero-container">
         <div className="progress-hero-content">
           <Link to="/learning-path" className="back-link">
-            ← Quay lại Lộ trình học
+            {t('progress.backToPath')}
           </Link>
 
-          <h1 className="progress-hero-title">TIẾN ĐỘ HỌC TẬP</h1>
+          <h1 className="progress-hero-title">{t('progress.heroTitle')}</h1>
           <p className="progress-hero-subtitle">
-            Theo dõi hành trình chinh phục tiếng Đức: Chuỗi học tập, Tiến độ cấp độ, Làm chủ từ vựng và Hiệu suất bài tập.
+            {t('progress.heroSubtitle')}
           </p>
 
           <div className="po-hero-badges">
             {streak > 0 && (
-              <span className="po-hero-badge po-hero-badge--streak" title="Chuỗi ngày học liên tục">
-                🔥 {streak} ngày streak liên tiếp
+              <span className="po-hero-badge po-hero-badge--streak" title={t('progress.streak')}>
+                🔥 {t('progress.streakDaysCount', { count: streak })}
               </span>
             )}
 
             {currentLevel && (
-              <span className="po-hero-badge po-hero-badge--level" title="Cấp độ hiện tại">
-                🎓 Trình độ: {currentLevel.level_name}
+              <span className="po-hero-badge po-hero-badge--level" title={t('progress.currentLevel')}>
+                🎓 {t('progress.currentLevelBadge', { level: currentLevel.level_name })}
               </span>
             )}
 
-            <span className="po-hero-badge po-hero-badge--progress" title="Tiến độ hoàn thành cấp độ hiện tại">
-              🎯 Hoàn thành {levelCompletionPercentage}%
+            <span className="po-hero-badge po-hero-badge--progress" title={t('progress.levelProgress')}>
+              🎯 {t('progress.completedPercent', { percent: levelCompletionPercentage })}
             </span>
           </div>
         </div>

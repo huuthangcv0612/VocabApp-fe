@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { LearningPathLesson } from '../types/learningPath'
 
 interface LessonNodeProps {
@@ -15,6 +16,7 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
   index,
   offsetPercent,
 }) => {
+  const { t } = useTranslation('learning')
   const navigate = useNavigate()
   const { _id, title, status, xp, estimated_minutes, description } = lesson
 
@@ -29,6 +31,12 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
     navigate(`/learn/lesson/${_id}`)
   }
 
+  const statusLabel = isCompleted
+    ? t('path.completed')
+    : isCurrent
+    ? t('path.current')
+    : t('path.locked')
+
   return (
     <div
       className={`lp-node-wrapper status-${status}`}
@@ -39,7 +47,7 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
       {/* Active Speech Bubble for Current Lesson */}
       {isCurrent && (
         <div className="lp-node-start-tooltip">
-          <span className="lp-tooltip-text">BẮT ĐẦU ▶</span>
+          <span className="lp-tooltip-text">{t('path.start')}</span>
           <div className="lp-tooltip-arrow" />
         </div>
       )}
@@ -54,7 +62,7 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
         onClick={handleClick}
         disabled={isLocked}
         title={title}
-        aria-label={`${title} (${isCompleted ? 'Hoàn thành' : isCurrent ? 'Bài hiện tại' : 'Khóa'})`}
+        aria-label={`${title} (${statusLabel})`}
       >
         <div className="lp-node-inner">
           <span className="lp-node-icon">{icon}</span>
@@ -67,7 +75,7 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
 
       {/* Node Label Under Circle */}
       <div className="lp-node-sublabel" onClick={handleClick} style={{ cursor: isLocked ? 'default' : 'pointer' }}>
-        <span className="lp-sublabel-step">Bài {index + 1}</span>
+        <span className="lp-sublabel-step">{t('path.stepLabel')} {index + 1}</span>
         <h5 className="lp-sublabel-title">
           {title} {isCompleted && <span className="check-mark">✓</span>}
         </h5>
@@ -76,15 +84,15 @@ export const LessonNode: React.FC<LessonNodeProps> = ({
       {/* Popover / Node Card Info */}
       <div className={`lp-node-card ${status}`}>
         <div className="lp-card-header">
-          <span className="lp-card-tag">BÀI {index + 1}</span>
+          <span className="lp-card-tag">{t('path.stepLabel').toUpperCase()} {index + 1}</span>
           <span className="lp-card-xp">⚡ +{xp} XP</span>
         </div>
         <h4 className="lp-card-title">{title}</h4>
         {description && <p className="lp-card-desc">{description}</p>}
         <div className="lp-card-meta">
-          <span className="lp-card-time">⏱️ {estimated_minutes} phút</span>
+          <span className="lp-card-time">⏱️ {estimated_minutes} {t('path.minutes')}</span>
           <span className={`lp-card-status-badge ${status}`}>
-            {isCompleted ? '✓ Hoàn thành' : isCurrent ? 'Bắt đầu học ▶' : '🔒 Chưa mở'}
+            {isCompleted ? `✓ ${t('path.completed')}` : isCurrent ? t('path.startPractice') : `🔒 ${t('path.notUnlocked')}`}
           </span>
         </div>
       </div>

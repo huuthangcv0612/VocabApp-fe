@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LearningPathLevel } from '../types/learningPath'
 
 interface LearningPathHeaderProps {
@@ -14,6 +15,7 @@ export const LearningPathHeader: React.FC<LearningPathHeaderProps> = ({
   selectedLevelId,
   onSelectLevel,
 }) => {
+  const { t } = useTranslation('learning')
   if (!activeLevel) return null
 
   const {
@@ -38,7 +40,7 @@ export const LearningPathHeader: React.FC<LearningPathHeaderProps> = ({
                 className={`lp-level-tab ${isActive ? 'active' : ''}`}
                 onClick={() => onSelectLevel(lvl._id)}
               >
-                <span className="lp-tab-name">LEVEL {lvl.level_name}</span>
+                <span className="lp-tab-name">{t('path.levelTag')} {lvl.level_name}</span>
                 {lvl.progressPercentage > 0 && (
                   <span className="lp-tab-pct">{lvl.progressPercentage}%</span>
                 )}
@@ -55,13 +57,12 @@ export const LearningPathHeader: React.FC<LearningPathHeaderProps> = ({
             <span className="lp-avatar-emoji">👧</span>
           </div>
           <div className="lp-banner-info">
-            <div className="lp-level-tag">TRÌNH ĐỘ {level_name}</div>
+            <div className="lp-level-tag">{t('path.levelTag')} {level_name}</div>
             <h1 className="lp-header-title">
-              Lộ trình học <span className="highlight">Tiếng Đức {level_name}</span>
+              {t('path.journeyTitle')} <span className="highlight">{t('path.germanLevel')} {level_name}</span>
             </h1>
             <p className="lp-header-desc">
-              {description ||
-                `Học cách gọi món, đặt đồ uống, từ vựng và giao tiếp chuẩn theo trình độ ${level_name}.`}
+              {description || t('path.descFallback', { level: level_name })}
             </p>
           </div>
         </div>
@@ -69,7 +70,7 @@ export const LearningPathHeader: React.FC<LearningPathHeaderProps> = ({
         {/* Right side progress box */}
         <div className="lp-header-progress-box">
           <div className="lp-progress-box-top">
-            <span className="lp-progress-label">Tiến độ phần này</span>
+            <span className="lp-progress-label">{t('path.sectionProgress')}</span>
             <span className="lp-progress-icon">📋</span>
           </div>
           <div className="lp-progress-track">
@@ -79,7 +80,7 @@ export const LearningPathHeader: React.FC<LearningPathHeaderProps> = ({
             />
           </div>
           <div className="lp-progress-val-sub">
-            {completedLessonsCount} / {totalLessonsCount} bài hoàn thành ({progressPercentage}%)
+            {completedLessonsCount} / {totalLessonsCount} {t('path.lessonsCompleted')} ({progressPercentage}%)
           </div>
         </div>
       </div>

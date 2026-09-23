@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import '../styles/components/footer.css'
 
 import CloudIcon from '../assets/Cloud.svg'
@@ -9,6 +10,8 @@ import PlaneIcon from '../assets/Icon-plane.svg'
 import DeutschUpLogo from '../assets/DEUTSCHUP.svg'
 
 const Footer = () => {
+  const { t } = useTranslation('common')
+
   return (
     <footer className="footer">
       {/* Top Scalloped Wave Border */}
@@ -38,24 +41,24 @@ const Footer = () => {
             {/* 3 Nav Columns */}
             <div className="footer-nav-columns">
               <div className="footer-col">
-                <Link to="/" className="footer-link">Home</Link>
-                <Link to="/" className="footer-link">About</Link>
-                <Link to="/interactive-room" className="footer-link">Admissions</Link>
-                <Link to="/levels" className="footer-link">Programs</Link>
+                <Link to="/" className="footer-link">{t('footer.home')}</Link>
+                <Link to="/" className="footer-link">{t('footer.about')}</Link>
+                <Link to="/interactive-room" className="footer-link">{t('footer.admissions')}</Link>
+                <Link to="/levels" className="footer-link">{t('footer.programs')}</Link>
               </div>
 
               <div className="footer-col">
-                <Link to="/levels" className="footer-link">Tuition</Link>
-                <Link to="/interactive-room" className="footer-link">Parent Resources</Link>
-                <Link to="/levels" className="footer-link">Teachers</Link>
-                <Link to="/levels" className="footer-link">Gallery</Link>
+                <Link to="/levels" className="footer-link">{t('footer.tuition')}</Link>
+                <Link to="/interactive-room" className="footer-link">{t('footer.parentResources')}</Link>
+                <Link to="/levels" className="footer-link">{t('footer.teachers')}</Link>
+                <Link to="/levels" className="footer-link">{t('footer.gallery')}</Link>
               </div>
 
               <div className="footer-col">
-                <a href="#faq" className="footer-link">FAQ</a>
-                <a href="#careers" className="footer-link">Careers</a>
-                <a href="#news" className="footer-link">News</a>
-                <a href="#contact" className="footer-link">Contact</a>
+                <a href="#faq" className="footer-link">{t('footer.faq')}</a>
+                <a href="#careers" className="footer-link">{t('footer.careers')}</a>
+                <a href="#news" className="footer-link">{t('footer.news')}</a>
+                <a href="#contact" className="footer-link">{t('footer.contact')}</a>
               </div>
             </div>
 
@@ -120,9 +123,9 @@ const Footer = () => {
               </div>
 
               <div className="footer-bottom-meta">
-                <Link to="/policy-and-terms" className="footer-legal-link">Policy and Terms</Link>
+                <Link to="/policy-and-terms" className="footer-legal-link">{t('footer.policyAndTerms')}</Link>
                 <div className="footer-copyright-text">
-                  © 2026 DeutschUp
+                  {t('footer.copyright')}
                 </div>
               </div>
             </div>

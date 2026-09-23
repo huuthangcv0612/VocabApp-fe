@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useLektions, useLevels, useUnits } from '../hooks/useApi'
@@ -9,6 +10,7 @@ import GirlIcon from '../assets/Girl 1.svg'
 import '../styles/pages/levels.css'
 
 const LevelDetail = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { levelId, topicId } = useParams<{ levelId: string; topicId?: string }>()
   const navigate = useNavigate()
   const { levels } = useLevels()
@@ -36,7 +38,7 @@ const LevelDetail = () => {
     <div className="lektion-page">
       <Header />
 
-      {/* Section 1: Hero Banner (CHOOSE LEKTION) */}
+      {/* Section 1: Hero Banner */}
       <section className="lektion-hero-section">
         {/* Floating Clouds */}
         <img src={CloudIcon} alt="" className="hero-cloud cloud-1" />
@@ -46,7 +48,7 @@ const LevelDetail = () => {
         <div className="lektion-hero-container">
           <div className="lektion-hero-title-wrapper">
             <h1 className="lektion-hero-title">
-              LEVEL {levelName}<br />LESSONS
+              {t('path.levelTag')} {levelName}<br />{t('unit.lessonsInUnit')}
             </h1>
           </div>
 
@@ -65,7 +67,7 @@ const LevelDetail = () => {
           {/* Breadcrumb / Back button */}
           <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.95rem' }}>
             <Link to="/levels" className="back-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              ← Levels
+              ← {t('common.nav.startLearning')}
             </Link>
             <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>/</span>
             <Link to={`/topics/${resolvedLevelId}`} style={{ color: '#ffffff', fontWeight: 600, textDecoration: 'none' }}>
@@ -74,16 +76,16 @@ const LevelDetail = () => {
             {topicId && (
               <>
                 <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>/</span>
-                <span style={{ color: '#ffffff', fontWeight: 700 }}>Topic Units</span>
+                <span style={{ color: '#ffffff', fontWeight: 700 }}>Units</span>
               </>
             )}
           </div>
 
           {topicId && units.length > 0 ? (
             <>
-              <h2 className="lektion-section-title">CHỌN UNIT HỌC ({levelName})</h2>
-              {unitsLoading && <p className="status-text white-text">Đang tải danh sách Units...</p>}
-              {unitsError && <p className="status-text error">Lỗi tải Units: {unitsError}</p>}
+              <h2 className="lektion-section-title">{t('levels.chooseUnit', { level: levelName })}</h2>
+              {unitsLoading && <p className="status-text white-text">{t('levels.loadingUnits')}</p>}
+              {unitsError && <p className="status-text error">{t('common.states.error')}: {unitsError}</p>}
               <div className="lektion-cards-grid">
                 {units.map((u, idx) => {
                   const title = u.unit_name || u.name || `Unit ${idx + 1}`
@@ -105,7 +107,7 @@ const LevelDetail = () => {
                             {u.description}
                           </p>
                         )}
-                        <p className="lektion-card-desc">▶ Xem bài học trong Unit này</p>
+                        <p className="lektion-card-desc">{t('levels.viewUnitLessons')}</p>
                       </div>
                     </div>
                   )
@@ -114,14 +116,14 @@ const LevelDetail = () => {
             </>
           ) : (
             <>
-              <h2 className="lektion-section-title">CHỌN BÀI HỌC ({levelName})</h2>
+              <h2 className="lektion-section-title">{t('levels.chooseLesson', { level: levelName })}</h2>
 
-              {lektionsLoading && <p className="status-text white-text">Đang tải danh sách bài học...</p>}
-              {lektionsError && <p className="status-text error">Lỗi: {lektionsError}</p>}
+              {lektionsLoading && <p className="status-text white-text">{t('levels.loadingLessons')}</p>}
+              {lektionsError && <p className="status-text error">{t('common.states.error')}: {lektionsError}</p>}
 
               {!lektionsLoading && displayLektions.length === 0 && (
                 <p className="status-text white-text">
-                  Chưa có bài học nào trong trình độ {levelName}.
+                  {t('levels.emptyLessons', { level: levelName })}
                 </p>
               )}
 
@@ -132,7 +134,7 @@ const LevelDetail = () => {
                     ? lektion.lektion_name.split('-').pop()?.trim() || lektion.lektion_name
                     : lektion.lektion_name
 
-                  // Extract Topic metadata (Topic is metadata only, not a navigation button)
+                  // Extract Topic metadata
                   const topicVal = lektion.topic
                   const topicName = typeof topicVal === 'object' && topicVal !== null
                     ? (topicVal.topic_name || topicVal.name || '')
@@ -170,7 +172,7 @@ const LevelDetail = () => {
                         )}
 
                         <p className="lektion-card-desc">
-                          📖 {count} từ vựng • {isCompleted ? '✓ Hoàn thành' : progress.percentage > 0 ? `⏳ Đang học (${progress.percentage}%)` : '░ Chưa học'}
+                          📖 {t('levels.vocabCount', { count })} • {isCompleted ? t('levels.completed') : progress.percentage > 0 ? t('levels.inProgress', { percent: progress.percentage }) : t('levels.notStarted')}
                         </p>
                       </div>
                     </div>

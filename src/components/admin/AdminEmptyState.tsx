@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface AdminEmptyStateProps {
   icon?: string
@@ -10,16 +11,17 @@ interface AdminEmptyStateProps {
 
 export const AdminEmptyState: React.FC<AdminEmptyStateProps> = ({
   icon = '📭',
-  title = 'Chưa có dữ liệu',
-  description = 'Hiện tại chưa có mục nào được tìm thấy hoặc danh sách đang trống.',
+  title,
+  description,
   actionLabel,
   onAction,
 }) => {
+  const { t } = useTranslation('common')
   return (
     <div className="admin-empty-state">
       <div className="admin-empty-icon">{icon}</div>
-      <h3 className="admin-empty-title">{title}</h3>
-      <p className="admin-empty-desc">{description}</p>
+      <h3 className="admin-empty-title">{title || t('states.empty')}</h3>
+      <p className="admin-empty-desc">{description || t('states.emptyDesc')}</p>
       {actionLabel && onAction && (
         <button onClick={onAction} className="btn-admin-primary admin-empty-btn">
           ➕ {actionLabel}

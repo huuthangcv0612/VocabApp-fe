@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -24,25 +25,6 @@ const normalizePlanType = (value: unknown): string | null => {
   return null
 }
 
-const formatPlanPrice = (plan: Plan): string => {
-  if (plan.planType === 'FREE') return 'Free'
-  if (plan.price === 0) return plan.planType === 'CUSTOM' ? 'Contact us' : 'Free'
-  return Number(plan.price).toLocaleString()
-}
-
-const formatPlanDuration = (plan: Plan): string => {
-  if (plan.planType === 'FREE') return ''
-  if (plan.durationDays === 30 || plan.durationDays === 31) return '/ month'
-  if (plan.durationDays > 0) return ` / ${plan.durationDays} days`
-  return ''
-}
-
-const getPlanSummary = (plan: Plan): string => {
-  if (plan.planType === 'FREE') return 'Basic vocabulary learning'
-  if (plan.planType === 'PREMIUM') return 'Learn German with AI'
-  return 'For teachers & organizations'
-}
-
 const sortPlans = (plans: Plan[]) => {
   const order = { FREE: 0, PREMIUM: 1, CUSTOM: 2 }
 
@@ -57,6 +39,7 @@ const sortPlans = (plans: Plan[]) => {
 }
 
 export const PricingPage: React.FC = () => {
+  const { t } = useTranslation(['subscription', 'common'])
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
 
@@ -76,7 +59,7 @@ export const PricingPage: React.FC = () => {
       const planList = await subscriptionService.getPlans()
       setPlans(sortPlans(planList))
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unable to load plans.'
+      const msg = err instanceof Error ? err.message : t('pricing.error')
       setError(msg)
     } finally {
       setLoading(false)
@@ -86,6 +69,25 @@ export const PricingPage: React.FC = () => {
   useEffect(() => {
     void fetchPlans()
   }, [])
+
+  const formatPlanPrice = (plan: Plan): string => {
+    if (plan.planType === 'FREE') return t('pricing.free')
+    if (plan.price === 0) return plan.planType === 'CUSTOM' ? t('pricing.contactUs') : t('pricing.free')
+    return `${Number(plan.price).toLocaleString('vi-VN')}đ`
+  }
+
+  const formatPlanDuration = (plan: Plan): string => {
+    if (plan.planType === 'FREE') return ''
+    if (plan.durationDays === 30 || plan.durationDays === 31) return t('pricing.perMonth')
+    if (plan.durationDays > 0) return t('pricing.perDays', { days: plan.durationDays })
+    return ''
+  }
+
+  const getPlanSummary = (plan: Plan): string => {
+    if (plan.planType === 'FREE') return t('pricing.freeSummary')
+    if (plan.planType === 'PREMIUM') return t('pricing.premiumSummary')
+    return t('pricing.customSummary')
+  }
 
   const handlePlanAction = async (plan: Plan) => {
     const isCurrentPlan = currentUserPlan === plan.planType
@@ -125,7 +127,9 @@ export const PricingPage: React.FC = () => {
 
   const getCtaLabel = (plan: Plan) => {
     const isCurrentPlan = currentUserPlan === plan.planType
-    return isCurrentPlan ? `You're on ${plan.name}` : `Get ${plan.name}`
+    return isCurrentPlan
+      ? t('pricing.yourOnPlan', { name: plan.name })
+      : t('pricing.getPlan', { name: plan.name })
   }
 
   return (
@@ -135,9 +139,9 @@ export const PricingPage: React.FC = () => {
       <section className="pricing-hero-section">
         <div className="pricing-hero-container">
           <div className="pricing-hero-title-wrap">
-            <h1 className="pricing-hero-title">Pricing</h1>
+            <h1 className="pricing-hero-title">{t('pricing.title')}</h1>
           </div>
-          <p className="pricing-hero-subtitle">Choose your learning plan</p>
+          <p className="pricing-hero-subtitle">{t('pricing.subtitle')}</p>
         </div>
       </section>
 
@@ -146,18 +150,18 @@ export const PricingPage: React.FC = () => {
           {loading ? (
             <div className="pricing-state pricing-state--loading">
               <div className="pricing-spinner" />
-              <p>Loading plans...</p>
+              <p>{t('pricing.loading')}</p>
             </div>
           ) : error ? (
             <div className="pricing-state pricing-state--error">
               <p>{error}</p>
               <button type="button" className="plan-button" onClick={() => void fetchPlans()}>
-                Try again
+                {t('pricing.tryAgain')}
               </button>
             </div>
           ) : plans.length === 0 ? (
             <div className="pricing-state pricing-state--empty">
-              <p>No plans available.</p>
+              <p>{t('pricing.empty')}</p>
             </div>
           ) : (
             <div className="pricing-grid">
@@ -166,9 +170,9 @@ export const PricingPage: React.FC = () => {
                 const features = plan.features && plan.features.length > 0
                   ? plan.features
                   : [
-                      'Vocabulary learning',
-                      'Practice exercises',
-                      'Progress tracking',
+                      t('pricing.defaultFeature1'),
+                      t('pricing.defaultFeature2'),
+                      t('pricing.defaultFeature3'),
                     ]
 
                 return (
@@ -178,7 +182,7 @@ export const PricingPage: React.FC = () => {
                   >
                     <div className="plan-card__header">
                       {isCurrentPlan ? (
-                        <span className="plan-badge plan-badge--current">Current plan</span>
+                        <span className="plan-badge plan-badge--current">{t('pricing.currentPlan')}</span>
                       ) : (
                         <span className="plan-badge plan-badge--type">{getPlanSummary(plan)}</span>
                       )}
@@ -210,7 +214,7 @@ export const PricingPage: React.FC = () => {
                         void handlePlanAction(plan)
                       }}
                     >
-                      {purchasingPlanId === plan._id ? 'Processing...' : getCtaLabel(plan)}
+                      {purchasingPlanId === plan._id ? t('pricing.processing') : getCtaLabel(plan)}
                     </button>
                   </article>
                 )

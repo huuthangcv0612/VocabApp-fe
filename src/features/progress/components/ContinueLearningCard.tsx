@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { ContinueLearning } from '../types/progressOverview'
 
 export interface ContinueLearningCardProps {
@@ -7,25 +8,26 @@ export interface ContinueLearningCardProps {
 }
 
 export const ContinueLearningCard: React.FC<ContinueLearningCardProps> = ({ continueLearning }) => {
+  const { t } = useTranslation('learning')
   const navigate = useNavigate()
 
   if (!continueLearning) {
     return (
-      <section className="po-card po-completed-card" aria-label="Trạng thái hoàn thành bài học">
+      <section className="po-card po-completed-card" aria-label={t('progress.allCompletedTitle')}>
         <div className="po-completed-icon" aria-hidden="true">
           🌟
         </div>
-        <h2 className="po-completed-title">Bạn đã hoàn thành toàn bộ bài học!</h2>
+        <h2 className="po-completed-title">{t('progress.allCompletedTitle')}</h2>
         <p className="po-completed-desc">
-          Xin chúc mừng bạn đã xuất sắc vượt qua các nội dung hiện tại. Hãy ôn tập lại các bài học hoặc khám phá lộ trình bài tập mở rộng.
+          {t('progress.allCompletedDesc')}
         </p>
         <button
           type="button"
           onClick={() => navigate('/learning-path')}
           className="po-continue-btn"
-          aria-label="Đi đến trang lộ trình học"
+          aria-label={t('progress.explorePathBtn')}
         >
-          Khám phá Lộ trình học 🚀
+          {t('progress.explorePathBtn')}
         </button>
       </section>
     )
@@ -38,23 +40,23 @@ export const ContinueLearningCard: React.FC<ContinueLearningCardProps> = ({ cont
   const isStarted = continueLearning.status === 'in_progress'
 
   return (
-    <section className="po-card po-continue-card" aria-label="Tiếp tục bài học gần nhất">
+    <section className="po-card po-continue-card" aria-label={t('progress.continueTitle')}>
       <div className="po-card-header">
         <div className="po-card-title-group">
           <div className="po-card-icon po-icon-orange" aria-hidden="true">
             📖
           </div>
           <div>
-            <h2 className="po-card-title">TIẾP TỤC HỌC</h2>
-            <p className="po-card-subtitle">Nội dung học tập được đề xuất tiếp theo</p>
+            <h2 className="po-card-title">{t('progress.continueTitle')}</h2>
+            <p className="po-card-subtitle">{t('progress.continueSubtitle')}</p>
           </div>
         </div>
 
         <span
           className={`po-continue-badge po-continue-badge--${continueLearning.status}`}
-          title={`Trạng thái: ${isStarted ? 'Đang học dở' : 'Chưa bắt đầu'}`}
+          title={isStarted ? t('progress.inProgressBadge') : t('progress.newLessonBadge')}
         >
-          {isStarted ? '⚡ Đang học dở' : '✨ Bài học mới'}
+          {isStarted ? t('progress.inProgressBadge') : t('progress.newLessonBadge')}
         </span>
       </div>
 
@@ -80,14 +82,14 @@ export const ContinueLearningCard: React.FC<ContinueLearningCardProps> = ({ cont
         </div>
 
         <div className="po-continue-progress-row">
-          <span>Tiến độ bài học:</span>
+          <span>{t('progress.lessonProgress')}</span>
           <span>{continueLearning.progress}%</span>
         </div>
 
         <div
           className="po-continue-bar"
           role="progressbar"
-          aria-label={`Tiến độ bài học ${continueLearning.lessonTitle}`}
+          aria-label={`${t('progress.lessonProgress')} ${continueLearning.lessonTitle}`}
           aria-valuenow={continueLearning.progress}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -102,9 +104,9 @@ export const ContinueLearningCard: React.FC<ContinueLearningCardProps> = ({ cont
           type="button"
           onClick={handleContinue}
           className="po-continue-btn"
-          aria-label={`Tiếp tục học bài ${continueLearning.lessonTitle}`}
+          aria-label={isStarted ? t('progress.continueNowBtn') : t('progress.startNowBtn')}
         >
-          {isStarted ? 'Tiếp tục bài học ngay ➔' : 'Bắt đầu bài học này ➔'}
+          {isStarted ? t('progress.continueNowBtn') : t('progress.startNowBtn')}
         </button>
       </div>
     </section>

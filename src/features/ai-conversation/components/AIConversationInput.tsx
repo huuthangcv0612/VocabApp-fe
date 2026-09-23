@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import type { AudioStatus } from '../hooks/useAITextToSpeech'
 
@@ -23,6 +24,7 @@ export const AIConversationInput: React.FC<AIConversationInputProps> = ({
   isAISpeaking = false,
   audioStatus = 'idle',
 }) => {
+  const { t } = useTranslation('ai')
   const [text, setText] = useState('')
 
   const {
@@ -79,12 +81,19 @@ export const AIConversationInput: React.FC<AIConversationInputProps> = ({
 
   // Dynamic placeholder guiding the user through the conversation flow
   const getPlaceholder = () => {
-    if (isFinished) return 'Diese Unterhaltung ist bereits beendet (3/3 Antworten).'
-    if (audioStatus === 'loading') return 'AI đang chuẩn bị giọng nói...'
-    if (audioStatus === 'playing') return 'AI đang nói, hãy chú ý lắng nghe...'
-    if (sending) return 'AI đang suy nghĩ...'
-    if (isListening) return 'Đang nghe bạn nói tiếng Đức...'
-    return 'Schreibe deine Antwort...'
+    if (isFinished) return t('conversation.placeholderFinished')
+    if (audioStatus === 'loading') return t('conversation.placeholderVoiceLoading')
+    if (audioStatus === 'playing') return t('conversation.placeholderSpeaking')
+    if (sending) return t('conversation.placeholderThinking')
+    if (isListening) return t('conversation.placeholderListening')
+    return t('conversation.placeholderDefault')
+  }
+
+  const getMicTitle = () => {
+    if (isFinished) return t('conversation.micFinished')
+    if (isAISpeaking) return t('conversation.micSpeaking')
+    if (isListening) return t('conversation.micListening')
+    return t('conversation.micDefault')
   }
 
   return (
@@ -106,16 +115,8 @@ export const AIConversationInput: React.FC<AIConversationInputProps> = ({
             className={`ai-mic-btn ${isListening ? 'listening' : ''}`}
             onClick={handleToggleMic}
             disabled={isInputDisabled}
-            title={
-              isFinished
-                ? 'Hội thoại đã kết thúc'
-                : isAISpeaking
-                ? 'AI đang nói, vui lòng lắng nghe...'
-                : isListening
-                ? 'Dừng ghi âm'
-                : 'Nói bằng tiếng Đức (Microphone)'
-            }
-            aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+            title={getMicTitle()}
+            aria-label={isListening ? t('conversation.micListening') : t('conversation.micDefault')}
           >
             {isListening ? '🔴' : '🎤'}
           </button>
@@ -125,16 +126,16 @@ export const AIConversationInput: React.FC<AIConversationInputProps> = ({
           type="submit"
           className="ai-send-btn"
           disabled={isInputDisabled || !text.trim()}
-          aria-label="Send message"
+          aria-label={t('conversation.send')}
         >
           {sending ? (
             <>
               <div className="ai-spinner-small" />
-              <span>Đang gửi...</span>
+              <span>{t('conversation.sending')}</span>
             </>
           ) : (
             <>
-              <span>Antworten</span>
+              <span>{t('conversation.send')}</span>
               <span>➔</span>
             </>
           )}
@@ -143,7 +144,6 @@ export const AIConversationInput: React.FC<AIConversationInputProps> = ({
     </div>
   )
 }
-
 
 export default AIConversationInput
 

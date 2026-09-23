@@ -1,4 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from 'react'
+import i18n from '../i18n'
 
 interface Props {
   children: ReactNode
@@ -38,9 +39,11 @@ export class ErrorBoundary extends Component<Props, State> {
           color: '#11224E',
           background: '#fff8f0'
         }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Đã xảy ra lỗi giao diện ⚠️</h1>
+          <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
+            {i18n.t('errorBoundary.title', { defaultValue: 'Đã xảy ra lỗi giao diện ⚠️' })}
+          </h1>
           <p style={{ color: '#64748b', maxWidth: '500px', marginBottom: '1.5rem' }}>
-            {this.state.error?.message || 'Có lỗi phát sinh trong khi tải trang.'}
+            {this.state.error?.message || i18n.t('errorBoundary.desc', { defaultValue: 'Có lỗi phát sinh trong khi tải trang.' })}
           </p>
           <button
             onClick={() => {
@@ -57,7 +60,7 @@ export class ErrorBoundary extends Component<Props, State> {
               cursor: 'pointer'
             }}
           >
-            Tải lại trang ↺
+            {i18n.t('errorBoundary.reload', { defaultValue: 'Tải lại trang ↺' })}
           </button>
         </div>
       )

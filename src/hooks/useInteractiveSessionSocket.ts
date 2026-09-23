@@ -22,6 +22,24 @@ interface UseInteractiveSessionSocketOptions {
   onSessionEnded?: () => void
 }
 
+export const normalizeStudentId = (
+  student: Record<string, unknown> | SessionConnectedStudent | null | undefined,
+): string => {
+  if (!student) return ''
+  const s = student as Record<string, unknown>
+  const user = (s.user as Record<string, unknown>) || {}
+  const rawId =
+    s.id ??
+    s._id ??
+    s.student_id ??
+    s.user_id ??
+    user.id ??
+    user._id ??
+    user.student_id
+  if (rawId === null || rawId === undefined) return ''
+  return String(rawId).trim()
+}
+
 export const useInteractiveSessionSocket = ({
   sessionId,
   isTeacher = false,
@@ -37,9 +55,29 @@ export const useInteractiveSessionSocket = ({
 }: UseInteractiveSessionSocketOptions) => {
   const [isConnected, setIsConnected] = useState(false)
   const [liveSession, setLiveSession] = useState<InteractiveSession | null>(initialSession || null)
-  const [connectedStudents, setConnectedStudents] = useState<SessionConnectedStudent[]>(
-    initialSession?.connected_students || [],
-  )
+  const [connectedStudents, setConnectedStudents] = useState<SessionConnectedStudent[]>(() => {
+    if (!initialSession?.connected_students || !Array.isArray(initialSession.connected_students)) {
+      return []
+    }
+    const unique: SessionConnectedStudent[] = []
+    const seen = new Set<string>()
+    for (const item of initialSession.connected_students) {
+      const id = normalizeStudentId(item)
+      if (!id || seen.has(id)) continue
+      seen.add(id)
+      unique.push({
+        id,
+        _id: id,
+        student_id: item.student_id || id,
+        user_id: item.user_id || id,
+        name: String(item.name || 'Học viên').trim() || 'Học viên',
+        avatar: item.avatar,
+        score: typeof item.score === 'number' ? item.score : 0,
+        joined_at: item.joined_at,
+      })
+    }
+    return unique
+  })
   const [responses, setResponses] = useState<SessionResponseRecord[]>(
     initialSession?.responses || [],
   )
@@ -80,8 +118,25 @@ export const useInteractiveSessionSocket = ({
   useEffect(() => {
     if (initialSession) {
       setLiveSession((prev) => prev || initialSession)
-      if (initialSession.connected_students) {
-        setConnectedStudents(initialSession.connected_students)
+      if (initialSession.connected_students && Array.isArray(initialSession.connected_students)) {
+        const unique: SessionConnectedStudent[] = []
+        const seen = new Set<string>()
+        for (const item of initialSession.connected_students) {
+          const id = normalizeStudentId(item)
+          if (!id || seen.has(id)) continue
+          seen.add(id)
+          unique.push({
+            id,
+            _id: id,
+            student_id: item.student_id || id,
+            user_id: item.user_id || id,
+            name: String(item.name || 'Học viên').trim() || 'Học viên',
+            avatar: item.avatar,
+            score: typeof item.score === 'number' ? item.score : 0,
+            joined_at: item.joined_at,
+          })
+        }
+        setConnectedStudents(unique)
       }
       if (initialSession.responses) {
         setResponses(initialSession.responses)
@@ -94,9 +149,40 @@ export const useInteractiveSessionSocket = ({
 
     const socket = socketService.connect()
 
+    const handleJoinAck = (ackResponse: unknown) => {
+      const ack = ackResponse as Record<string, unknown> | undefined
+      if (ack && typeof ack === 'object') {
+        const rawList = Array.isArray(ack.students)
+          ? (ack.students as Record<string, unknown>[])
+          : Array.isArray(ack.connected_students)
+          ? (ack.connected_students as Record<string, unknown>[])
+          : []
+        if (rawList.length > 0) {
+          const unique: SessionConnectedStudent[] = []
+          const seen = new Set<string>()
+          for (const item of rawList) {
+            const id = normalizeStudentId(item)
+            if (!id || seen.has(id)) continue
+            seen.add(id)
+            unique.push({
+              id,
+              _id: id,
+              student_id: (item.student_id as string) || id,
+              user_id: (item.user_id as string) || id,
+              name: String(item.name ?? item.student_name ?? 'Học viên').trim() || 'Học viên',
+              avatar: item.avatar as string | undefined,
+              score: typeof item.score === 'number' ? item.score : 0,
+              joined_at: item.joined_at as string | undefined,
+            })
+          }
+          setConnectedStudents(unique)
+        }
+      }
+    }
+
     const handleConnect = () => {
       setIsConnected(true)
-      socketService.joinSessionRoom(sessionId, isTeacher)
+      socketService.joinSessionRoom(sessionId, isTeacher, handleJoinAck)
     }
 
     const handleDisconnect = () => {
@@ -105,7 +191,7 @@ export const useInteractiveSessionSocket = ({
 
     if (socket.connected) {
       setIsConnected(true)
-      socketService.joinSessionRoom(sessionId, isTeacher)
+      socketService.joinSessionRoom(sessionId, isTeacher, handleJoinAck)
     }
 
     socket.on('connect', handleConnect)
@@ -119,24 +205,89 @@ export const useInteractiveSessionSocket = ({
       callbacksRef.current.onSessionUpdated?.(data as Partial<InteractiveSession>)
     })
 
+    // Event: session:connected-students
+    const unsubConnectedStudents = socketService.on('session:connected-students', (raw: unknown) => {
+      const data = (raw as Record<string, unknown>) || {}
+      console.log('[Socket] session:connected-students', data)
+      const rawList = Array.isArray(raw)
+        ? (raw as Record<string, unknown>[])
+        : Array.isArray(data.students)
+        ? (data.students as Record<string, unknown>[])
+        : Array.isArray(data.connected_students)
+        ? (data.connected_students as Record<string, unknown>[])
+        : []
+
+      const uniqueStudents: SessionConnectedStudent[] = []
+      const seenIds = new Set<string>()
+
+      for (const st of rawList) {
+        const id = normalizeStudentId(st)
+        if (!id || seenIds.has(id)) continue
+        seenIds.add(id)
+        uniqueStudents.push({
+          id,
+          _id: id,
+          student_id: (st.student_id as string) || id,
+          user_id: (st.user_id as string) || id,
+          name: String(st.name ?? st.student_name ?? 'Học viên').trim() || 'Học viên',
+          avatar: st.avatar as string | undefined,
+          score: typeof st.score === 'number' ? st.score : 0,
+          joined_at: st.joined_at as string | undefined,
+        })
+      }
+
+      setConnectedStudents(uniqueStudents)
+    })
+
     // Event: student:joined
     const unsubStudentJoined = socketService.on('student:joined', (raw: unknown) => {
       const studentData = (raw as Record<string, unknown>) || {}
       console.log('[Socket] student:joined', studentData)
+      const id = normalizeStudentId(studentData)
+      if (!id) return
+
+      const studentName = String(
+        studentData.name ?? studentData.student_name ?? ''
+      ).trim() || 'Học viên'
+
       const student: SessionConnectedStudent = {
-        id: String(studentData.id || studentData._id || studentData.student_id || ''),
-        name: String(studentData.name || studentData.student_name || 'Học viên'),
+        id,
+        _id: id,
+        student_id: (studentData.student_id as string) || id,
+        user_id: (studentData.user_id as string) || id,
+        name: studentName,
         avatar: studentData.avatar as string | undefined,
         score: typeof studentData.score === 'number' ? studentData.score : 0,
+        joined_at: (studentData.joined_at as string) || undefined,
       }
 
       setConnectedStudents((prev) => {
-        const exists = prev.some((s) => s.id === student.id)
-        if (exists) return prev
+        if (prev.some((s) => normalizeStudentId(s) === id)) {
+          return prev.map((s) =>
+            normalizeStudentId(s) === id
+              ? {
+                  ...s,
+                  name: studentName !== 'Học viên' ? studentName : s.name,
+                  avatar: student.avatar || s.avatar,
+                  score: typeof studentData.score === 'number' ? studentData.score : s.score,
+                }
+              : s,
+          )
+        }
         return [...prev, student]
       })
 
       callbacksRef.current.onStudentJoined?.(student)
+    })
+
+    // Event: student:left
+    const unsubStudentLeft = socketService.on('student:left', (raw: unknown) => {
+      const leftData = (raw as Record<string, unknown>) || {}
+      console.log('[Socket] student:left', leftData)
+      const id = normalizeStudentId(leftData)
+      if (!id) return
+
+      setConnectedStudents((prev) => prev.filter((s) => normalizeStudentId(s) !== id))
     })
 
     // Event: activity:started
@@ -201,10 +352,15 @@ export const useInteractiveSessionSocket = ({
     const unsubStudentAnswered = socketService.on('student:answered', (raw: unknown) => {
       const answerData = (raw as Record<string, unknown>) || {}
       console.log('[Socket] student:answered', answerData)
+      const studentId = normalizeStudentId(answerData) || String(answerData.student_id || answerData.userId || '')
+      const studentName = String(
+        answerData.student_name ?? answerData.name ?? ''
+      ).trim() || undefined
+
       const record: SessionResponseRecord = {
-        student_id: String(answerData.student_id || answerData.userId || answerData.id || ''),
-        student_name: answerData.student_name as string | undefined || answerData.name as string | undefined,
-        answer: (answerData.answer as string | number | boolean | Record<string, unknown>) || '',
+        student_id: studentId,
+        student_name: studentName,
+        answer: (answerData.answer as string | number | boolean | Record<string, unknown>) ?? '',
         is_correct: answerData.is_correct as boolean | undefined,
         created_at: new Date().toISOString(),
       }
@@ -247,7 +403,9 @@ export const useInteractiveSessionSocket = ({
       socket.off('connect', handleConnect)
       socket.off('disconnect', handleDisconnect)
       unsubSessionStarted()
+      unsubConnectedStudents()
       unsubStudentJoined()
+      unsubStudentLeft()
       unsubActivityStarted()
       unsubNextItem()
       unsubShowAnswer()

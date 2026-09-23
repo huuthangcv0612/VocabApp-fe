@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const VerifyEmail = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const [searchParams] = useSearchParams()
   const location = useLocation()
   const token = useMemo(() => searchParams.get('token')?.trim() ?? '', [searchParams])
@@ -22,30 +24,30 @@ const VerifyEmail = () => {
   useEffect(() => {
     if (isPending) {
       setStatus('success')
-      setMessage('Vui lòng kiểm tra email để xác nhận tài khoản.')
+      setMessage(t('verifyEmail.pendingSubtitle'))
       return
     }
 
     if (!token) {
       setStatus('error')
-      setMessage('Link xác thực không hợp lệ hoặc đã hết hạn.')
+      setMessage(t('verifyEmail.failedDesc'))
       return
     }
 
     let isMounted = true
     const verify = async () => {
       setStatus('loading')
-      setMessage('Đang xác thực email...')
+      setMessage(t('verifyEmail.verifyingTitle'))
       try {
         const successMsg = await authService.verifyEmail(token)
         if (isMounted) {
           setStatus('success')
-          setMessage(successMsg || 'Xác thực email thành công. Bạn có thể đăng nhập ngay bây giờ.')
+          setMessage(successMsg || t('verifyEmail.successDesc'))
         }
       } catch (error) {
         if (isMounted) {
           setStatus('error')
-          setMessage(error instanceof Error ? error.message : 'Link xác thực không hợp lệ hoặc đã hết hạn.')
+          setMessage(error instanceof Error ? error.message : t('verifyEmail.failedDesc'))
         }
       }
     }
@@ -55,13 +57,13 @@ const VerifyEmail = () => {
     return () => {
       isMounted = false
     }
-  }, [token, isPending])
+  }, [token, isPending, t])
 
   const handleResend = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmedEmail = email.trim()
     if (!trimmedEmail) {
-      toast.error('Vui lòng nhập địa chỉ email.')
+      toast.error(t('validation.invalidEmail', { defaultValue: 'Vui lòng nhập địa chỉ email.' }))
       return
     }
 
@@ -71,11 +73,11 @@ const VerifyEmail = () => {
 
     try {
       const msg = await authService.resendVerification(trimmedEmail)
-      const finalMsg = msg || 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.'
+      const finalMsg = msg || t('login.resendSuccess', { defaultValue: 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.' })
       setResendSuccess(finalMsg)
       toast.success(finalMsg)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Không thể gửi lại email xác thực.'
+      const msg = err instanceof Error ? err.message : t('login.resendFail', { defaultValue: 'Không thể gửi lại email xác thực.' })
       setResendError(msg)
       toast.error(msg)
     } finally {
@@ -83,7 +85,7 @@ const VerifyEmail = () => {
     }
   }
 
-  // Màn hình 1: Đăng ký thành công - Đang chờ xác nhận email (/verify-email/pending)
+  // Pending screen
   if (isPending) {
     return (
       <main className="auth-page">
@@ -107,13 +109,12 @@ const VerifyEmail = () => {
                 <polyline points="22,6 12,13 2,6" />
               </svg>
             </div>
-            <h1 className="auth-page__title">Đăng ký thành công!</h1>
+            <h1 className="auth-page__title">{t('verifyEmail.pendingTitle')}</h1>
             <p className="auth-page__subtitle" style={{ fontSize: '1.05rem', fontWeight: 600, color: '#1e293b', marginTop: '0.5rem' }}>
-              Vui lòng kiểm tra email để xác nhận tài khoản.
+              {t('verifyEmail.pendingSubtitle')}
             </p>
             <p style={{ color: '#64748b', fontSize: '0.92rem', marginTop: '0.75rem', lineHeight: 1.6 }}>
-              Chúng tôi đã gửi link xác thực đến {email ? <strong>{email}</strong> : 'hộp thư của bạn'}.
-              Vui lòng kiểm tra hộp thư đến (hoặc mục Spam/Thư rác) và bấm xác nhận để kích hoạt tài khoản.
+              {t('verifyEmail.pendingDesc')} {email && <strong>({email})</strong>}
             </p>
           </div>
 
@@ -123,15 +124,15 @@ const VerifyEmail = () => {
               className="auth-form__submit"
               style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
             >
-              Đăng nhập
+              {t('login.submit')}
             </Link>
 
             <form onSubmit={handleResend} style={{ marginTop: '1.25rem', borderTop: '1px solid var(--auth-border)', paddingTop: '1.25rem' }}>
               <p className="auth-page__subtitle" style={{ fontSize: '0.88rem', marginBottom: '0.75rem', textAlign: 'center' }}>
-                Chưa nhận được email xác nhận? Nhập email để gửi lại:
+                {t('verifyEmail.resendPrompt')}
               </p>
               <FormInput
-                label="Email"
+                label={t('login.email')}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -154,7 +155,7 @@ const VerifyEmail = () => {
                 className="auth-form__submit"
                 style={{ marginTop: '0.75rem', background: '#f1f5f9', color: '#0f172a', border: '1px solid #cbd5e1' }}
               >
-                {resendLoading ? 'Đang gửi lại...' : 'Gửi lại email xác thực'}
+                {resendLoading ? t('verifyEmail.resendingBtn') : t('verifyEmail.resendBtn')}
               </button>
             </form>
           </div>
@@ -163,7 +164,7 @@ const VerifyEmail = () => {
     )
   }
 
-  // Màn hình 2: Đang xác thực (Loading)
+  // Loading screen
   if (status === 'loading') {
     return (
       <main className="auth-page">
@@ -197,15 +198,15 @@ const VerifyEmail = () => {
                 <path d="M12 2a10 10 0 0 1 10 10" />
               </svg>
             </div>
-            <h1 className="auth-page__title">Đang xác thực email...</h1>
-            <p className="auth-page__subtitle">Hệ thống đang xử lý yêu cầu xác nhận của bạn. Vui lòng đợi trong giây lát.</p>
+            <h1 className="auth-page__title">{t('verifyEmail.verifyingTitle')}</h1>
+            <p className="auth-page__subtitle">{t('verifyEmail.verifyingSubtitle')}</p>
           </div>
         </section>
       </main>
     )
   }
 
-  // Màn hình 3: Xác thực thành công
+  // Success screen
   if (status === 'success') {
     return (
       <main className="auth-page">
@@ -229,7 +230,7 @@ const VerifyEmail = () => {
                 <polyline points="22 4 12 14.01 9 11.01" />
               </svg>
             </div>
-            <h1 className="auth-page__title">Xác thực email thành công!</h1>
+            <h1 className="auth-page__title">{t('verifyEmail.successTitle')}</h1>
             <p className="auth-page__subtitle" style={{ fontSize: '1rem', color: '#166534', marginTop: '0.5rem', fontWeight: 500 }}>
               {message}
             </p>
@@ -241,7 +242,7 @@ const VerifyEmail = () => {
               className="auth-form__submit"
               style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
             >
-              Đăng nhập
+              {t('login.submit')}
             </Link>
           </div>
         </section>
@@ -249,7 +250,7 @@ const VerifyEmail = () => {
     )
   }
 
-  // Màn hình 4: Xác thực thất bại (400 hoặc lỗi khác)
+  // Error screen
   return (
     <main className="auth-page">
       <section className="auth-page__container">
@@ -273,7 +274,7 @@ const VerifyEmail = () => {
               <line x1="9" y1="9" x2="15" y2="15" />
             </svg>
           </div>
-          <h1 className="auth-page__title">Xác thực thất bại</h1>
+          <h1 className="auth-page__title">{t('verifyEmail.failedTitle')}</h1>
           <p className="auth-form__error" style={{ marginTop: '1rem', textAlign: 'center' }}>
             {message}
           </p>
@@ -281,10 +282,10 @@ const VerifyEmail = () => {
 
         <form onSubmit={handleResend} className="auth-form" style={{ marginTop: '1.5rem' }}>
           <p className="auth-page__subtitle" style={{ fontSize: '0.9rem', marginBottom: '0.5rem', textAlign: 'center' }}>
-            Link xác thực đã hết hạn hoặc không hợp lệ? Nhập email để gửi lại link mới:
+            {t('verifyEmail.resendPrompt')}
           </p>
           <FormInput
-            label="Email"
+            label={t('login.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -302,12 +303,12 @@ const VerifyEmail = () => {
             </p>
           ) : null}
           <button type="submit" disabled={resendLoading} className="auth-form__submit">
-            {resendLoading ? 'Đang gửi...' : 'Gửi lại email xác thực'}
+            {resendLoading ? t('verifyEmail.resendingBtn') : t('verifyEmail.resendBtn')}
           </button>
 
           <p className="auth-form__footer" style={{ marginTop: '1rem' }}>
             <Link to="/login" className="font-semibold text-slate-900 hover:text-slate-700">
-              Quay lại đăng nhập
+              {t('verifyEmail.backToLogin')}
             </Link>
           </p>
         </form>

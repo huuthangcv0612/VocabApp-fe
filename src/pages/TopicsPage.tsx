@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useTopics, useLevels } from '../hooks/useApi'
@@ -75,6 +76,7 @@ const getTopicIcon = (topicName?: string, icon?: string): string => {
 }
 
 const TopicsPage = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { levelId: paramLevelId } = useParams<{ levelId?: string }>()
   const navigate = useNavigate()
   const selectedLevel = paramLevelId || 'A1.1'
@@ -108,7 +110,7 @@ const TopicsPage = () => {
         <div className="topics-hero-container">
           <div className="topics-hero-title-wrapper">
             <h1 className="topics-hero-title">
-              CHOOSE<br />TOPIC
+              {t('topics.chooseTopic')}
             </h1>
           </div>
 
@@ -141,16 +143,16 @@ const TopicsPage = () => {
                 gap: '6px',
               }}
             >
-              ← Back to Levels ({displayLevelName})
+              {t('topics.backToLevels', { level: displayLevelName })}
             </button>
           </div>
-          <h2 className="topics-section-title">WHAT TOPIC YOU LIKE ?</h2>
+          <h2 className="topics-section-title">{t('topics.whatTopicLike')}</h2>
 
-          {topicsLoading && <p className="status-text white-text">Đang tải danh sách chủ đề...</p>}
-          {topicsError && <p className="status-text error">Lỗi: {topicsError}</p>}
+          {topicsLoading && <p className="status-text white-text">{t('topics.loading')}</p>}
+          {topicsError && <p className="status-text error">{t('common.states.error')}: {topicsError}</p>}
 
           {!topicsLoading && effectiveTopics.length === 0 && (
-            <p className="status-text white-text">Chưa có chủ đề nào trong cấp độ {displayLevelName}.</p>
+            <p className="status-text white-text">{t('topics.empty', { level: displayLevelName })}</p>
           )}
 
           {/* Topic Cards Grid */}
@@ -174,7 +176,7 @@ const TopicsPage = () => {
                   <div className="topic-card-content">
                     <h3 className="topic-card-name">{topicName}</h3>
                     <p className="topic-card-desc">
-                      {topic?.description || `Các bài học từ vựng tiếng Đức thuộc chủ đề ${topicName}`}
+                      {topic?.description || t('topics.defaultDesc', { name: topicName })}
                     </p>
                   </div>
                 </div>

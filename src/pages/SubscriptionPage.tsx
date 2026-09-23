@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { subscriptionService, BackendSubscriptionResponse } from '../services/subscriptionService'
@@ -8,6 +9,7 @@ import CloudIcon from '../assets/Cloud.svg'
 import '../styles/pages/progress.css'
 
 export const SubscriptionPage: React.FC = () => {
+  const { t } = useTranslation(['subscription', 'common'])
   const navigate = useNavigate()
 
   const [sub, setSub] = useState<UserSubscription | null>(null)
@@ -45,12 +47,12 @@ export const SubscriptionPage: React.FC = () => {
         <div className="progress-hero-container">
           <div className="progress-hero-content">
             <Link to="/levels" className="back-link">
-              ← Trở về danh sách bài học
+              {t('mySubscription.backToLessons')}
             </Link>
 
-            <h1 className="progress-hero-title">GÓI DỊCH VỤ CỦA TÔI</h1>
+            <h1 className="progress-hero-title">{t('mySubscription.title')}</h1>
             <p className="progress-hero-subtitle">
-              Quản lý thông tin gói dịch vụ hiện tại, thời hạn sử dụng và các quyền lợi đi kèm.
+              {t('mySubscription.subtitle')}
             </p>
           </div>
         </div>
@@ -64,7 +66,7 @@ export const SubscriptionPage: React.FC = () => {
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-              <p>Đang tải thông tin tài khoản...</p>
+              <p>{t('mySubscription.loading')}</p>
             </div>
           ) : (
             <>
@@ -72,10 +74,10 @@ export const SubscriptionPage: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
                   <div>
                     <span className={`badge-pill ${sub?.plan_id === 'free' ? 'badge-draft' : 'badge-active'}`} style={{ marginBottom: '8px', display: 'inline-block' }}>
-                      {sub?.isPremium ? 'Gói Nâng Cấp' : 'Gói Miễn Phí'}
+                      {sub?.isPremium ? t('mySubscription.upgradedBadge') : t('mySubscription.freeBadge')}
                     </span>
                     <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      {sub?.plan_name || 'Gói Free'}
+                      {sub?.plan_name || t('mySubscription.freePlan')}
                     </h2>
                   </div>
 
@@ -84,29 +86,29 @@ export const SubscriptionPage: React.FC = () => {
                     onClick={() => navigate('/pricing')}
                     style={{ padding: '12px 24px', borderRadius: '9999px' }}
                   >
-                    ✨ Nâng Cấp / Đổi Gói Dịch Vụ
+                    {t('mySubscription.upgradeOrChangeBtn')}
                   </button>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', backgroundColor: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
                   <div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TRẠNG THÁI GÓI</div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>{t('mySubscription.planStatusLabel')}</div>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: sub?.isPremium ? '#16a34a' : '#64748b', textTransform: 'uppercase', marginTop: '2px' }}>
                       ● {sub?.status || 'Active'}
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>NGÀY HẾT HẠN</div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>{t('mySubscription.expiryDateLabel')}</div>
                     <div style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginTop: '2px' }}>
-                      {sub?.end_date ? new Date(sub.end_date).toLocaleDateString('vi-VN') : 'Không giới hạn'}
+                      {sub?.end_date ? new Date(sub.end_date).toLocaleDateString() : t('mySubscription.unlimited')}
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>TÍNH NĂNG ĐƯỢC PHÉP</div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>{t('mySubscription.allowedFeaturesLabel')}</div>
                     <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#2a63e8', marginTop: '2px' }}>
-                      {sub?.features && sub.features.length > 0 ? sub.features.join(', ') : 'Học bài cơ bản'}
+                      {sub?.features && sub.features.length > 0 ? sub.features.join(', ') : t('mySubscription.basicLearning')}
                     </div>
                   </div>
                 </div>
@@ -115,7 +117,7 @@ export const SubscriptionPage: React.FC = () => {
               {history.length > 0 && (
                 <div className="admin-card" style={{ padding: '28px', borderRadius: '24px' }}>
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-                    📜 Lịch Sử Đăng Ký Gói (Subscription History)
+                    {t('mySubscription.historyTitle')}
                   </h3>
                   <div style={{ display: 'grid', gap: '12px' }}>
                     {history.map((item, idx) => (
@@ -135,14 +137,14 @@ export const SubscriptionPage: React.FC = () => {
                       >
                         <div>
                           <div style={{ fontWeight: 700, color: '#0f172a' }}>
-                            Gói: {typeof item.subscription?.planId === 'object' ? item.subscription.planId.name : item.subscription?.planId || 'Premium'}
+                            {t('mySubscription.planPrefix')} {typeof item.subscription?.planId === 'object' ? item.subscription.planId.name : item.subscription?.planId || 'Premium'}
                           </div>
                           <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
-                            Thời gian: {new Date(item.subscription?.startDate).toLocaleDateString('vi-VN')} - {new Date(item.subscription?.endDate).toLocaleDateString('vi-VN')}
+                            {t('mySubscription.periodPrefix')} {new Date(item.subscription?.startDate).toLocaleDateString()} - {new Date(item.subscription?.endDate).toLocaleDateString()}
                           </div>
                         </div>
                         <span className={`badge-pill ${item.subscription?.status === 'active' ? 'badge-active' : 'badge-draft'}`}>
-                          {item.subscription?.status || 'Ended'}
+                          {item.subscription?.status === 'active' ? t('mySubscription.statusActive') : t('mySubscription.statusEnded')}
                         </span>
                       </div>
                     ))}

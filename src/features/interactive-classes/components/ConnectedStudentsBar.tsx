@@ -41,7 +41,7 @@ export const ConnectedStudentsBar = ({
         <div style={{ display: 'flex', alignItems: 'center', marginLeft: '4px' }}>
           {students.slice(0, 5).map((s, idx) => (
             <div
-              key={s.id || idx}
+              key={s.id || s._id || idx}
               style={{
                 width: '28px',
                 height: '28px',
@@ -55,10 +55,19 @@ export const ConnectedStudentsBar = ({
                 justifyContent: 'center',
                 marginLeft: idx > 0 ? '-6px' : '0',
                 border: '2px solid #1E293B',
+                overflow: 'hidden',
               }}
               title={s.name}
             >
-              {s.name ? s.name.charAt(0).toUpperCase() : 'H'}
+              {s.avatar ? (
+                <img
+                  src={s.avatar}
+                  alt={s.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                s.name ? s.name.charAt(0).toUpperCase() : 'H'
+              )}
             </div>
           ))}
           {students.length > 5 && (

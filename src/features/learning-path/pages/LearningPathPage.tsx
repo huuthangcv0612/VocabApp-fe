@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { useLearningPath } from '../hooks/useLearningPath'
@@ -10,6 +11,7 @@ import cloudSvg from '../../../assets/Cloud.svg'
 import '../styles/learningPath.css'
 
 export const LearningPathPage: React.FC = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const {
     data,
     activeLevel,
@@ -39,17 +41,17 @@ export const LearningPathPage: React.FC = () => {
         ) : error ? (
           <div className="lp-error-state">
             <div className="lp-error-icon">⚠️</div>
-            <h3 className="lp-error-title">Không thể tải Lộ trình học</h3>
+            <h3 className="lp-error-title">{t('path.loadFailed')}</h3>
             <p className="lp-error-desc">{error}</p>
             <button type="button" className="lp-retry-btn" onClick={refetch}>
-              Thử lại 🔄
+              {t('actions.retry', { ns: 'common' })} 🔄
             </button>
           </div>
         ) : !data || !activeLevel ? (
           <div className="lp-empty-state">
             <div className="lp-empty-icon">🗺️</div>
-            <h3 className="lp-empty-title">Chưa có dữ liệu Lộ trình</h3>
-            <p className="lp-empty-desc">Hệ thống đang cập nhật các chương học mới.</p>
+            <h3 className="lp-empty-title">{t('path.noPathData')}</h3>
+            <p className="lp-empty-desc">{t('path.pathUpdating')}</p>
           </div>
         ) : (
           <div className="lp-layout-grid">
@@ -72,10 +74,10 @@ export const LearningPathPage: React.FC = () => {
                 <div className="lp-empty-state">
                   <div className="lp-empty-icon">📚</div>
                   <h3 className="lp-empty-title">
-                    Chưa có Unit nào trong Trình độ {activeLevel.level_name}
+                    {t('path.emptyUnits', { level: activeLevel.level_name })}
                   </h3>
                   <p className="lp-empty-desc">
-                    Vui lòng chọn trình độ khác hoặc quay lại sau.
+                    {t('path.chooseOtherLevel')}
                   </p>
                 </div>
               )}

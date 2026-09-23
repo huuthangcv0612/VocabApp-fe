@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import '../styles/components/header.css'
 import useAuth from '../hooks/useAuth'
 import HamburgerIcon from '../assets/Hamberger.svg'
@@ -10,6 +11,7 @@ type HeaderProps = {
 }
 
 const Header = ({ animate = false }: HeaderProps) => {
+  const { t } = useTranslation('common')
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -36,24 +38,24 @@ const Header = ({ animate = false }: HeaderProps) => {
 
         <nav className="nav-menu">
           <NavLink to="/learning-path" className="nav-link">
-            Start Learning
+            {t('nav.startLearning')}
           </NavLink>
           <NavLink to="/progress" className="nav-link">
-            Progress
+            {t('nav.progress')}
           </NavLink>
           <NavLink to="/pricing" className="nav-link">
-            Pricing
+            {t('nav.pricing')}
           </NavLink>
 
           <NavLink to="/test" className="nav-link">
-            Practice Tests
+            {t('nav.practiceTests')}
           </NavLink>
           <NavLink to="/interactive-room" className="nav-link">
-            Interactive Classes
+            {t('nav.interactiveClasses')}
           </NavLink>
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" style={{ color: '#FFF2B7', fontWeight: 800 }}>
-              ⚙️ Admin Dashboard
+              {t('nav.adminDashboard')}
             </NavLink>
           )}
         </nav>
@@ -65,16 +67,16 @@ const Header = ({ animate = false }: HeaderProps) => {
                 Hallo, <span className="username">{user?.name}</span> 👤
               </NavLink>
               <button onClick={handleLogout} className="btn-book">
-                Logout
+                {t('nav.logout')}
               </button>
             </>
           ) : (
             <>
               <NavLink to="/login" className="btn-book">
-                Login
+                {t('nav.login')}
               </NavLink>
               <NavLink to="/register" className="btn-book btn-register">
-                Register
+                {t('nav.register')}
               </NavLink>
             </>
           )}
@@ -93,25 +95,25 @@ const Header = ({ animate = false }: HeaderProps) => {
       {isMobileMenuOpen && (
         <div className="mobile-menu open">
           <NavLink to="/learning-path" className="nav-link" onClick={closeMobileMenu}>
-            Start Learning
+            {t('nav.startLearning')}
           </NavLink>
           <NavLink to="/progress" className="nav-link" onClick={closeMobileMenu}>
-            Progress
+            {t('nav.progress')}
           </NavLink>
 
           <NavLink to="/pricing" className="nav-link" onClick={closeMobileMenu}>
-            Pricing
+            {t('nav.pricing')}
           </NavLink>
 
           <NavLink to="/test" className="nav-link" onClick={closeMobileMenu}>
-            Practice Tests
+            {t('nav.practiceTests')}
           </NavLink>
           <NavLink to="/interactive-room" className="nav-link" onClick={closeMobileMenu}>
-            Interactive Classes
+            {t('nav.interactiveClasses')}
           </NavLink>
           {user?.role === 'admin' && (
             <NavLink to="/admin" className="nav-link" onClick={closeMobileMenu} style={{ color: '#FFF2B7', fontWeight: 800 }}>
-              ⚙️ Admin Dashboard
+              {t('nav.adminDashboard')}
             </NavLink>
           )}
 
@@ -123,15 +125,15 @@ const Header = ({ animate = false }: HeaderProps) => {
               }}
               className="btn-book"
             >
-              Logout ({user?.name})
+              {t('nav.logout')} ({user?.name})
             </button>
           ) : (
             <div className="mobile-auth-buttons">
               <NavLink to="/login" className="btn-book" onClick={closeMobileMenu}>
-                Login
+                {t('nav.login')}
               </NavLink>
               <NavLink to="/register" className="btn-book btn-register" onClick={closeMobileMenu}>
-                Register
+                {t('nav.register')}
               </NavLink>
             </div>
           )}
@@ -142,3 +144,4 @@ const Header = ({ animate = false }: HeaderProps) => {
 }
 
 export default Header
+

@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "startLearning": "Bắt đầu học",
+    "progress": "Tiến độ",
+    "pricing": "Bảng giá",
+    "practiceTests": "Đề thi thử",
+    "interactiveClasses": "Lớp học tương tác",
+    "adminDashboard": "⚙️ Quản trị viên",
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "logout": "Đăng xuất",
+    "profile": "Tài khoản cá nhân",
+    "hello": "Xin chào",
+    "menu": "Menu"
+  },
+  "footer": {
+    "home": "Trang chủ",
+    "about": "Giới thiệu",
+    "admissions": "Đăng ký nhập học",
+    "programs": "Chương trình học",
+    "tuition": "Học phí & Gói học",
+    "parentResources": "Tài liệu phụ huynh",
+    "teachers": "Đội ngũ giảng viên",
+    "gallery": "Hình ảnh hoạt động",
+    "faq": "Câu hỏi thường gặp",
+    "careers": "Tuyển dụng",
+    "news": "Tin tức",
+    "contact": "Liên hệ",
+    "policyAndTerms": "Chính sách & Điều khoản",
+    "copyright": "© 2026 DeutschUp. Bảo lưu mọi quyền."
+  },
+  "actions": {
+    "save": "Lưu",
+    "saving": "Đang lưu...",
+    "cancel": "Hủy bỏ",
+    "delete": "Xóa",
+    "deleting": "Đang xóa...",
+    "edit": "Chỉnh sửa",
+    "back": "Quay lại",
+    "continue": "Tiếp tục",
+    "retry": "Thử lại",
+    "close": "Đóng",
+    "viewDetail": "Xem chi tiết",
+    "loading": "Đang tải...",
+    "confirm": "Xác nhận",
+    "check": "Kiểm tra",
+    "submit": "Gửi đi",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép!"
+  },
+  "states": {
+    "empty": "Chưa có dữ liệu",
+    "emptyDesc": "Hiện tại danh sách này đang trống hoặc chưa có dữ liệu.",
+    "error": "Đã xảy ra lỗi",
+    "networkError": "Không thể kết nối với máy chủ. Vui lòng kiểm tra lại kết nối mạng.",
+    "unauthorized": "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+    "notFound": "Không tìm thấy nội dung yêu cầu.",
+    "loadingData": "Đang tải dữ liệu..."
+  },
+  "pagination": {
+    "showing": "Hiển thị",
+    "to": "-",
+    "of": "trong tổng số",
+    "items": "mục",
+    "prevPage": "◀ Trang trước",
+    "nextPage": "Trang sau ▶",
+    "page": "Trang"
+  },
+  "modals": {
+    "confirmDeleteTitle": "Xác nhận xóa",
+    "confirmDeleteWarning": "⚠️ Hành động này không thể hoàn tác.",
+    "permanentDelete": "Xóa vĩnh viễn"
+  },
+  "language": {
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "selectLanguage": "Chọn ngôn ngữ"
+  },
+  "lock": {
+    "premiumFeature": "🔒 Tính Năng Nâng Cao",
+    "upgradeRequired": "Tính năng này yêu cầu nâng cấp Gói Premium hoặc Pro để truy cập.",
+    "upgradeNow": "Nâng cấp ngay",
+    "viewSubscription": "Xem trạng thái gói"
+  },
+  "errorBoundary": {
+    "title": "Đã xảy ra lỗi giao diện ⚠️",
+    "desc": "Có lỗi phát sinh trong khi tải giao diện ứng dụng.",
+    "reload": "Tải lại trang ↺"
+  },
+  "speaker": {
+    "playing": "Đang phát âm thanh...",
+    "loading": "Đang tải âm thanh...",
+    "pronounce": "Phát âm:",
+    "unsupported": "Trình duyệt không hỗ trợ phát âm"
+  },
+  "policy": {
+    "heroTitle": "CHÍNH SÁCH & ĐIỀU KHOẢN",
+    "contactUs": "LIÊN HỆ CHÚNG TÔI",
+    "contactDesc": "Nếu bạn có câu hỏi về trang này, vui lòng liên hệ với chúng tôi qua các thông tin trên trang.",
+    "contactNow": "LIÊN HỆ NGAY",
+    "policiesTitle": "CHÍNH SÁCH BẢO MẬT",
+    "policiesIntro": "Chúng tôi tôn trọng quyền riêng tư của bạn và giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
+    "termsTitle": "ĐIỀU KHOẢN DỊCH VỤ",
+    "termsIntro": "Bằng việc sử dụng trang web này, bạn đồng ý tuân thủ các Điều khoản này cùng mọi cập nhật được ban hành.",
+    "lastUpdate": "Cập nhật lần cuối: Tháng 7/2026"
+  }
+}

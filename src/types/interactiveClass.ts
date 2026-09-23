@@ -53,11 +53,21 @@ export interface ClassStudent {
   _id: string
   id?: string
   student_id?: string
+  user_id?: string
+  membership_id?: string
   name: string
   email?: string
   avatar?: string
   status?: 'active' | 'inactive' | 'pending' | string
   joined_at?: string
+  user?: {
+    _id?: string
+    id?: string
+    name?: string
+    email?: string
+    avatar?: string
+    [key: string]: unknown
+  }
 }
 
 export interface ClassItem {
@@ -71,6 +81,8 @@ export interface ClassItem {
   teacher_name?: string
   students?: ClassStudent[]
   students_count?: number
+  studentCount?: number
+  isTeacher?: boolean
   status?: 'active' | 'archived' | string
   active_session_id?: string | null
   created_at?: string
@@ -79,9 +91,13 @@ export interface ClassItem {
 
 export interface SessionConnectedStudent {
   id: string
+  _id?: string
+  student_id?: string
+  user_id?: string
   name: string
   avatar?: string
   score?: number
+  joined_at?: string
 }
 
 export interface SessionResponseRecord {
@@ -106,6 +122,9 @@ export interface InteractiveSession {
   current_item?: VocabularyItem | Record<string, unknown> | null
   show_answer?: boolean
   connected_students?: SessionConnectedStudent[]
+  connected_students_count?: number
+  students_count?: number
+  studentCount?: number
   spin_result?: {
     word?: string
     vocabulary?: VocabularyItem

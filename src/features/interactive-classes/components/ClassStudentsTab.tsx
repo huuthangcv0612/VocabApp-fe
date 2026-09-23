@@ -30,16 +30,39 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
     fetchStudents()
   }, [fetchStudents])
 
-  const handleRemove = async (studentId: string, studentName: string) => {
+  const handleRemove = async (student: ClassStudent) => {
+    const studentUser = (student.user as Record<string, unknown>) || {}
+    const removalId = String(
+      student.student_id ??
+      student._id ??
+      student.id ??
+      student.membership_id ??
+      studentUser._id ??
+      studentUser.id ??
+      ''
+    ).trim()
+
+    if (!removalId) {
+      toast.error('Không tìm thấy ID học viên để xóa.')
+      return
+    }
+
+    const studentName = (student.name || (studentUser.name as string) || '').trim() || 'Học viên'
     if (!window.confirm(`Xóa học viên "${studentName}" khỏi lớp học này?`)) {
       return
     }
 
-    setRemovingId(studentId)
+    setRemovingId(removalId)
     try {
-      await interactiveClassService.removeStudent(classId, studentId)
+      await interactiveClassService.removeStudent(classId, removalId)
       toast.success(`Đã xóa học viên ${studentName} khỏi lớp`)
-      setStudents((prev) => prev.filter((s) => (s._id || s.id || s.student_id) !== studentId))
+      setStudents((prev) =>
+        prev.filter((s) => {
+          const u = (s.user as Record<string, unknown>) || {}
+          const id = String(s.student_id ?? s._id ?? s.id ?? s.membership_id ?? u._id ?? u.id ?? '').trim()
+          return id !== removalId
+        }),
+      )
     } catch (err: unknown) {
       console.error('Error removing student:', err)
       const errorObj = err as { response?: { data?: { message?: string } } }
@@ -92,10 +115,28 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
           </thead>
           <tbody>
             {students.map((student, idx) => {
-              const sId = student._id || student.id || student.student_id || `s_${idx}`
+              const studentUser = (student.user as Record<string, unknown>) || {}
+              const studentName = (student.name || (studentUser.name as string) || '').trim() || 'Học viên'
+              const studentEmail = (student.email || (studentUser.email as string) || '').trim() || '—'
+              const studentAvatar = student.avatar || (studentUser.avatar as string)
+              const studentJoinedAt = student.joined_at || (studentUser.joined_at as string) || (studentUser.created_at as string)
+              const studentStatus = student.status || (studentUser.status as string) || 'Active'
+
+              const sId = String(
+                student.student_id ??
+                student._id ??
+                student.id ??
+                student.membership_id ??
+                studentUser._id ??
+                studentUser.id ??
+                ''
+              ).trim()
+
+              const rowKey = sId || `student_row_${idx}`
+
               return (
                 <tr
-                  key={sId}
+                  key={rowKey}
                   style={{
                     backgroundColor: '#FFFFFF',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
@@ -112,42 +153,55 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div
-                        style={{
-                          width: '36px',
-                          height: '36px',
-                          borderRadius: '50%',
-                          backgroundColor: '#E0E7FF',
-                          color: '#4338CA',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {student.name ? student.name.charAt(0).toUpperCase() : 'H'}
-                      </div>
-                      <span>{student.name || 'Học viên'}</span>
+                      {studentAvatar ? (
+                        <img
+                          src={studentAvatar}
+                          alt={studentName}
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '50%',
+                            backgroundColor: '#E0E7FF',
+                            color: '#4338CA',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {studentName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span>{studentName}</span>
                     </div>
                   </td>
 
                   <td style={{ padding: '16px', color: '#475569' }}>
-                    {student.email || '—'}
+                    {studentEmail}
                   </td>
 
                   <td style={{ padding: '16px' }}>
                     <span
                       className={`ic-badge ${
-                        student.status === 'inactive' ? 'ic-badge-outline' : 'ic-badge-active'
+                        studentStatus.toLowerCase() === 'inactive' ? 'ic-badge-outline' : 'ic-badge-active'
                       }`}
                     >
-                      {student.status || 'Active'}
+                      {studentStatus}
                     </span>
                   </td>
 
                   <td style={{ padding: '16px', color: '#64748B', fontSize: '0.9rem' }}>
-                    {student.joined_at
-                      ? new Date(student.joined_at).toLocaleDateString('vi-VN')
+                    {studentJoinedAt
+                      ? new Date(studentJoinedAt).toLocaleDateString('vi-VN')
                       : '—'}
                   </td>
 
@@ -164,7 +218,7 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
                         type="button"
                         className="ic-btn ic-btn-outline ic-btn-sm"
                         style={{ color: '#EF4444', borderColor: '#FECACA' }}
-                        onClick={() => handleRemove(sId, student.name)}
+                        onClick={() => handleRemove(student)}
                         disabled={removingId === sId}
                       >
                         {removingId === sId ? 'Đang xóa...' : 'Xóa học viên'}

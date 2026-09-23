@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useAuth } from '../contexts/AuthContext'
@@ -12,6 +13,7 @@ import '../styles/pages/profile.css'
 const PRESET_AVATARS = ['👧', '👦', '🦜', '🦁', '🐻', '🚀', '🎓', '👑']
 
 export const ProfilePage: React.FC = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const { user: contextUser, updateProfileState } = useAuth()
   const [profile, setProfile] = useState<AuthUser | null>(contextUser)
   const [loading, setLoading] = useState(!contextUser)
@@ -82,7 +84,7 @@ export const ProfilePage: React.FC = () => {
     return () => {
       isMounted = false
     }
-  }, [updateProfileState])
+  }, [contextUser, updateProfileState])
 
   const handleStartEdit = () => {
     if (profile) {
@@ -112,7 +114,7 @@ export const ProfilePage: React.FC = () => {
     const trimmedUsername = username.trim()
 
     if (trimmedName.length < 2) {
-      toast.error('Họ tên phải có ít nhất 2 ký tự.')
+      toast.error(t('validations.nameMinLength'))
       return
     }
 
@@ -129,7 +131,7 @@ export const ProfilePage: React.FC = () => {
       setProfile(updated)
       updateProfileState(updated)
       setIsEditing(false)
-      toast.success('Cập nhật hồ sơ thành công!')
+      toast.success(t('profile.successUpdate'))
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Cập nhật hồ sơ thất bại.'
       toast.error(msg)
@@ -143,7 +145,7 @@ export const ProfilePage: React.FC = () => {
     setSendingVerification(true)
     try {
       await authService.resendVerification(profile.email)
-      toast.success('Đã gửi lại email xác thực! Vui lòng kiểm tra hộp thư của bạn.')
+      toast.success(t('login.resendSuccess', { defaultValue: 'Đã gửi lại email xác thực! Vui lòng kiểm tra hộp thư của bạn.' }))
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gửi email xác thực thất bại.'
       toast.error(msg)
@@ -156,29 +158,29 @@ export const ProfilePage: React.FC = () => {
     e.preventDefault()
 
     if (!oldPassword) {
-      toast.error('Vui lòng nhập mật khẩu hiện tại.')
+      toast.error(t('validations.required'))
       return
     }
 
     if (newPassword.length < 8) {
-      toast.error('Mật khẩu mới phải có ít nhất 8 ký tự.')
+      toast.error(t('validations.passwordMinLength'))
       return
     }
 
     if (newPassword !== confirmPassword) {
-      toast.error('Xác nhận mật khẩu mới không trùng khớp.')
+      toast.error(t('validations.passwordMismatch'))
       return
     }
 
     setChangingPassword(true)
     try {
       await authService.changePassword(oldPassword, newPassword, confirmPassword)
-      toast.success('Đổi mật khẩu thành công!')
+      toast.success(t('changePassword.successMessage'))
       setOldPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Đổi mật khẩu thất bại.'
+      const msg = err instanceof Error ? err.message : t('common.states.error')
       toast.error(msg)
     } finally {
       setChangingPassword(false)
@@ -215,14 +217,14 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
             <div>
-              <h1 className="profile-banner-title">{profile?.name || 'Người dùng'}</h1>
+              <h1 className="profile-banner-title">{profile?.name || t('profile.notUpdated')}</h1>
               <p className="profile-banner-subtitle">
-                @{profile?.username || 'username'} • {profile?.email || ''}
+                @{profile?.username || 'user'} • {profile?.email || ''}
               </p>
             </div>
           </div>
           <span className="profile-role-badge">
-            {profile?.role === 'admin' ? '⚙️ Quản trị viên (Admin)' : '🎓 Học viên (Learner)'}
+            {profile?.role === 'admin' ? `⚙️ ${t('profile.admin')}` : `🎓 ${t('profile.learner')}`}
           </span>
         </section>
 
@@ -233,21 +235,21 @@ export const ProfilePage: React.FC = () => {
             className={`profile-tab-btn ${activeTab === 'info' ? 'active' : ''}`}
             onClick={() => setActiveTab('info')}
           >
-            <span>👤</span> Thông Tin Cá Nhân
+            <span>👤</span> {t('profile.tabs.info')}
           </button>
           <button
             type="button"
             className={`profile-tab-btn ${activeTab === 'verification' ? 'active' : ''}`}
             onClick={() => setActiveTab('verification')}
           >
-            <span>✉️</span> Quản Lý Email & Xác Thực
+            <span>✉️</span> {t('profile.tabs.verification')}
           </button>
           <button
             type="button"
             className={`profile-tab-btn ${activeTab === 'password' ? 'active' : ''}`}
             onClick={() => setActiveTab('password')}
           >
-            <span>🔒</span> Thay Đổi Mật Khẩu
+            <span>🔒</span> {t('profile.tabs.password')}
           </button>
         </div>
 
@@ -259,7 +261,7 @@ export const ProfilePage: React.FC = () => {
 
         {loading && !profile ? (
           <div className="profile-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <p style={{ fontSize: '1.1rem', color: '#64748b' }}>Đang tải thông tin hồ sơ cá nhân...</p>
+            <p style={{ fontSize: '1.1rem', color: '#64748b' }}>{t('common.states.loadingData')}</p>
           </div>
         ) : (
           <>
@@ -268,12 +270,12 @@ export const ProfilePage: React.FC = () => {
               <div className="profile-card">
                 <div className="profile-card-header">
                   <div>
-                    <h3 className="profile-card-title">👤 Thông Tin Cá Nhân</h3>
-                    <p className="profile-card-desc">Quản lý ảnh đại diện và thông tin lý lịch cá nhân của bạn</p>
+                    <h3 className="profile-card-title">👤 {t('profile.title')}</h3>
+                    <p className="profile-card-desc">{t('profile.subtitle')}</p>
                   </div>
                   {!isEditing && (
                     <button type="button" className="btn-btn-primary" onClick={handleStartEdit}>
-                      ✏️ Chỉnh Sửa Thông Tin
+                      ✏️ {t('profile.editBtn')}
                     </button>
                   )}
                 </div>
@@ -287,7 +289,7 @@ export const ProfilePage: React.FC = () => {
                         {renderAvatarContent(avatar)}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div className="avatar-presets-label">Chọn biểu tượng đại diện (Avatar):</div>
+                        <div className="avatar-presets-label">{t('profile.avatarLabel')}</div>
                         <div className="avatar-presets-grid">
                           {PRESET_AVATARS.map((emoji) => (
                             <button
@@ -302,7 +304,7 @@ export const ProfilePage: React.FC = () => {
                         </div>
                         <div style={{ marginTop: '12px' }}>
                           <label className="profile-form-label" style={{ fontSize: '0.85rem' }}>
-                            Hoặc nhập URL ảnh đại diện tùy chỉnh:
+                            {t('profile.customAvatarUrl')}
                           </label>
                           <input
                             type="text"
@@ -318,30 +320,30 @@ export const ProfilePage: React.FC = () => {
 
                     <div className="profile-grid-form">
                       <div className="profile-form-group">
-                        <label className="profile-form-label">Họ và tên *</label>
+                        <label className="profile-form-label">{t('profile.fullName')} *</label>
                         <input
                           type="text"
                           className="profile-form-input"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          placeholder="Nhập họ và tên..."
+                          placeholder={t('profile.fullName')}
                           required
                         />
                       </div>
 
                       <div className="profile-form-group">
-                        <label className="profile-form-label">Tên người dùng (Username)</label>
+                        <label className="profile-form-label">{t('profile.username')}</label>
                         <input
                           type="text"
                           className="profile-form-input"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          placeholder="Ví dụ: huuthang"
+                          placeholder="huuthang"
                         />
                       </div>
 
                       <div className="profile-form-group">
-                        <label className="profile-form-label">Địa chỉ Email</label>
+                        <label className="profile-form-label">{t('profile.email')}</label>
                         <input
                           type="email"
                           className="profile-form-input"
@@ -351,20 +353,20 @@ export const ProfilePage: React.FC = () => {
                       </div>
 
                       <div className="profile-form-group">
-                        <label className="profile-form-label">Giới tính</label>
+                        <label className="profile-form-label">{t('profile.gender')}</label>
                         <select
                           className="profile-form-select"
                           value={gender}
                           onChange={(e) => setGender(e.target.value)}
                         >
-                          <option value="male">Nam 👨</option>
-                          <option value="female">Nữ 👩</option>
-                          <option value="other">Khác 🌈</option>
+                          <option value="male">{t('profile.genderMale')}</option>
+                          <option value="female">{t('profile.genderFemale')}</option>
+                          <option value="other">{t('profile.genderOther')}</option>
                         </select>
                       </div>
 
                       <div className="profile-form-group profile-form-full">
-                        <label className="profile-form-label">Ngày sinh</label>
+                        <label className="profile-form-label">{t('profile.dateOfBirth')}</label>
                         <input
                           type="date"
                           className="profile-form-input"
@@ -376,10 +378,10 @@ export const ProfilePage: React.FC = () => {
 
                     <div style={{ display: 'flex', gap: '12px', marginTop: '28px', justifyContent: 'flex-end' }}>
                       <button type="button" className="btn-btn-secondary" onClick={handleCancelEdit}>
-                        ✕ Hủy
+                        ✕ {t('profile.cancelBtn')}
                       </button>
                       <button type="submit" className="btn-btn-primary" disabled={savingProfile}>
-                        {savingProfile ? 'Đang lưu...' : '💾 Lưu Thay Đổi'}
+                        {savingProfile ? t('profile.saving') : `💾 ${t('profile.saveBtn')}`}
                       </button>
                     </div>
                   </form>
@@ -387,36 +389,36 @@ export const ProfilePage: React.FC = () => {
                   /* VIEW MODE DISPLAY */
                   <div className="profile-info-list">
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Họ và tên</div>
-                      <div className="profile-info-val">{profile?.name || 'Chưa cập nhật'}</div>
+                      <div className="profile-info-label">{t('profile.fullName')}</div>
+                      <div className="profile-info-val">{profile?.name || t('profile.notUpdated')}</div>
                     </div>
 
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Username</div>
-                      <div className="profile-info-val">@{profile?.username || 'chuacapnhat'}</div>
+                      <div className="profile-info-label">{t('profile.username')}</div>
+                      <div className="profile-info-val">@{profile?.username || 'username'}</div>
                     </div>
 
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Địa chỉ Email</div>
+                      <div className="profile-info-label">{t('profile.email')}</div>
                       <div className="profile-info-val">{profile?.email || 'N/A'}</div>
                     </div>
 
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Giới tính</div>
+                      <div className="profile-info-label">{t('profile.gender')}</div>
                       <div className="profile-info-val">
-                        {gender === 'female' ? 'Nữ 👩' : gender === 'other' ? 'Khác 🌈' : 'Nam 👨'}
+                        {gender === 'female' ? t('profile.genderFemale') : gender === 'other' ? t('profile.genderOther') : t('profile.genderMale')}
                       </div>
                     </div>
 
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Ngày sinh</div>
-                      <div className="profile-info-val">{profile?.dateOfBirth || 'Chưa thiết lập'}</div>
+                      <div className="profile-info-label">{t('profile.dateOfBirth')}</div>
+                      <div className="profile-info-val">{profile?.dateOfBirth || t('profile.notUpdated')}</div>
                     </div>
 
                     <div className="profile-info-item">
-                      <div className="profile-info-label">Vai trò tài khoản</div>
+                      <div className="profile-info-label">{t('profile.role')}</div>
                       <div className="profile-info-val" style={{ textTransform: 'capitalize' }}>
-                        {profile?.role === 'admin' ? '⚙️ Admin' : '🎓 Learner'}
+                        {profile?.role === 'admin' ? `⚙️ ${t('profile.admin')}` : `🎓 ${t('profile.learner')}`}
                       </div>
                     </div>
                   </div>
@@ -429,25 +431,25 @@ export const ProfilePage: React.FC = () => {
               <div className="profile-card">
                 <div className="profile-card-header">
                   <div>
-                    <h3 className="profile-card-title">✉️ Quản Lý Email & Xác Thực Tài Khoản</h3>
-                    <p className="profile-card-desc">Kiểm tra trạng thái xác minh email và bảo mật tài khoản</p>
+                    <h3 className="profile-card-title">✉️ {t('profile.verification.cardTitle')}</h3>
+                    <p className="profile-card-desc">{t('profile.verification.cardDesc')}</p>
                   </div>
                 </div>
 
                 <div className={`verification-status-box ${profile?.isEmailVerified ? 'verified' : 'unverified'}`}>
                   <div>
                     <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>
-                      Email liên kết với tài khoản:
+                      {t('profile.verification.associatedEmail')}
                     </div>
                     <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
                       {profile?.email}
                     </div>
                     <div style={{ marginTop: '8px' }}>
-                      <span>Trạng thái: </span>
+                      <span>{t('profile.verification.status')} </span>
                       {profile?.isEmailVerified ? (
-                        <span className="verif-badge verified">✓ Đã xác thực</span>
+                        <span className="verif-badge verified">✓ {t('profile.verification.verified')}</span>
                       ) : (
-                        <span className="verif-badge unverified">⚠️ Chưa xác thực</span>
+                        <span className="verif-badge unverified">⚠️ {t('profile.verification.unverified')}</span>
                       )}
                     </div>
                   </div>
@@ -459,18 +461,18 @@ export const ProfilePage: React.FC = () => {
                       onClick={handleResendEmailVerification}
                       disabled={sendingVerification}
                     >
-                      {sendingVerification ? 'Đang gửi...' : '📩 Gửi lại email xác thực'}
+                      {sendingVerification ? t('profile.verification.resending') : `📩 ${t('profile.verification.resendBtn')}`}
                     </button>
                   )}
                 </div>
 
                 {profile?.isEmailVerified ? (
                   <p style={{ color: '#166534', backgroundColor: '#f0fdf4', padding: '16px', borderRadius: '14px', border: '1px solid #bbf7d0', fontSize: '0.92rem' }}>
-                    🎉 **Tài khoản của bạn đã được xác thực an toàn.** Bạn có thể trải nghiệm đầy đủ tất cả tính năng trên hệ thống Deutschup.
+                    🎉 **{t('profile.verification.verifiedNote')}**
                   </p>
                 ) : (
                   <p style={{ color: '#9a3412', backgroundColor: '#fff7ed', padding: '16px', borderRadius: '14px', border: '1px solid #fed7aa', fontSize: '0.92rem', lineHeight: 1.5 }}>
-                    💡 **Lưu ý:** Nếu bạn chưa nhận được thư xác thực, hãy kiểm tra kỹ hộp thư rác (Spam / Junk) hoặc bấm nút <strong>"Gửi lại email xác thực"</strong> ở trên để nhận liên kết xác minh mới.
+                    💡 **Lưu ý:** {t('profile.verification.unverifiedNote')}
                   </p>
                 )}
               </div>
@@ -481,15 +483,15 @@ export const ProfilePage: React.FC = () => {
               <div className="profile-card">
                 <div className="profile-card-header">
                   <div>
-                    <h3 className="profile-card-title">🔒 Thay Đổi Mật Khẩu</h3>
-                    <p className="profile-card-desc">Cập nhật mật khẩu thường xuyên để bảo vệ tài khoản cá nhân</p>
+                    <h3 className="profile-card-title">🔒 {t('changePassword.title')}</h3>
+                    <p className="profile-card-desc">{t('changePassword.subtitle')}</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleChangePasswordSubmit} style={{ maxWidth: '520px' }}>
                   {/* Current Password */}
                   <div className="profile-form-group" style={{ marginBottom: '18px' }}>
-                    <label className="profile-form-label">Mật khẩu hiện tại *</label>
+                    <label className="profile-form-label">{t('changePassword.oldPassword')} *</label>
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showOldPass ? 'text' : 'password'}
@@ -511,12 +513,12 @@ export const ProfilePage: React.FC = () => {
 
                   {/* New Password */}
                   <div className="profile-form-group" style={{ marginBottom: '18px' }}>
-                    <label className="profile-form-label">Mật khẩu mới *</label>
+                    <label className="profile-form-label">{t('changePassword.newPassword')} *</label>
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showNewPass ? 'text' : 'password'}
                         className="profile-form-input"
-                        placeholder="•••••••• (Ít nhất 8 ký tự)"
+                        placeholder="•••••••• (>= 8 chars)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         minLength={8}
@@ -534,7 +536,7 @@ export const ProfilePage: React.FC = () => {
 
                   {/* Confirm New Password */}
                   <div className="profile-form-group" style={{ marginBottom: '24px' }}>
-                    <label className="profile-form-label">Xác nhận mật khẩu mới *</label>
+                    <label className="profile-form-label">{t('changePassword.confirmNewPassword')} *</label>
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showConfirmPass ? 'text' : 'password'}
@@ -561,7 +563,7 @@ export const ProfilePage: React.FC = () => {
                     disabled={changingPassword}
                     style={{ width: '100%', padding: '14px' }}
                   >
-                    {changingPassword ? 'Đang đổi mật khẩu...' : '🔒 Đổi Mật Khẩu'}
+                    {changingPassword ? t('changePassword.submitting') : `🔒 ${t('changePassword.submit')}`}
                   </button>
                 </form>
               </div>

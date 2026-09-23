@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
@@ -15,6 +16,7 @@ import 'swiper/css'
 import 'swiper/css/effect-cards'
 
 const Flashcard = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId || ''
   const { vocabulary, loading, error } = useVocabulary(activeLessonId)
@@ -69,7 +71,7 @@ const Flashcard = () => {
       setIsCompleted(true)
       try {
         await progressApi.completeLesson(activeLessonId)
-        toast.success('Chúc mừng! Bạn đã hoàn thành Bài Học này! 🎉')
+        toast.success(t('flashcard.completedToast'))
       } catch (err) {
         console.error('Error completing lesson:', err)
       }
@@ -84,23 +86,23 @@ const Flashcard = () => {
 
       <main className="flashcard-main">
         <Link to={`/lessons/${activeLessonId}`} className="back-button">
-          ← Quay lại bài học
+          {t('flashcard.backToLesson')}
         </Link>
 
         <div className="flashcard-container">
-          {loading && <p>Đang tải từ vựng...</p>}
-          {error && <p className="error">Lỗi: {error}</p>}
+          {loading && <p>{t('flashcard.loading')}</p>}
+          {error && <p className="error">{t('common.states.error')}: {error}</p>}
           {!loading && !error && vocabulary.length === 0 && (
-            <p className="status-text">Không tìm thấy từ vựng cho bài học này.</p>
+            <p className="status-text">{t('flashcard.empty')}</p>
           )}
 
           {vocabulary.length > 0 && currentCard && (
             <>
-              {/* Bước 4: Progress Indicator */}
+              {/* Progress Indicator */}
               <div className="progress-section">
                 <div className="progress-text" style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>
-                    Thẻ {currentIndex + 1} / {vocabulary.length} ({learnedCount} / {vocabulary.length} đã học)
+                    {t('flashcard.card')} {currentIndex + 1} / {vocabulary.length} ({learnedCount} / {vocabulary.length} {t('flashcard.learnedCount')})
                   </span>
                   <span>{calculatedPercentage}%</span>
                 </div>
@@ -149,7 +151,7 @@ const Flashcard = () => {
                               ? card.example
                               : card.example
                               ? `${card.example.de || ''}${card.example.de && card.example.vi ? ' / ' : ''}${card.example.vi || ''}`
-                              : 'Không có ví dụ'}
+                              : t('flashcard.noExample')}
                           </div>
                         </div>
                       </div>
@@ -164,11 +166,11 @@ const Flashcard = () => {
                   onClick={handlePrev}
                   disabled={currentIndex === 0}
                 >
-                  ← Zurück
+                  {t('flashcard.prev')}
                 </button>
 
                 <button className="learned-button" onClick={handleMarkLearned}>
-                  {learned.includes(currentCard._id) ? "✓ Gelernt" : "Als gelernt markieren"}
+                  {learned.includes(currentCard._id) ? t('flashcard.learned') : t('flashcard.markLearned')}
                 </button>
 
                 <button
@@ -176,14 +178,14 @@ const Flashcard = () => {
                   onClick={handleNext}
                   disabled={currentIndex === vocabulary.length - 1}
                 >
-                  Weiter →
+                  {t('flashcard.next')}
                 </button>
               </div>
 
               <div className="learned-count" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', alignItems: 'center' }}>
-                <span>Đã ôn: {learned.length} / {vocabulary.length}</span>
+                <span>{t('flashcard.reviewed')} {learned.length} / {vocabulary.length}</span>
                 {isCompleted && (
-                  <span style={{ color: '#00C853', fontWeight: 'bold' }}>✓ Hoàn thành 100%</span>
+                  <span style={{ color: '#00C853', fontWeight: 'bold' }}>{t('flashcard.completed100')}</span>
                 )}
               </div>
             </>

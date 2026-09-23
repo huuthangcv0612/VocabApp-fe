@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "startLearning": "Start Learning",
+    "progress": "Progress",
+    "pricing": "Pricing",
+    "practiceTests": "Practice Tests",
+    "interactiveClasses": "Interactive Classes",
+    "adminDashboard": "⚙️ Admin Dashboard",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "My Profile",
+    "hello": "Hello",
+    "menu": "Menu"
+  },
+  "footer": {
+    "home": "Home",
+    "about": "About",
+    "admissions": "Admissions",
+    "programs": "Programs",
+    "tuition": "Tuition & Plans",
+    "parentResources": "Parent Resources",
+    "teachers": "Teachers",
+    "gallery": "Gallery",
+    "faq": "FAQ",
+    "careers": "Careers",
+    "news": "News",
+    "contact": "Contact",
+    "policyAndTerms": "Policy and Terms",
+    "copyright": "© 2026 DeutschUp. All rights reserved."
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "back": "Back",
+    "continue": "Continue",
+    "retry": "Try again",
+    "close": "Close",
+    "viewDetail": "View Detail",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "check": "Check",
+    "submit": "Submit",
+    "copy": "Copy",
+    "copied": "Copied!"
+  },
+  "states": {
+    "empty": "No data available",
+    "emptyDesc": "This list is currently empty or no records were found.",
+    "error": "An error occurred",
+    "networkError": "Cannot connect to server. Please check your network connection.",
+    "unauthorized": "Your session has expired. Please log in again.",
+    "notFound": "Requested content not found.",
+    "loadingData": "Loading data..."
+  },
+  "pagination": {
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "items": "items",
+    "prevPage": "◀ Previous",
+    "nextPage": "Next ▶",
+    "page": "Page"
+  },
+  "modals": {
+    "confirmDeleteTitle": "Confirm Deletion",
+    "confirmDeleteWarning": "⚠️ This action cannot be undone.",
+    "permanentDelete": "Delete permanently"
+  },
+  "language": {
+    "vietnamese": "Tiếng Việt",
+    "english": "English",
+    "selectLanguage": "Select Language"
+  },
+  "lock": {
+    "premiumFeature": "🔒 Premium Feature",
+    "upgradeRequired": "This feature requires upgrading to a Premium or Pro plan.",
+    "upgradeNow": "Upgrade Now",
+    "viewSubscription": "View Subscription"
+  },
+  "errorBoundary": {
+    "title": "UI Error Occurred ⚠️",
+    "desc": "An unexpected error occurred while loading this page.",
+    "reload": "Reload Page ↺"
+  },
+  "speaker": {
+    "playing": "Playing audio...",
+    "loading": "Loading audio...",
+    "pronounce": "Pronounce:",
+    "unsupported": "Browser does not support speech synthesis"
+  },
+  "policy": {
+    "heroTitle": "POLICIES & TERMS",
+    "contactUs": "CONTACT US",
+    "contactDesc": "If you have questions about this page, please contact us using the details on this website.",
+    "contactNow": "CONTACT NOW",
+    "policiesTitle": "PRIVACY POLICIES",
+    "policiesIntro": "We respect your privacy and explain how we collect, use, and protect your information here.",
+    "termsTitle": "TERMS OF SERVICE",
+    "termsIntro": "By using this website, you agree to follow these Terms and any updates we make.",
+    "lastUpdate": "Last update: July 2026"
+  }
+}

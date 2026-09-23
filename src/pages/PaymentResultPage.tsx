@@ -1,16 +1,43 @@
-import React from 'react'
-import { useLocation, useNavigate, Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
+import { subscriptionService } from '../services/subscriptionService'
 import CloudIcon from '../assets/Cloud.svg'
 import '../styles/pages/progress.css'
 
 export const PaymentResultPage: React.FC = () => {
+  const { t } = useTranslation(['payment', 'common'])
   const location = useLocation()
   const navigate = useNavigate()
-  const state = (location.state as { status?: string; planName?: string }) || {}
+  const [searchParams] = useSearchParams()
 
-  const isSuccess = state.status === 'success'
+  const state = (location.state as { status?: string; planName?: string }) || {}
+  const [isSuccess, setIsSuccess] = useState<boolean>(state.status === 'success' || searchParams.get('status') === 'success')
+  const [planName, setPlanName] = useState<string>(state.planName || searchParams.get('plan') || 'PREMIUM')
+  const [checking, setChecking] = useState<boolean>(!state.status && !searchParams.get('status'))
+
+  useEffect(() => {
+    // If user refreshed and location.state was cleared, check active subscription
+    if (!state.status && !searchParams.get('status')) {
+      subscriptionService.getCurrentSubscription()
+        .then((sub) => {
+          if (sub.isPremium && sub.status === 'active') {
+            setIsSuccess(true)
+            setPlanName(sub.plan_name)
+          } else {
+            setIsSuccess(false)
+          }
+        })
+        .catch(() => {
+          setIsSuccess(false)
+        })
+        .finally(() => {
+          setChecking(false)
+        })
+    }
+  }, [state.status, searchParams])
 
   return (
     <div className="progress-page">
@@ -24,12 +51,12 @@ export const PaymentResultPage: React.FC = () => {
         <div className="progress-hero-container">
           <div className="progress-hero-content">
             <Link to="/subscription" className="back-link">
-              ← Về trang tài khoản
+              {t('result.backToProfile')}
             </Link>
 
-            <h1 className="progress-hero-title">KẾT QUẢ XÁC MINH THANH TOÁN</h1>
+            <h1 className="progress-hero-title">{t('result.heroTitle')}</h1>
             <p className="progress-hero-subtitle">
-              Kết quả xác minh giao dịch được trả về trực tiếp từ Backend API.
+              {t('result.heroSubtitle')}
             </p>
           </div>
         </div>
@@ -41,57 +68,66 @@ export const PaymentResultPage: React.FC = () => {
       <main className="progress-main-section" style={{ padding: '40px 20px 80px 20px' }}>
         <div className="progress-container" style={{ maxWidth: '600px' }}>
           <div className="admin-card" style={{ padding: '40px', borderRadius: '24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>{isSuccess ? '🎉' : '❌'}</div>
+            {checking ? (
+              <div style={{ padding: '30px 0' }}>
+                <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
+                <p>{t('checkout.checkingStatus')}</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: '4rem', marginBottom: '16px' }}>{isSuccess ? '🎉' : '❌'}</div>
 
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: isSuccess ? '#15803d' : '#b91c1c', margin: '0 0 12px 0' }}>
-              {isSuccess ? 'Kích Hoạt Gói Dịch Vụ Thành Công!' : 'Chưa Nhận Được Xác Minh Thanh Toán'}
-            </h2>
+                <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: isSuccess ? '#15803d' : '#b91c1c', margin: '0 0 12px 0' }}>
+                  {isSuccess ? t('result.successHeading') : t('result.failedHeading')}
+                </h2>
 
-            <p style={{ color: '#475569', fontSize: '1rem', marginBottom: '32px', lineHeight: 1.6 }}>
-              {isSuccess
-                ? `Chúc mừng bạn! Backend đã xác minh thành công giao dịch và nâng cấp tài khoản của bạn lên Gói ${state.planName || 'PREMIUM'}. Tất cả các tính năng AI và bài tập nâng cao đã được mở khóa.`
-                : 'Backend chưa thể khớp lệnh giao dịch thanh toán này. Nếu bạn đã thực hiện chuyển khoản, vui lòng đợi ít phút hoặc nhấn xác minh lại.'}
-            </p>
+                <p style={{ color: '#475569', fontSize: '1rem', marginBottom: '32px', lineHeight: 1.6 }}>
+                  {isSuccess
+                    ? t('result.successDesc', { name: planName })
+                    : t('result.failedDesc')}
+                </p>
 
-            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              {isSuccess ? (
-                <>
-                  <button
-                    className="btn-admin-secondary"
-                    style={{ padding: '12px 24px', borderRadius: '9999px' }}
-                    onClick={() => navigate('/subscription')}
-                  >
-                    Xem Trạng Thái Gói
-                  </button>
+                <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  {isSuccess ? (
+                    <>
+                      <button
+                        className="btn-admin-secondary"
+                        style={{ padding: '12px 24px', borderRadius: '9999px' }}
+                        onClick={() => navigate('/subscription')}
+                      >
+                        {t('result.viewSubscription')}
+                      </button>
 
-                  <button
-                    className="btn-admin-primary"
-                    style={{ padding: '12px 28px', borderRadius: '9999px', backgroundColor: '#16a34a' }}
-                    onClick={() => navigate('/levels')}
-                  >
-                    Bắt Đầu Học Bài Nâng Cao ➔
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    className="btn-admin-secondary"
-                    style={{ padding: '12px 24px', borderRadius: '9999px' }}
-                    onClick={() => navigate('/pricing')}
-                  >
-                    Quay Lại Bảng Giá
-                  </button>
+                      <button
+                        className="btn-admin-primary"
+                        style={{ padding: '12px 28px', borderRadius: '9999px', backgroundColor: '#16a34a' }}
+                        onClick={() => navigate('/levels')}
+                      >
+                        {t('result.startAdvancedLearning')}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className="btn-admin-secondary"
+                        style={{ padding: '12px 24px', borderRadius: '9999px' }}
+                        onClick={() => navigate('/pricing')}
+                      >
+                        {t('result.backToPricing')}
+                      </button>
 
-                  <button
-                    className="btn-admin-primary"
-                    style={{ padding: '12px 28px', borderRadius: '9999px' }}
-                    onClick={() => navigate('/subscription')}
-                  >
-                    Thử Lại Sau
-                  </button>
-                </>
-              )}
-            </div>
+                      <button
+                        className="btn-admin-primary"
+                        style={{ padding: '12px 28px', borderRadius: '9999px' }}
+                        onClick={() => navigate('/subscription')}
+                      >
+                        {t('result.tryAgainLater')}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </main>

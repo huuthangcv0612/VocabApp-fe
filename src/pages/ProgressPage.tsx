@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useProgressOverview } from '../features/progress/hooks/useProgressOverview'
@@ -16,6 +17,7 @@ import '../styles/pages/progress.css'
 import '../features/progress/styles/progressOverview.css'
 
 export const ProgressPage: React.FC = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const navigate = useNavigate()
   const { data, loading, error, refetch } = useProgressOverview()
 
@@ -37,42 +39,42 @@ export const ProgressPage: React.FC = () => {
         ) : error ? (
           /* Error State */
           <div className="po-container">
-            <section className="po-state-container" aria-label="Lỗi tải tiến độ">
+            <section className="po-state-container" aria-label="Error loading progress">
               <div className="po-state-icon" aria-hidden="true">
                 ⚠️
               </div>
-              <h2 className="po-state-title">Không thể tải tiến độ học tập.</h2>
+              <h2 className="po-state-title">{t('progress.loadFailed')}</h2>
               <p className="po-state-desc">
-                Đã xảy ra sự cố khi kết nối với máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại.
+                {t('progress.loadFailedDesc')}
               </p>
               <button
                 type="button"
                 onClick={refetch}
                 className="po-btn-primary"
-                aria-label="Thử tải lại tiến độ học tập"
+                aria-label={t('actions.retry', { ns: 'common' })}
               >
-                Thử lại 🔄
+                {t('actions.retry', { ns: 'common' })} 🔄
               </button>
             </section>
           </div>
         ) : !data || (!data.overview && !data.levels?.length) ? (
           /* Empty / New User State */
           <div className="po-container">
-            <section className="po-state-container" aria-label="Chưa có dữ liệu tiến độ">
+            <section className="po-state-container" aria-label="No progress data">
               <div className="po-state-icon" aria-hidden="true">
                 🌱
               </div>
-              <h2 className="po-state-title">Bắt đầu hành trình học tiếng Đức của bạn!</h2>
+              <h2 className="po-state-title">{t('progress.emptyTitle')}</h2>
               <p className="po-state-desc">
-                Bạn chưa bắt đầu bài học nào. Hãy tham gia ngay các bài học thú vị đầu tiên để theo dõi tiến độ và tích lũy điểm thưởng XP!
+                {t('progress.emptyDesc')}
               </p>
               <button
                 type="button"
                 onClick={() => navigate('/learning-path')}
                 className="po-btn-primary"
-                aria-label="Đi đến lộ trình học để bắt đầu học"
+                aria-label={t('progress.startLearningBtn')}
               >
-                Bắt đầu học 🚀
+                {t('progress.startLearningBtn')}
               </button>
             </section>
           </div>

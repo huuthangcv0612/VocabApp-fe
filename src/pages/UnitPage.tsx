@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { studentLearningService } from '../services/studentLearningService'
@@ -9,6 +10,7 @@ import type { UserProgressData } from '../types/progress'
 import '../styles/pages/lesson.css'
 
 export const UnitPage: React.FC = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { unitId } = useParams<{ unitId: string }>()
   const navigate = useNavigate()
 
@@ -42,14 +44,14 @@ export const UnitPage: React.FC = () => {
         setUnitData(data)
         setLessonProgressMap(map)
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Không thể tải thông tin Unit.'
+        const msg = err instanceof Error ? err.message : t('unit.notFound')
         setError(msg)
       } finally {
         setLoading(false)
       }
     }
     fetchUnitAndProgress()
-  }, [unitId])
+  }, [unitId, t])
 
   return (
     <div className="lesson">
@@ -58,17 +60,17 @@ export const UnitPage: React.FC = () => {
         <div className="lesson-container">
           <Link to="/levels" className="back-button" style={{ marginBottom: '24px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
             <span>←</span>
-            <span>Trở về Khóa Học</span>
+            <span>{t('unit.backToCourse')}</span>
           </Link>
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
               <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-              <p>Đang tải danh sách bài học và tiến độ...</p>
+              <p>{t('unit.loading')}</p>
             </div>
           ) : error || !unitData ? (
             <div style={{ textAlign: 'center', padding: '40px 20px', color: '#dc2626' }}>
-              <p>{error || 'Không tìm thấy dữ liệu Unit.'}</p>
+              <p>{error || t('unit.notFound')}</p>
             </div>
           ) : (
             <>
@@ -82,13 +84,13 @@ export const UnitPage: React.FC = () => {
                   {unitData.unitName}
                 </h1>
                 <p className="lesson-description" style={{ textAlign: 'left', margin: 0 }}>
-                  {unitData.description || 'Hoàn thành các bài học bên dưới để tích lũy từ vựng và điểm thưởng XP.'}
+                  {unitData.description || t('path.descFallback', { level: unitData.levelName || 'A1' })}
                 </p>
               </div>
 
               {/* Lessons List Grid */}
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-                📖 Danh Sách Bài Học (Lessons in Unit)
+                {t('unit.lessonsInUnit')}
               </h3>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
@@ -124,7 +126,7 @@ export const UnitPage: React.FC = () => {
                       <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                           <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#64748b' }}>
-                            LESSON {idx + 1}
+                            {t('path.stepLabel')} {idx + 1}
                           </span>
                           <span
                             className={`badge-pill ${
@@ -132,12 +134,12 @@ export const UnitPage: React.FC = () => {
                             }`}
                           >
                             {isCompleted
-                              ? '✓ Completed'
+                              ? t('levels.completed')
                               : isInProgress
-                              ? `⏳ ${progressPct}% In Progress`
+                              ? t('levels.inProgress', { percent: progressPct })
                               : isLocked
-                              ? '🔒 Locked'
-                              : '▶ Available'}
+                              ? `🔒 ${t('path.locked')}`
+                              : `▶ ${t('path.start')}`}
                           </span>
                         </div>
 
@@ -154,7 +156,7 @@ export const UnitPage: React.FC = () => {
 
                       <div>
                         <div style={{ display: 'flex', gap: '12px', fontSize: '0.82rem', color: '#64748b', marginBottom: '16px' }}>
-                          <span>⏱️ {les.estimated_minutes || 15} phút</span>
+                          <span>⏱️ {les.estimated_minutes || 15} {t('path.minutes')}</span>
                           <span>•</span>
                           <span>⚡ {les.xp || 20} XP</span>
                         </div>
@@ -167,7 +169,7 @@ export const UnitPage: React.FC = () => {
                             backgroundColor: isCompleted ? '#16a34a' : isInProgress ? '#ca8a04' : isLocked ? '#cbd5e1' : '#2a63e8',
                           }}
                         >
-                          {isCompleted ? 'Học Lại Bài Này' : isInProgress ? `Tiếp Tục (${progressPct}%)` : isLocked ? 'Chưa Mở Khóa' : 'Bắt Đầu Học ▶'}
+                          {isCompleted ? t('unit.retakeLesson') : isInProgress ? t('unit.continueLesson', { percent: progressPct }) : isLocked ? t('unit.lockedLesson') : t('unit.startLesson')}
                         </button>
                       </div>
                     </div>

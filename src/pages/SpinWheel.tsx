@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useVocabulary } from '../hooks/useApi'
@@ -30,6 +31,7 @@ const describeArc = (x: number, y: number, radius: number, startAngle: number, e
 const SEGMENT_COLORS = ['#1e7f34', '#fbbf24', '#ef4444']
 
 export const SpinWheel = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId || ''
   const { vocabulary, loading, error } = useVocabulary(activeLessonId)
@@ -119,16 +121,16 @@ export const SpinWheel = () => {
       <Header />
 
       <main className="spinwheel-main">
-        <h1>Vòng Quay Từ Vựng</h1>
-        <p>Quay vòng và nhận từ vựng ngẫu nhiên. Ai đến ô nào là người chiến thắng!</p>
+        <h1>{t('spin.title')}</h1>
+        <p>{t('spin.subtitle')}</p>
 
-        {loading && <p>Đang tải từ vựng...</p>}
-        {error && <p className="status-text error">Lỗi: {error}</p>}
+        {loading && <p>{t('flashcard.loading')}</p>}
+        {error && <p className="status-text error">{t('common.states.error')}: {error}</p>}
         {!loading && !error && vocabulary.length === 0 && (
-          <p className="status-text">Không có từ vựng cho vòng quay này.</p>
+          <p className="status-text">{t('flashcard.empty')}</p>
         )}
 
-        <div className={`wheel-stage ${showSentenceCard ? 'wheel-disabled' : ''}`} onClick={handleSpin} role="button" tabIndex={0} aria-label="Quay vòng" onKeyDown={(e) => { if (e.key === 'Enter') handleSpin() }}>
+        <div className={`wheel-stage ${showSentenceCard ? 'wheel-disabled' : ''}`} onClick={handleSpin} role="button" tabIndex={0} aria-label={t('spin.title')} onKeyDown={(e) => { if (e.key === 'Enter') handleSpin() }}>
           <div className="wheel-area">
             <div className="wheel-pointer" style={{ borderRightColor: pointerColor }} />
             <svg
@@ -171,30 +173,29 @@ export const SpinWheel = () => {
                   </g>
                 )
               })}
-
             </svg>
           </div>
 
-          {rotating && <div className="spin-status">Đang quay...</div>}
+          {rotating && <div className="spin-status">{t('spin.spinning')}</div>}
         </div>
 
         {showSentenceCard && result && (
           <div className="sentence-card">
             <div className="sentence-header">
-              <h2>Từ vựng của bạn là:</h2>
+              <h2>{t('spin.yourWordIs')}</h2>
               <h3>{result}</h3>
-              <p>Hãy đặt một câu tiếng Đức với từ này:</p>
+              <p>{t('spin.prompt')}</p>
             </div>
             <textarea
               value={sentence}
               onChange={(e) => setSentence(e.target.value)}
-              placeholder={`Ví dụ: Ich habe eine ${result} ...`}
+              placeholder={t('spin.placeholder', { word: result })}
             />
             <div className="sentence-actions">
               <button
                 onClick={async () => {
                   if (!sentence.trim()) {
-                    setGrammarFeedback('Vui lòng nhập một câu hợp lệ.')
+                    setGrammarFeedback(t('spin.enterValidSentence'))
                     return
                   }
 
@@ -202,22 +203,19 @@ export const SpinWheel = () => {
                   setGrammarFeedback(null)
 
                   try {
-                    console.log('Calling OpenAI feedback API with:', { word: result, sentence })
                     const feedback = await vocabularyApi.getSentenceFeedback(sentence)
-                    console.log('Received feedback:', feedback)
                     setGrammarFeedback(feedback)
-                  } catch (error: unknown) {
-                    console.error('Error getting feedback:', error)
+                  } catch (err: unknown) {
                     let errorMessage = 'Không thể nhận xét câu này. Vui lòng thử lại.'
 
-                    if (typeof error === 'object' && error !== null) {
-                      const errObj = error as { response?: { status?: number }; code?: string; message?: string }
+                    if (typeof err === 'object' && err !== null) {
+                      const errObj = err as { response?: { status?: number }; code?: string; message?: string }
                       if (errObj.response?.status === 404) {
-                        errorMessage = 'Tính năng nhận xét AI chưa được kích hoạt. Vui lòng liên hệ quản trị viên.'
+                        errorMessage = 'Tính năng nhận xét AI chưa được kích hoạt.'
                       } else if (errObj.response?.status && errObj.response.status >= 500) {
                         errorMessage = 'Lỗi máy chủ. Vui lòng thử lại sau.'
                       } else if (errObj.code === 'NETWORK_ERROR' || errObj.message?.includes('timeout')) {
-                        errorMessage = 'Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng.'
+                        errorMessage = 'Không thể kết nối đến máy chủ.'
                       }
                     }
 
@@ -228,7 +226,7 @@ export const SpinWheel = () => {
                 }}
                 disabled={feedbackLoading}
               >
-                {feedbackLoading ? 'Đang nhận xét...' : 'Nhận xét từ AI'}
+                {feedbackLoading ? t('spin.analyzing') : t('spin.aiFeedbackBtn')}
               </button>
               <button
                 onClick={() => {
@@ -239,7 +237,7 @@ export const SpinWheel = () => {
                   setFeedbackLoading(false)
                 }}
               >
-                Hoàn thành
+                {t('spin.finish')}
               </button>
             </div>
             {grammarFeedback && <div className="grammar-feedback">{grammarFeedback}</div>}
@@ -248,7 +246,7 @@ export const SpinWheel = () => {
 
         {!showSentenceCard && (
           <Link to={`/lessons/${activeLessonId}`} className="back-button">
-            ← Quay lại trang bài học
+            {t('spin.backToLesson')}
           </Link>
         )}
       </main>

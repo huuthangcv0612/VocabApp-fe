@@ -13,6 +13,7 @@ const getSocketUrl = (): string => {
 class SocketService {
   private socket: Socket | null = null
   private currentSessionId: string | null = null
+  private currentIsTeacher: boolean = false
 
   public connect(tokenOverride?: string): Socket {
     const token = tokenOverride || localStorage.getItem(STORAGE_TOKEN_KEY) || ''
@@ -41,7 +42,7 @@ class SocketService {
     this.socket.on('connect', () => {
       console.log('[Socket] Connected successfully with ID:', this.socket?.id)
       if (this.currentSessionId) {
-        this.joinSessionRoom(this.currentSessionId)
+        this.joinSessionRoom(this.currentSessionId, this.currentIsTeacher)
       }
     })
 
@@ -63,8 +64,13 @@ class SocketService {
     return this.socket
   }
 
-  public joinSessionRoom(sessionId: string, isTeacher = false): void {
+  public joinSessionRoom(
+    sessionId: string,
+    isTeacher = false,
+    onJoinCallback?: (res: unknown) => void,
+  ): void {
     this.currentSessionId = sessionId
+    this.currentIsTeacher = isTeacher
     const s = this.getSocket()
     if (!s) return
 
@@ -74,9 +80,13 @@ class SocketService {
     s.emit('join-room', { room, sessionId })
     if (isTeacher) {
       s.emit('teacher:start-session', { sessionId, room })
-      s.emit('teacher:join', { sessionId, room })
+      s.emit('teacher:join', { sessionId, room }, (response: unknown) => {
+        onJoinCallback?.(response)
+      })
     } else {
-      s.emit('student:join-session', { sessionId, room })
+      s.emit('student:join-session', { sessionId, room }, (response: unknown) => {
+        onJoinCallback?.(response)
+      })
       s.emit('student:join', { sessionId, room })
     }
   }
@@ -86,9 +96,13 @@ class SocketService {
     if (targetSession && this.socket) {
       const room = `session:${targetSession}`
       this.socket.emit('leave-room', { room, sessionId: targetSession })
+      if (!this.currentIsTeacher) {
+        this.socket.emit('student:leave-session', { sessionId: targetSession, room })
+      }
     }
     if (!sessionId || sessionId === this.currentSessionId) {
       this.currentSessionId = null
+      this.currentIsTeacher = false
     }
   }
 

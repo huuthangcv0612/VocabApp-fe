@@ -13,6 +13,7 @@ import type {
   CreateActivityPayload,
   UpdateActivityPayload,
   InteractiveSession,
+  SessionConnectedStudent,
   CreateSessionPayload,
   SessionResponsePayload,
 } from '../types/interactiveClass'
@@ -35,28 +36,80 @@ export const interactiveClassService = {
   createClass: async (payload: CreateClassPayload): Promise<ClassItem> => {
     const res = await api.post('/classes', payload)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.class as ClassItem) || (data as unknown as ClassItem)
+    const cls = ((data?.class as Record<string, unknown>) || data || {}) as unknown as ClassItem
+    const count =
+      (typeof cls.students_count === 'number' ? cls.students_count : undefined) ??
+      (typeof cls.studentCount === 'number' ? cls.studentCount : undefined) ??
+      0
+    return {
+      ...cls,
+      students_count: count,
+      studentCount: count,
+    }
   },
 
   getClasses: async (): Promise<ClassItem[]> => {
     const res = await api.get('/classes')
     const data = unpack<unknown>(res)
-    if (Array.isArray(data)) return data as ClassItem[]
-    const record = data as Record<string, unknown>
-    if (Array.isArray(record?.classes)) return record.classes as ClassItem[]
-    return []
+    let list: Record<string, unknown>[] = []
+    if (Array.isArray(data)) list = data as Record<string, unknown>[]
+    else {
+      const record = data as Record<string, unknown>
+      if (Array.isArray(record?.classes)) list = record.classes as Record<string, unknown>[]
+      else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
+    }
+    return list.map((item) => {
+      const count =
+        (typeof item.students_count === 'number' ? item.students_count : undefined) ??
+        (typeof item.studentCount === 'number' ? item.studentCount : undefined) ??
+        (Array.isArray(item.students) ? item.students.length : 0)
+      return {
+        ...(item as unknown as ClassItem),
+        students_count: count,
+        studentCount: count,
+      }
+    })
   },
 
   getClassById: async (id: string): Promise<ClassItem> => {
     const res = await api.get(`/classes/${encodeURIComponent(id)}`)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.class as ClassItem) || (data as unknown as ClassItem)
+    const classObj = ((data?.class as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    const count =
+      (typeof classObj.students_count === 'number' ? classObj.students_count : undefined) ??
+      (typeof classObj.studentCount === 'number' ? classObj.studentCount : undefined) ??
+      (typeof data?.students_count === 'number' ? (data.students_count as number) : undefined) ??
+      (typeof data?.studentCount === 'number' ? (data.studentCount as number) : undefined) ??
+      (Array.isArray(classObj.students) ? classObj.students.length : 0)
+
+    const isTeacher =
+      typeof data?.isTeacher === 'boolean'
+        ? (data.isTeacher as boolean)
+        : typeof classObj.isTeacher === 'boolean'
+        ? (classObj.isTeacher as boolean)
+        : undefined
+
+    return {
+      ...(classObj as unknown as ClassItem),
+      students_count: count,
+      studentCount: count,
+      ...(isTeacher !== undefined ? { isTeacher } : {}),
+    }
   },
 
   updateClass: async (id: string, payload: UpdateClassPayload): Promise<ClassItem> => {
     const res = await api.put(`/classes/${encodeURIComponent(id)}`, payload)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.class as ClassItem) || (data as unknown as ClassItem)
+    const cls = ((data?.class as Record<string, unknown>) || data || {}) as unknown as ClassItem
+    const count =
+      (typeof cls.students_count === 'number' ? cls.students_count : undefined) ??
+      (typeof cls.studentCount === 'number' ? cls.studentCount : undefined) ??
+      0
+    return {
+      ...cls,
+      students_count: count,
+      studentCount: count,
+    }
   },
 
   deleteClass: async (id: string): Promise<void> => {
@@ -79,19 +132,85 @@ export const interactiveClassService = {
   getMyClasses: async (): Promise<ClassItem[]> => {
     const res = await api.get('/classes/my')
     const data = unpack<unknown>(res)
-    if (Array.isArray(data)) return data as ClassItem[]
-    const record = data as Record<string, unknown>
-    if (Array.isArray(record?.classes)) return record.classes as ClassItem[]
-    return []
+    let list: Record<string, unknown>[] = []
+    if (Array.isArray(data)) list = data as Record<string, unknown>[]
+    else {
+      const record = data as Record<string, unknown>
+      if (Array.isArray(record?.classes)) list = record.classes as Record<string, unknown>[]
+      else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
+    }
+    return list.map((item) => {
+      const count =
+        (typeof item.students_count === 'number' ? item.students_count : undefined) ??
+        (typeof item.studentCount === 'number' ? item.studentCount : undefined) ??
+        (Array.isArray(item.students) ? item.students.length : 0)
+      return {
+        ...(item as unknown as ClassItem),
+        students_count: count,
+        studentCount: count,
+      }
+    })
   },
 
   getClassStudents: async (classId: string): Promise<ClassStudent[]> => {
     const res = await api.get(`/classes/${encodeURIComponent(classId)}/students`)
     const data = unpack<unknown>(res)
-    if (Array.isArray(data)) return data as ClassStudent[]
-    const record = data as Record<string, unknown>
-    if (Array.isArray(record?.students)) return record.students as ClassStudent[]
-    return []
+    let list: Record<string, unknown>[] = []
+    if (Array.isArray(data)) list = data as Record<string, unknown>[]
+    else {
+      const record = data as Record<string, unknown>
+      if (Array.isArray(record?.students)) list = record.students as Record<string, unknown>[]
+      else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
+    }
+    return list.map((st, idx) => {
+      const user = (st.user as Record<string, unknown>) || {}
+      const id = String(
+        st.id ??
+        st._id ??
+        st.student_id ??
+        st.membership_id ??
+        user.id ??
+        user._id ??
+        user.student_id ??
+        ''
+      ).trim()
+      const studentId = String(
+        st.student_id ??
+        st._id ??
+        st.id ??
+        st.membership_id ??
+        user.student_id ??
+        user._id ??
+        user.id ??
+        id
+      ).trim()
+      const name = String(
+        st.name ??
+        user.name ??
+        st.student_name ??
+        user.student_name ??
+        ''
+      ).trim()
+      const email = (st.email as string) || (user.email as string) || undefined
+      const avatar = (st.avatar as string) || (user.avatar as string) || undefined
+      const status = (st.status as string) || (user.status as string) || 'active'
+      const joinedAt = (st.joined_at as string) || (st.created_at as string) || undefined
+      const membershipId = (st.membership_id as string) || undefined
+
+      return {
+        ...(st as unknown as ClassStudent),
+        _id: id || `student_${idx}`,
+        id: id || `student_${idx}`,
+        student_id: studentId || id || `student_${idx}`,
+        membership_id: membershipId,
+        name: name || 'Học viên',
+        email,
+        avatar,
+        status,
+        joined_at: joinedAt,
+        user: typeof st.user === 'object' && st.user !== null ? (st.user as ClassStudent['user']) : undefined,
+      }
+    })
   },
 
   removeStudent: async (classId: string, studentId: string): Promise<void> => {
@@ -197,13 +316,65 @@ export const interactiveClassService = {
   ): Promise<InteractiveSession> => {
     const res = await api.post('/interactive-sessions', payload)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.session as InteractiveSession) || (data as unknown as InteractiveSession)
+    const sessionObj = ((data?.session as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    return {
+      ...(sessionObj as unknown as InteractiveSession),
+      connected_students: (sessionObj.connected_students as SessionConnectedStudent[]) || [],
+      connected_students_count:
+        typeof sessionObj.connected_students_count === 'number'
+          ? (sessionObj.connected_students_count as number)
+          : 0,
+    }
   },
 
   getSessionById: async (id: string): Promise<InteractiveSession> => {
     const res = await api.get(`/interactive-sessions/${encodeURIComponent(id)}`)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.session as InteractiveSession) || (data as unknown as InteractiveSession)
+    const sessionObj = ((data?.session as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    const rawConnected =
+      (sessionObj.connected_students as unknown[]) ??
+      (data?.connected_students as unknown[]) ??
+      []
+
+    const connectedStudents: SessionConnectedStudent[] = []
+    const seenIds = new Set<string>()
+
+    if (Array.isArray(rawConnected)) {
+      for (const raw of rawConnected) {
+        if (!raw || typeof raw !== 'object') continue
+        const item = raw as Record<string, unknown>
+        const studentId = String(
+          item.id ?? item._id ?? item.student_id ?? item.user_id ?? ''
+        ).trim()
+        if (!studentId || seenIds.has(studentId)) continue
+        seenIds.add(studentId)
+        connectedStudents.push({
+          id: studentId,
+          _id: studentId,
+          student_id: (item.student_id as string) || studentId,
+          user_id: (item.user_id as string) || studentId,
+          name: String(item.name ?? item.student_name ?? 'Học viên').trim() || 'Học viên',
+          avatar: (item.avatar as string) || undefined,
+          score: typeof item.score === 'number' ? item.score : 0,
+          joined_at: (item.joined_at as string) || undefined,
+        })
+      }
+    }
+
+    const connectedCount =
+      (typeof sessionObj.connected_students_count === 'number'
+        ? sessionObj.connected_students_count
+        : undefined) ??
+      (typeof data?.connected_students_count === 'number'
+        ? (data.connected_students_count as number)
+        : undefined) ??
+      connectedStudents.length
+
+    return {
+      ...(sessionObj as unknown as InteractiveSession),
+      connected_students: connectedStudents,
+      connected_students_count: connectedCount,
+    }
   },
 
   setSessionActivity: async (

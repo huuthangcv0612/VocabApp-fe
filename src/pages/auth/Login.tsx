@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { GoogleLogin, type CredentialResponse } from '@react-oauth/google'
 import { useAuth } from '../../contexts/AuthContext'
 import { authService } from '../../services/authService'
@@ -8,6 +9,7 @@ import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
 const Login = () => {
+  const { t } = useTranslation(['auth', 'common'])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -44,33 +46,28 @@ const Login = () => {
 
     const trimmedEmail = email.trim()
     if (!validateEmail(trimmedEmail)) {
-      setError('Vui lòng nhập địa chỉ email hợp lệ.')
+      setError(t('validation.invalidEmail', { ns: 'auth', defaultValue: 'Vui lòng nhập địa chỉ email hợp lệ.' }))
       setLoading(false)
       return
     }
 
     if (password.length < 8) {
-      setError('Mật khẩu phải có ít nhất 8 ký tự.')
+      setError(t('validation.passwordMin', { ns: 'auth', defaultValue: 'Mật khẩu phải có ít nhất 8 ký tự.' }))
       setLoading(false)
       return
     }
 
-    console.log('Login form submitted:', { email: trimmedEmail })
     try {
       const loggedUser = await login(trimmedEmail, password)
-      toast.success('Đăng nhập thành công')
+      toast.success(t('login.successToast'))
 
       if (loggedUser?.role === 'admin') {
-        console.log('Admin login successful, navigating to /admin')
         navigate('/admin', { replace: true })
       } else {
-        console.log('User login successful, navigating to:', from)
         navigate(from, { replace: true })
       }
     } catch (err) {
-      console.error('Login page catch error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại'
-      console.error('Setting error:', errorMessage)
+      const errorMessage = err instanceof Error ? err.message : t('login.failedToast', { defaultValue: 'Đăng nhập thất bại' })
       setError(errorMessage)
       toast.error(errorMessage)
 
@@ -87,18 +84,18 @@ const Login = () => {
   const handleResendVerification = async () => {
     const trimmedEmail = email.trim()
     if (!trimmedEmail) {
-      toast.error('Vui lòng nhập địa chỉ email.')
+      toast.error(t('validation.invalidEmail', { ns: 'auth', defaultValue: 'Vui lòng nhập địa chỉ email.' }))
       return
     }
 
     setResendLoading(true)
     try {
       const msg = await authService.resendVerification(trimmedEmail)
-      const successMsg = msg || 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.'
+      const successMsg = msg || t('login.resendSuccess', { defaultValue: 'Đã gửi lại email xác nhận. Vui lòng kiểm tra hộp thư của bạn.' })
       setResendMessage(successMsg)
       toast.success(successMsg)
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Không thể gửi lại email xác thực.'
+      const msg = err instanceof Error ? err.message : t('login.resendFail', { defaultValue: 'Không thể gửi lại email xác thực.' })
       toast.error(msg)
     } finally {
       setResendLoading(false)
@@ -107,7 +104,7 @@ const Login = () => {
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
-      const errorMessage = 'Không nhận được thông tin xác thực từ Google.'
+      const errorMessage = t('login.googleFail')
       setError(errorMessage)
       toast.error(errorMessage)
       return
@@ -120,7 +117,7 @@ const Login = () => {
 
     try {
       const loggedUser = await googleLogin(credentialResponse.credential)
-      toast.success('Đăng nhập bằng Google thành công')
+      toast.success(t('login.googleSuccess'))
 
       if (loggedUser?.role === 'admin') {
         navigate('/admin', { replace: true })
@@ -128,8 +125,7 @@ const Login = () => {
         navigate(from, { replace: true })
       }
     } catch (err) {
-      console.error('Google login error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Đăng nhập bằng Google thất bại'
+      const errorMessage = err instanceof Error ? err.message : t('login.googleFail')
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -138,7 +134,7 @@ const Login = () => {
   }
 
   const handleGoogleError = () => {
-    const errorMessage = 'Đăng nhập bằng Google thất bại.'
+    const errorMessage = t('login.googleFail')
     setError(errorMessage)
     toast.error(errorMessage)
   }
@@ -147,13 +143,13 @@ const Login = () => {
     <main className="auth-page">
       <section className="auth-page__container">
         <div className="auth-page__header">
-          <h1 className="auth-page__title">Đăng nhập</h1>
-          <p className="auth-page__subtitle">Nhập thông tin của bạn để tiếp tục học tập.</p>
+          <h1 className="auth-page__title">{t('login.title')}</h1>
+          <p className="auth-page__subtitle">{t('login.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <FormInput
-            label="Email"
+            label={t('login.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -161,7 +157,7 @@ const Login = () => {
             required
           />
           <FormInput
-            label="Mật khẩu"
+            label={t('login.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -183,7 +179,7 @@ const Login = () => {
               }}
             >
               <p style={{ fontSize: '0.9rem', color: '#1e40af', marginBottom: '0.5rem' }}>
-                Tài khoản chưa được kích hoạt. Bạn cần gửi lại link xác thực?
+                {t('login.unverifiedNotice')}
               </p>
               {resendMessage ? (
                 <p style={{ fontSize: '0.88rem', color: '#166534', fontWeight: 500 }}>
@@ -204,7 +200,7 @@ const Login = () => {
                     textDecoration: 'underline',
                   }}
                 >
-                  {resendLoading ? 'Đang gửi lại...' : 'Gửi lại email xác nhận'}
+                  {resendLoading ? t('login.resending') : t('login.resendVerification')}
                 </button>
               )}
             </div>
@@ -215,12 +211,12 @@ const Login = () => {
             disabled={loading || googleLoading}
             className="auth-form__submit"
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {loading ? t('login.submitting') : t('login.submit')}
           </button>
         </form>
 
         <div className="auth-divider">
-          <span>Hoặc</span>
+          <span>{t('login.or')}</span>
         </div>
 
         <div className="auth-google-wrapper">
@@ -232,13 +228,13 @@ const Login = () => {
         </div>
 
         <p className="auth-form__footer">
-          <Link to="/forgot-password">Quên mật khẩu?</Link>
+          <Link to="/forgot-password">{t('login.forgotPassword')}</Link>
         </p>
 
         <p className="auth-form__footer">
-          Chưa có tài khoản?{' '}
+          {t('login.noAccount')}{' '}
           <Link to="/register" className="font-semibold text-slate-900 hover:text-slate-700">
-            Đăng ký ngay
+            {t('login.registerNow')}
           </Link>
         </p>
       </section>

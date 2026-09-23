@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface PaginationProps {
   currentPage: number
@@ -15,6 +16,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   limit,
   onPageChange,
 }) => {
+  const { t } = useTranslation('common')
   if (totalPages <= 1) return null
 
   const startItem = (currentPage - 1) * limit + 1
@@ -23,7 +25,7 @@ export const Pagination: React.FC<PaginationProps> = ({
   return (
     <div className="admin-pagination">
       <div className="pagination-info">
-        Hiển thị <strong>{startItem}</strong> - <strong>{endItem}</strong> trong tổng số <strong>{totalItems}</strong> mục
+        {t('pagination.showing')} <strong>{startItem}</strong> {t('pagination.to')} <strong>{endItem}</strong> {t('pagination.of')} <strong>{totalItems}</strong> {t('pagination.items')}
       </div>
 
       <div className="pagination-controls">
@@ -32,11 +34,11 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
         >
-          ◀ Trang trước
+          {t('pagination.prevPage')}
         </button>
 
         <span className="pagination-current">
-          Trang <strong>{currentPage}</strong> / {totalPages}
+          {t('pagination.page')} <strong>{currentPage}</strong> / {totalPages}
         </span>
 
         <button
@@ -44,7 +46,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
         >
-          Trang sau ▶
+          {t('pagination.nextPage')}
         </button>
       </div>
     </div>

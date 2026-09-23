@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface AIConversationErrorProps {
   message?: string | null
@@ -7,33 +8,35 @@ interface AIConversationErrorProps {
   onExit: () => void
 }
 
-const getErrorMessageForStatus = (statusCode?: number | null, customMsg?: string | null): string => {
-  if (customMsg) return customMsg
-  switch (statusCode) {
-    case 401:
-      return 'Vui lòng đăng nhập để sử dụng AI.'
-    case 400:
-      return 'Không thể bắt đầu hội thoại cho bài học này.'
-    case 404:
-      return 'Hội thoại hoặc bài học không tồn tại.'
-    case 403:
-      return 'Bạn không có quyền truy cập hội thoại này.'
-    case 409:
-      return 'Hội thoại đã hoàn thành.'
-    case 429:
-      return 'AI đang quá tải hoặc đã đạt giới hạn API. Vui lòng thử lại sau.'
-    case 500:
-    default:
-      return 'Đã xảy ra lỗi khi kết nối với AI.'
-  }
-}
-
 export const AIConversationError: React.FC<AIConversationErrorProps> = ({
   message,
   statusCode,
   onRetry,
   onExit,
 }) => {
+  const { t } = useTranslation('ai')
+
+  const getErrorMessageForStatus = (code?: number | null, customMsg?: string | null): string => {
+    if (customMsg) return customMsg
+    switch (code) {
+      case 401:
+        return t('conversation.err401')
+      case 400:
+        return t('conversation.err400')
+      case 404:
+        return t('conversation.err404')
+      case 403:
+        return t('conversation.err403')
+      case 409:
+        return t('conversation.err409')
+      case 429:
+        return t('conversation.err429')
+      case 500:
+      default:
+        return t('conversation.errDefault')
+    }
+  }
+
   const displayMsg = getErrorMessageForStatus(statusCode, message)
 
   return (
@@ -51,7 +54,7 @@ export const AIConversationError: React.FC<AIConversationErrorProps> = ({
     >
       <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
       <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#dc2626', marginBottom: '12px' }}>
-        Có lỗi xảy ra
+        {t('conversation.errorTitle')}
       </h3>
       <p style={{ color: '#475569', fontSize: '1rem', marginBottom: '28px', lineHeight: 1.5 }}>
         {displayMsg}
@@ -64,7 +67,7 @@ export const AIConversationError: React.FC<AIConversationErrorProps> = ({
             className="btn-admin-primary"
             style={{ padding: '12px 24px', borderRadius: '9999px' }}
           >
-            Thử lại 🔄
+            {t('conversation.retryBtn')}
           </button>
         )}
 
@@ -73,7 +76,7 @@ export const AIConversationError: React.FC<AIConversationErrorProps> = ({
           className="btn-admin-secondary"
           style={{ padding: '12px 24px', borderRadius: '9999px' }}
         >
-          Về Lộ Trình Học 🏠
+          {t('conversation.backToPathBtn')}
         </button>
       </div>
     </div>

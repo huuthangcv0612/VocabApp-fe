@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { levelApi } from '../services/levelApi'
@@ -30,38 +31,6 @@ const ScallopedDivider = ({ fill = '#2A63E8', flip = false, className = '' }: { 
   </div>
 )
 
-interface FAQItem {
-  question: string
-  answer: string
-}
-
-const defaultFaqData: FAQItem[] = [
-  {
-    question: 'WHO IS DEUTSCHUP FOR?',
-    answer: 'DeutschUp is designed for learners who want to learn German from beginner to intermediate levels, starting from A1.1 and progressing toward B1.',
-  },
-  {
-    question: 'HOW DOES THE LEARNING PATH WORK?',
-    answer: 'Learning is organized into levels, topics, units and lessons. Each lesson contains vocabulary and interactive exercises to help you practice what you learn.',
-  },
-  {
-    question: 'WHAT TYPES OF EXERCISES ARE AVAILABLE?',
-    answer: 'DeutschUp can include multiple-choice, listening, typing, sentence-building and other interactive exercises.',
-  },
-  {
-    question: 'CAN I TRACK MY LEARNING PROGRESS?',
-    answer: 'Yes. Your learning progress can be recorded as you complete lessons and exercises, helping you see what you have learned and what you should practice next.',
-  },
-  {
-    question: 'CAN I LEARN GERMAN WITH AI?',
-    answer: 'DeutschUp includes AI-powered learning features designed to give learners more opportunities to practice German and improve their communication skills.',
-  },
-  {
-    question: 'IS DEUTSCHUP FREE?',
-    answer: 'DeutschUp provides free learning content and premium plans with additional learning features.',
-  },
-]
-
 const sortPlans = (plansList: Plan[]): Plan[] => {
   const order: Record<string, number> = { FREE: 0, PREMIUM: 1, CUSTOM: 2 }
 
@@ -83,12 +52,12 @@ const defaultHomePlans: Plan[] = [
     code: 'FREE',
     price: 0,
     durationDays: 0,
-    description: 'Start building your German vocabulary with essential learning content.',
+    description: 'Bắt đầu học từ vựng tiếng Đức nền tảng hoàn toàn miễn phí.',
     features: [
-      'Essential vocabulary',
-      'Selected lessons',
-      'Interactive exercises',
-      'Learning progress',
+      'Từ vựng thiết yếu',
+      'Bài học chọn lọc',
+      'Bài tập tương tác',
+      'Theo dõi tiến độ',
     ],
     permissions: [],
     planType: 'FREE',
@@ -102,14 +71,14 @@ const defaultHomePlans: Plan[] = [
     code: 'PREMIUM',
     price: 10000,
     durationDays: 30,
-    description: 'Unlock more lessons, exercises and learning features for a complete learning experience.',
+    description: 'Mở khóa toàn bộ bài học, phòng luyện nói AI và kiểm tra ngữ pháp không giới hạn.',
     features: [
-      'Full learning path',
-      'More lessons',
-      'More exercises',
-      'AI learning features',
-      'Learning progress',
-      'Review activities',
+      'Toàn bộ lộ trình học',
+      'Đầy đủ bài học chuyên sâu',
+      'Bài tập luyện nghe phản xạ',
+      'Tính năng hội thoại AI',
+      'Theo dõi tiến độ & streak',
+      'Ôn tập từ vựng thông minh',
     ],
     permissions: [],
     planType: 'PREMIUM',
@@ -123,12 +92,12 @@ const defaultHomePlans: Plan[] = [
     code: 'CUSTOM',
     price: 0,
     durationDays: 365,
-    description: 'Get the full DeutschUp learning experience with yearly access.',
+    description: 'Trải nghiệm học tiếng Đức trọn vẹn 1 năm với ưu đãi học phí tốt nhất.',
     features: [
-      'Full learning path',
-      'Yearly access discount',
-      'All exercises & AI features',
-      'Dedicated support',
+      'Toàn bộ lộ trình học A1-B1',
+      'Ưu đãi theo năm tiết kiệm',
+      'Mọi tính năng bài tập & AI',
+      'Hỗ trợ giải đáp chuyên sâu',
     ],
     permissions: [],
     planType: 'CUSTOM',
@@ -139,12 +108,13 @@ const defaultHomePlans: Plan[] = [
 
 // Fallback Levels mapping
 const fallbackLevels = [
-  { code: 'A1.1', title: 'STARTER', desc: 'Build your foundation with everyday German vocabulary, basic expressions and simple communication.', icon: BookIcon, theme: 'red', btnText: 'START A1.1' },
-  { code: 'A1.2', title: 'PRESCHOOLERS', desc: 'Our preschool program encourages exploration, communication, creativity and confident growth.', icon: AppleIcon, theme: 'blue', btnText: 'EXPLORE A1.2' },
-  { code: 'A2.1', title: 'KINDERGARTEN', desc: 'Our readiness program builds literacy, problem-solving, confidence, and independence.', icon: PencilIcon, theme: 'light', btnText: 'EXPLORE A2.1' },
+  { code: 'A1.1', title: 'STARTER', desc: 'Xây dựng nền tảng từ vựng tiếng Đức hàng ngày, giao tiếp cơ bản và phát âm chuẩn.', icon: BookIcon, theme: 'red', btnText: 'START A1.1' },
+  { code: 'A1.2', title: 'PRESCHOOLERS', desc: 'Mở rộng vốn từ về gia đình, đồ ăn, mua sắm và các tình huống giao tiếp thông dụng.', icon: AppleIcon, theme: 'blue', btnText: 'EXPLORE A1.2' },
+  { code: 'A2.1', title: 'KINDERGARTEN', desc: 'Nâng cao khả năng diễn đạt, ngữ pháp câu và phản xạ giao tiếp tự tin hơn.', icon: PencilIcon, theme: 'light', btnText: 'EXPLORE A2.1' },
 ]
 
 const Home = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [, setApiLevels] = useState<LevelItem[]>([])
   const [plans, setPlans] = useState<Plan[]>([])
@@ -172,9 +142,18 @@ const Home = () => {
     setOpenFaq(openFaq === index ? null : index)
   }
 
+  const faqData = useMemo(() => [
+    { question: t('home.faq1Q'), answer: t('home.faq1A') },
+    { question: t('home.faq2Q'), answer: t('home.faq2A') },
+    { question: t('home.faq3Q'), answer: t('home.faq3A') },
+    { question: t('home.faq4Q'), answer: t('home.faq4A') },
+    { question: t('home.faq5Q'), answer: t('home.faq5A') },
+    { question: t('home.faq6Q'), answer: t('home.faq6A') },
+  ], [t])
+
   return (
     <div className="home-page">
-      {/* Existing HEADER - Unchanged */}
+      {/* Existing HEADER */}
       <Header animate />
 
       {/* 1. HERO SECTION */}
@@ -190,22 +169,21 @@ const Home = () => {
 
           <div className="home-hero__content">
             <h1 className="home-hero__title">
-              START YOUR GERMAN JOURNEY
+              {t('home.heroTitle')}
             </h1>
 
             <p className="home-hero__desc">
-              Learn German step by step with structured lessons, interactive exercises and AI-powered learning tools.
+              {t('home.heroDesc')}
             </p>
 
             <div className="home-hero__cta">
               <Link to="/learning-path" className="home-btn home-btn--primary">
-                START LEARNING
+                {t('home.startLearning')}
               </Link>
               <Link to="/topics" className="home-btn home-btn--secondary">
-                EXPLORE LESSONS
+                {t('home.exploreLessons')}
               </Link>
             </div>
-
           </div>
 
           <div className="hero-illustration hero-illustration--right">
@@ -222,7 +200,7 @@ const Home = () => {
         <img src={CloudIcon} alt="Cloud" className="cloud-decor cloud-decor--5" />
 
         <div className="home-container">
-          <h2 className="home-section-title">WHAT DOES DEUTSCHUP HAVE?</h2>
+          <h2 className="home-section-title">{t('home.whatDoesHave')}</h2>
 
           <div className="home-features__grid">
             {/* CARD 1 */}
@@ -230,9 +208,9 @@ const Home = () => {
               <div className="card-thumb">
                 <img src={SchoolIcon} alt="Structured Lessons" className="card-thumb__img" />
               </div>
-              <h3 className="feature-card__title">STRUCTURED LESSONS</h3>
+              <h3 className="feature-card__title">{t('home.structuredLessonsTitle')}</h3>
               <p className="feature-card__desc">
-                Follow a clear learning path from A1.1 to B1 with topics, units and lessons designed to help you learn step by step.
+                {t('home.structuredLessonsDesc')}
               </p>
             </div>
 
@@ -241,9 +219,9 @@ const Home = () => {
               <div className="card-thumb">
                 <img src={Girl2Icon} alt="Interactive Exercises" className="card-thumb__img" />
               </div>
-              <h3 className="feature-card__title">INTERACTIVE EXERCISES</h3>
+              <h3 className="feature-card__title">{t('home.interactiveExercisesTitle')}</h3>
               <p className="feature-card__desc">
-                Practice German through multiple choice, listening, typing, sentence-building and other interactive exercises.
+                {t('home.interactiveExercisesDesc')}
               </p>
             </div>
 
@@ -252,9 +230,9 @@ const Home = () => {
               <div className="card-thumb">
                 <img src={Boy3Icon} alt="AI Learning" className="card-thumb__img" />
               </div>
-              <h3 className="feature-card__title">AI-POWERED LEARNING</h3>
+              <h3 className="feature-card__title">{t('home.aiLearningTitle')}</h3>
               <p className="feature-card__desc">
-                Practice German with AI-powered learning activities and conversation experiences.
+                {t('home.aiLearningDesc')}
               </p>
             </div>
           </div>
@@ -267,39 +245,39 @@ const Home = () => {
 
         <div className="home-about__vault">
           <div className="home-container">
-            <h2 className="home-section-title home-section-title--dark">ABOUT DEUTSCHUP</h2>
+            <h2 className="home-section-title home-section-title--dark">{t('home.aboutTitle')}</h2>
             <p className="home-about__intro">
-              DeutschUp is a web-based German learning platform designed to make learning German simple, structured and engaging.
+              {t('home.aboutIntro')}
             </p>
 
             <div className="home-about__grid">
               <div className="about-block">
                 <div className="about-block__header">
                   <img src={SunIcon} alt="Sun" className="about-icon" />
-                  <h3>OUR MISSION</h3>
+                  <h3>{t('home.ourMission')}</h3>
                 </div>
                 <p>
-                  Make German learning more accessible through structured lessons, interactive practice and modern learning technology.
+                  {t('home.ourMissionDesc')}
                 </p>
               </div>
 
               <div className="about-block">
                 <div className="about-block__header">
                   <img src={SunIcon} alt="Sun" className="about-icon" />
-                  <h3>OUR VALUES</h3>
+                  <h3>{t('home.ourValues')}</h3>
                 </div>
                 <p>
-                  <strong>Simple. Interactive. Consistent.</strong>
+                  <strong>{t('home.ourValuesDesc')}</strong>
                 </p>
               </div>
 
               <div className="about-block">
                 <div className="about-block__header">
                   <img src={SunIcon} alt="Sun" className="about-icon" />
-                  <h3>OUR APPROACH</h3>
+                  <h3>{t('home.ourApproach')}</h3>
                 </div>
                 <p>
-                  <strong>Learn → Practice → Review → Improve</strong>
+                  <strong>{t('home.ourApproachDesc')}</strong>
                 </p>
               </div>
             </div>
@@ -320,9 +298,9 @@ const Home = () => {
         <img src={CloudIcon} alt="Cloud" className="path-cloud path-cloud--right-2" />
 
         <div className="home-container">
-          <h2 className="home-section-title">YOUR GERMAN LEARNING PATH</h2>
+          <h2 className="home-section-title">{t('home.pathTitle')}</h2>
           <p className="home-section-subtitle">
-            Build your German skills step by step, from your first words to confident intermediate communication.
+            {t('home.pathSubtitle')}
           </p>
 
           <div className="path-grid">
@@ -340,7 +318,6 @@ const Home = () => {
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
@@ -349,7 +326,7 @@ const Home = () => {
         <img src={CloudIcon} alt="Cloud" className="cloud-decor cloud-decor--9" />
 
         <div className="home-container">
-          <h2 className="home-section-title">CHOOSE YOUR LEARNING PLAN</h2>
+          <h2 className="home-section-title">{t('home.choosePlan')}</h2>
 
           <div className="plans-grid">
             {(plans.length > 0 ? sortPlans(plans) : defaultHomePlans).map((plan, index) => {
@@ -360,16 +337,16 @@ const Home = () => {
               if (index === 1 || plan.planType === 'PREMIUM') planIcon = BookIcon
               else if (index === 2 || plan.planType === 'CUSTOM') planIcon = AppleIcon
 
-              let subtitle = 'Flexible planning'
-              if (isPopular) subtitle = 'Easier budgeting'
-              else if (index === 2 || plan.planType === 'CUSTOM') subtitle = 'Best value'
+              let subtitle = t('home.flexiblePlanning')
+              if (isPopular) subtitle = t('home.easierBudgeting')
+              else if (index === 2 || plan.planType === 'CUSTOM') subtitle = t('home.bestValue')
 
-              const btnText = 'VIEW DETAIL'
+              const btnText = t('home.viewDetail')
 
               return (
                 <div key={plan._id || plan.id || index} className={cardClass}>
                   {isPopular && (
-                    <div className="plan-card__badge-floating">Best choice</div>
+                    <div className="plan-card__badge-floating">{t('home.bestChoice')}</div>
                   )}
 
                   <div className="plan-card__decor">
@@ -380,7 +357,7 @@ const Home = () => {
                   <div className="plan-card__subtitle">{subtitle}</div>
 
                   <p className="plan-card__desc">
-                    {plan.description || 'Build your German skills with our learning path.'}
+                    {plan.description || t('home.heroDesc')}
                   </p>
 
                   <Link to="/pricing" className="plan-card__btn">
@@ -393,7 +370,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 7. START YOUR GERMAN JOURNEY */}
+      {/* 6. START YOUR GERMAN JOURNEY */}
       <section className="home-steps">
         <img src={CloudIcon} alt="Cloud" className="journey-cloud journey-cloud--top" />
         <img src={CloudIcon} alt="Cloud" className="journey-cloud journey-cloud--small" />
@@ -403,9 +380,9 @@ const Home = () => {
               <div className="steps-illustration">
                 <img src={BoyLearnIcon} alt="Learner" className="steps-img" />
               </div>
-              <h2 className="home-section-title home-section-title--left">START LEARNING</h2>
+              <h2 className="home-section-title home-section-title--left">{t('home.startJourney')}</h2>
               <Link to="/learning-path" className="home-btn home-btn--primary">
-                START LEARNING
+                {t('home.startLearning')}
               </Link>
             </div>
 
@@ -413,24 +390,24 @@ const Home = () => {
               <div className="step-item">
                 <img src={SunIcon} alt="Step 1" className="step-icon" />
                 <div>
-                  <h6 className="step-title">CREATE YOUR ACCOUNT</h6>
-                  <p className="step-desc">Sign up with your email or Google account.</p>
+                  <h6 className="step-title">{t('home.step1Title')}</h6>
+                  <p className="step-desc">{t('home.step1Desc')}</p>
                 </div>
               </div>
 
               <div className="step-item">
                 <img src={SunIcon} alt="Step 2" className="step-icon" />
                 <div>
-                  <h6 className="step-title">CHOOSE YOUR LEVEL</h6>
-                  <p className="step-desc">Start with the German level that matches your learning journey.</p>
+                  <h6 className="step-title">{t('home.step2Title')}</h6>
+                  <p className="step-desc">{t('home.step2Desc')}</p>
                 </div>
               </div>
 
               <div className="step-item">
                 <img src={SunIcon} alt="Step 3" className="step-icon" />
                 <div>
-                  <h6 className="step-title">PRACTICE &amp; TRACK YOUR PROGRESS</h6>
-                  <p className="step-desc">Complete exercises, review vocabulary and follow your learning progress.</p>
+                  <h6 className="step-title">{t('home.step3Title')}</h6>
+                  <p className="step-desc">{t('home.step3Desc')}</p>
                 </div>
               </div>
             </div>
@@ -438,15 +415,15 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 8. FAQ */}
+      {/* 7. FAQ */}
       <section className="home-faq">
         <img src={CloudIcon} alt="Cloud" className="cloud-decor cloud-decor--10" />
 
         <div className="home-container">
-          <h2 className="home-section-title">FREQUENTLY ASKED QUESTIONS</h2>
+          <h2 className="home-section-title">{t('home.faqTitle')}</h2>
 
           <div className="faq-list">
-            {defaultFaqData.map((item, index) => (
+            {faqData.map((item, index) => (
               <div
                 key={index}
                 className={`faq-item ${openFaq === index ? 'faq-item--open' : ''}`}
@@ -467,7 +444,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Existing FOOTER - Unchanged */}
+      {/* Existing FOOTER */}
       <Footer />
     </div>
   )

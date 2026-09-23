@@ -49,6 +49,10 @@ export const ClassDetailPage = () => {
   const isTeacher = canManageThisClass
 
   const code = cls?.class_code || cls?.code || ''
+  const studentsCount =
+    cls?.students_count ??
+    cls?.studentCount ??
+    (Array.isArray(cls?.students) ? cls.students.length : 0)
 
   const handleCopyCode = () => {
     if (code) {
@@ -165,12 +169,7 @@ export const ClassDetailPage = () => {
                   </strong>
                 </span>
                 <span>
-                  👥 Học viên:{' '}
-                  <strong>
-                    {typeof cls.students_count === 'number'
-                      ? cls.students_count
-                      : cls.students?.length || 0}
-                  </strong>
+                  👥 Học viên: <strong>{studentsCount}</strong>
                 </span>
               </div>
             </div>
@@ -242,7 +241,7 @@ export const ClassDetailPage = () => {
               className={`ic-tab ${activeTab === 'students' ? 'active' : ''}`}
               onClick={() => setActiveTab('students')}
             >
-              Học viên ({typeof cls.students_count === 'number' ? cls.students_count : cls.students?.length || 0})
+              Học viên ({studentsCount})
             </button>
             <button
               type="button"

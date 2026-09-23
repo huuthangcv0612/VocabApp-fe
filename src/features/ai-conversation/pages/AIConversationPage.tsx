@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { useAIConversation } from '../hooks/useAIConversation'
@@ -14,6 +15,7 @@ import { AIConversationError } from '../components/AIConversationError'
 import '../styles/aiConversation.css'
 
 export const AIConversationPage: React.FC = () => {
+  const { t } = useTranslation('ai')
   const { sessionId } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const location = useLocation()
@@ -219,10 +221,10 @@ export const AIConversationPage: React.FC = () => {
 
         {/* Scenario Display */}
         {session.scenario && (
-          <div className="ai-scenario-card" aria-label="Situation Context">
+          <div className="ai-scenario-card" aria-label={t('conversation.situation')}>
             <div className="ai-scenario-badge">
               <span className="ai-scenario-icon" aria-hidden="true">🎭</span>
-              <span>SITUATION</span>
+              <span>{t('conversation.situation')}</span>
             </div>
             <p className="ai-scenario-text">{session.scenario}</p>
           </div>
@@ -246,11 +248,11 @@ export const AIConversationPage: React.FC = () => {
           >
             <span className="ai-autoplay-icon" aria-hidden="true">🔊</span>
             <div className="ai-autoplay-info">
-              <strong>Bấm vào đây để nghe giọng đọc của AI</strong>
-              <span>Trình duyệt yêu cầu một lượt bấm để cho phép phát âm thanh tự động</span>
+              <strong>{t('conversation.promptAutoplay')}</strong>
+              <span>{t('conversation.promptAutoplayDesc')}</span>
             </div>
             <button type="button" className="ai-autoplay-btn">
-              Nghe ngay ▶
+              {t('conversation.listenNow')}
             </button>
           </div>
         )}
@@ -283,7 +285,7 @@ export const AIConversationPage: React.FC = () => {
           {sending && (
             <div className="ai-typing-indicator">
               <div className="ai-spinner-small" />
-              <span>AI đang suy nghĩ...</span>
+              <span>{t('conversation.thinking')}</span>
             </div>
           )}
         </div>
@@ -292,14 +294,14 @@ export const AIConversationPage: React.FC = () => {
         {audioStatus === 'loading' && (
           <div className="ai-audio-status-banner loading">
             <div className="ai-spinner-small" />
-            <span>AI đang chuẩn bị giọng nói...</span>
+            <span>{t('conversation.preparingVoice')}</span>
           </div>
         )}
 
         {audioStatus === 'playing' && (
           <div className="ai-audio-status-banner playing">
             <span className="ai-audio-wave-anim">🔊</span>
-            <span>AI đang nói... (Vui lòng chú ý lắng nghe)</span>
+            <span>{t('conversation.speaking')}</span>
           </div>
         )}
 
@@ -331,24 +333,24 @@ export const AIConversationPage: React.FC = () => {
         {isCompleted ? (
           <div className="ai-completed-card">
             <div className="ai-completed-header">
-              <span className="ai-completed-badge">🎉 Hoàn thành hội thoại</span>
-              <span className="ai-completed-turn-count">3 / 3 câu trả lời</span>
+              <span className="ai-completed-badge">{t('conversation.completedTitle')}</span>
+              <span className="ai-completed-turn-count">{t('conversation.answersGiven')}</span>
             </div>
             <p className="ai-completed-desc">
-              Du hast 3 Antworten gegeben. Sehr gut gemacht! Bạn đã hoàn thành lượt luyện tập hội thoại tiếng Đức.
+              {t('conversation.praiseText')}
             </p>
             <div className="ai-completed-actions">
               <button
                 onClick={handleRestart}
                 className="ai-completed-btn restart"
               >
-                🔄 Luyện tập lại
+                {t('conversation.restartPractice')}
               </button>
               <button
                 onClick={handleExit}
                 className="ai-completed-btn exit"
               >
-                🏠 Về Lộ Trình Học
+                {t('conversation.backToPath')}
               </button>
             </div>
           </div>

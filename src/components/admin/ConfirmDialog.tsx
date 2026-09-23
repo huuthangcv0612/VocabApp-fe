@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface ConfirmDialogProps {
   isOpen: boolean
@@ -14,23 +15,28 @@ interface ConfirmDialogProps {
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
-  title = 'Xác nhận xóa',
+  title,
   message,
   itemName,
-  confirmText = 'Xóa vĩnh viễn',
-  cancelText = 'Hủy bỏ',
+  confirmText,
+  cancelText,
   isLoading = false,
   onConfirm,
   onCancel,
 }) => {
+  const { t } = useTranslation('common')
   if (!isOpen) return null
+
+  const displayTitle = title || t('modals.confirmDeleteTitle')
+  const displayConfirm = confirmText || t('modals.permanentDelete')
+  const displayCancel = cancelText || t('actions.cancel')
 
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal-card confirm-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-modal-header">
           <div className="confirm-modal-icon">🗑️</div>
-          <h3 className="modal-title">{title}</h3>
+          <h3 className="modal-title">{displayTitle}</h3>
         </div>
 
         <div className="confirm-modal-body">
@@ -40,7 +46,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               <strong>{itemName}</strong>
             </div>
           )}
-          <p className="confirm-warning-note">⚠️ Hành động này không thể hoàn tác.</p>
+          <p className="confirm-warning-note">{t('modals.confirmDeleteWarning')}</p>
         </div>
 
         <div className="confirm-modal-actions">
@@ -50,7 +56,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             disabled={isLoading}
             className="btn-admin-secondary"
           >
-            {cancelText}
+            {displayCancel}
           </button>
           <button
             type="button"
@@ -58,7 +64,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             disabled={isLoading}
             className="btn-admin-danger"
           >
-            {isLoading ? 'Đang xử lý...' : confirmText}
+            {isLoading ? t('actions.loading') : displayConfirm}
           </button>
         </div>
       </div>

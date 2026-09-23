@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { lessonApi } from '../services/lessonApi'
@@ -9,6 +10,7 @@ import type { LevelItem } from '../types/level'
 import '../styles/pages/lesson.css'
 
 export const Lektion: React.FC = () => {
+  const { t } = useTranslation(['learning', 'common'])
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId || ''
   const navigate = useNavigate()
@@ -35,14 +37,14 @@ export const Lektion: React.FC = () => {
         const data = await lessonApi.getById(activeLessonId)
         setLessonData(data)
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Không thể tải bài học.'
+        const msg = err instanceof Error ? err.message : t('common.states.notFound')
         setError(msg)
       } finally {
         setLoading(false)
       }
     }
     fetchLesson()
-  }, [activeLessonId])
+  }, [activeLessonId, t])
 
   if (loading) {
     return (
@@ -50,7 +52,7 @@ export const Lektion: React.FC = () => {
         <Header />
         <div style={{ textAlign: 'center', padding: '80px 20px', minHeight: '60vh' }}>
           <div className="admin-spinner" style={{ margin: '0 auto 16px auto' }}></div>
-          <p style={{ fontWeight: 600, color: '#475569' }}>Đang tải bài tập...</p>
+          <p style={{ fontWeight: 600, color: '#475569' }}>{t('common.states.loadingData')}</p>
         </div>
         <Footer />
       </div>
@@ -62,9 +64,9 @@ export const Lektion: React.FC = () => {
       <div className="lesson" style={{ backgroundColor: '#f8fafc', minHeight: '100vh' }}>
         <Header />
         <div style={{ textAlign: 'center', padding: '60px 20px', minHeight: '60vh', color: '#dc2626' }}>
-          <p>{error || 'Không tìm thấy bài học.'}</p>
+          <p>{error || t('common.states.notFound')}</p>
           <button className="btn-admin-primary" onClick={() => navigate('/learning-path')}>
-            Về Lộ Trình Học
+            {t('path.journeyTitle')}
           </button>
         </div>
         <Footer />
@@ -81,7 +83,7 @@ export const Lektion: React.FC = () => {
     ? (topicObj.topic_name || topicObj.name || '')
     : (typeof topicObj === 'string' ? topicObj : '')
 
-  // Extract Level metadata from unit or lesson extra fields safely
+  // Extract Level metadata safely
   const lessonRecord = lesson as unknown as Record<string, unknown>
   const unitObj = lesson.unit_id || lesson.unit
   const rawLevelObj = (typeof unitObj === 'object' && unitObj !== null ? (unitObj as unknown as Record<string, unknown>).level_id : undefined) ||
@@ -103,7 +105,7 @@ export const Lektion: React.FC = () => {
         {/* Breadcrumb / Back button */}
         <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.92rem', flexWrap: 'wrap' }}>
           <Link to="/learning-path" style={{ color: '#2a63e8', textDecoration: 'none', fontWeight: 600 }}>
-            Learning Path
+            {t('path.journeyTitle')}
           </Link>
           {levelNameVal && (
             <>
@@ -116,7 +118,7 @@ export const Lektion: React.FC = () => {
           <span style={{ color: '#94a3b8' }}>/</span>
           <span style={{ color: '#0f172a', fontWeight: 700 }}>{lessonTitle}</span>
           <span style={{ color: '#94a3b8' }}>/</span>
-          <span style={{ color: '#64748b', fontWeight: 600 }}>Exercises</span>
+          <span style={{ color: '#64748b', fontWeight: 600 }}>{t('lektion.breadcrumbExercises')}</span>
         </div>
 
         {/* Lesson Overview Card */}
@@ -134,7 +136,7 @@ export const Lektion: React.FC = () => {
           <div style={{ display: 'flex', gap: '10px', marginBottom: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             {levelNameVal && (
               <span style={{ backgroundColor: '#2a63e8', color: '#fff', padding: '4px 12px', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: 700 }}>
-                Level: {levelNameVal}
+                {t('path.levelTag')}: {levelNameVal}
               </span>
             )}
             {topicName && (
@@ -149,7 +151,7 @@ export const Lektion: React.FC = () => {
           </h1>
 
           <p style={{ color: '#cbd5e1', fontSize: '0.95rem', margin: '0 0 24px 0', lineHeight: 1.5 }}>
-            {lesson.description || 'Chọn bài tập bên dưới để bắt đầu luyện tập từ vựng và củng cố kiến thức.'}
+            {lesson.description || t('path.descFallback', { level: levelNameVal })}
           </p>
 
           <div
@@ -161,29 +163,29 @@ export const Lektion: React.FC = () => {
           >
             <div style={{ background: 'rgba(255,255,255,0.08)', padding: '12px 16px', borderRadius: '12px' }}>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>{vocabularies.length}</div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>📚 Từ Vựng</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>📚 {t('lektion.vocab')}</div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.08)', padding: '12px 16px', borderRadius: '12px' }}>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#c084fc' }}>{exercises.length}</div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>✍️ Bài Tập</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>✍️ {t('lektion.exercise')}</div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.08)', padding: '12px 16px', borderRadius: '12px' }}>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#4ade80' }}>{lesson.estimated_minutes || 15}</div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⏱️ Phút Học</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⏱️ {t('lektion.studyTime')}</div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.08)', padding: '12px 16px', borderRadius: '12px' }}>
               <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fbbf24' }}>{lesson.xp || 20}</div>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⚡ Điểm XP</div>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8' }}>⚡ {t('lektion.xpPoints')}</div>
             </div>
           </div>
         </div>
 
         {/* Exercises List Section */}
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginBottom: '20px' }}>
-          📝 DANH SÁCH BÀI TẬP (EXERCISES)
+          📝 {t('lektion.exercisesListTitle')}
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
@@ -207,18 +209,18 @@ export const Lektion: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '1.8rem' }}>🃏</span>
                 <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Exercise 1
+                  1
                 </span>
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                Flashcard (Thẻ Từ Vựng)
+                {t('lektion.flashcardTitle')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.4 }}>
-                Lật thẻ học từ vựng tiếng Đức, phát âm chuẩn và lưu tiến độ học tập.
+                {t('lektion.flashcardDesc')}
               </p>
             </div>
             <button className="btn-admin-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px' }}>
-              Luyện Flashcard ▶
+              {t('lektion.flashcardBtn')}
             </button>
           </div>
 
@@ -242,18 +244,18 @@ export const Lektion: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '1.8rem' }}>⚡</span>
                 <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Exercise 2
+                  2
                 </span>
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                Multiple Choice / Quick Quiz
+                {t('lektion.quizTitle')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.4 }}>
-                Kiểm tra phản xạ chọn nghĩa từ vựng nhanh và tính điểm kết quả.
+                {t('lektion.quizDesc')}
               </p>
             </div>
             <button className="btn-admin-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#8b5cf6' }}>
-              Làm Quick Quiz ▶
+              {t('lektion.quizBtn')}
             </button>
           </div>
 
@@ -277,18 +279,18 @@ export const Lektion: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '1.8rem' }}>🎡</span>
                 <span style={{ backgroundColor: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Exercise 3
+                  3
                 </span>
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                Vòng Quay & AI Đặt Câu
+                {t('lektion.spinTitle')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.4 }}>
-                Quay từ vựng ngẫu nhiên, tự đặt câu tiếng Đức và nhận phản hồi trực tiếp từ AI.
+                {t('lektion.spinDesc')}
               </p>
             </div>
             <button className="btn-admin-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#f59e0b' }}>
-              Chơi Vòng Quay AI ▶
+              {t('lektion.spinBtn')}
             </button>
           </div>
 
@@ -312,18 +314,18 @@ export const Lektion: React.FC = () => {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span style={{ fontSize: '1.8rem' }}>🎓</span>
                 <span style={{ backgroundColor: '#d1fae5', color: '#065f46', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                  Exercise 4
+                  4
                 </span>
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-                Bài Học Tương Tác Cụ Thể
+                {t('lektion.guidedTitle')}
               </h3>
               <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.4 }}>
-                Chuỗi bài tập tương tác hoàn chỉnh: Nghe phát âm, Ghép câu, Điền từ & Dịch thuật.
+                {t('lektion.guidedDesc')}
               </p>
             </div>
             <button className="btn-admin-primary" style={{ width: '100%', padding: '12px', borderRadius: '12px', backgroundColor: '#10b981' }}>
-              Bắt Đầu Bài Học ▶
+              {t('lektion.guidedBtn')}
             </button>
           </div>
         </div>
@@ -332,7 +334,7 @@ export const Lektion: React.FC = () => {
         {exercises.length > 0 && (
           <div style={{ marginTop: '20px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', marginBottom: '16px' }}>
-              🎯 Các bài tập thành phần ({exercises.length} câu hỏi)
+              🎯 {t('lektion.exercise')} ({exercises.length})
             </h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               {exercises.map((ex, idx) => (
@@ -350,7 +352,7 @@ export const Lektion: React.FC = () => {
                 >
                   <div>
                     <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
-                      CÂU {idx + 1} • {ex.type}
+                      {idx + 1} • {ex.type}
                     </span>
                     <h4 style={{ margin: '4px 0 0 0', fontSize: '1rem', color: '#0f172a', fontWeight: 700 }}>
                       {ex.question}

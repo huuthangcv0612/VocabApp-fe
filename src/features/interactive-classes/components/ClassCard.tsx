@@ -27,11 +27,9 @@ export const ClassCard = ({
       : 'Giáo viên')
 
   const studentsCount =
-    typeof cls.students_count === 'number'
-      ? cls.students_count
-      : Array.isArray(cls.students)
-      ? cls.students.length
-      : 0
+    cls.students_count ??
+    cls.studentCount ??
+    (Array.isArray(cls.students) ? cls.students.length : 0)
 
   const handleCopyCode = (e: React.MouseEvent) => {
     e.stopPropagation()

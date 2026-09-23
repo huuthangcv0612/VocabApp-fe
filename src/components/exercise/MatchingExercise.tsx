@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { LessonExercise, MatchingPair } from '../../types/exercise'
 import './matchingExercise.css'
 
@@ -46,6 +47,7 @@ export const MatchingExercise: React.FC<MatchingExerciseProps> = ({
   disabled = false,
   submissionResult = null,
 }) => {
+  const { t } = useTranslation('learning')
   const [leftCards, setLeftCards] = useState<CardItem[]>([])
   const [rightCards, setRightCards] = useState<CardItem[]>([])
   const [selectedLeft, setSelectedLeft] = useState<CardItem | null>(null)
@@ -156,7 +158,7 @@ export const MatchingExercise: React.FC<MatchingExerciseProps> = ({
   if (pairsList.length === 0) {
     return (
       <div className="matching-exercise" style={{ textAlign: 'center', padding: '24px', color: '#dc2626' }}>
-        <p style={{ fontWeight: 600 }}>Dữ liệu bài tập ghép cặp chưa hợp lệ hoặc thiếu thông tin cặp từ.</p>
+        <p style={{ fontWeight: 600 }}>{t('exercises.matchingInvalidData')}</p>
       </div>
     )
   }
@@ -165,10 +167,10 @@ export const MatchingExercise: React.FC<MatchingExerciseProps> = ({
     <div className="matching-exercise">
       <div className="matching-header">
         <h3 className="matching-title">
-          <span>🔗</span> {exercise.question || (exercise.content?.question as string) || 'Ghép các cặp từ tương ứng:'}
+          <span>🔗</span> {exercise.question || (exercise.content?.question as string) || t('exercises.matchingPrompt')}
         </h3>
         <p className="matching-instruction">
-          Chạm vào 1 từ cột bên trái và 1 từ cột bên phải tương ứng để ghép cặp.
+          {t('exercises.matchingInstruction')}
         </p>
       </div>
 

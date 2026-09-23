@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ProgressOverview } from '../types/progressOverview'
 
 export interface ProgressOverviewGridProps {
@@ -6,20 +7,22 @@ export interface ProgressOverviewGridProps {
 }
 
 export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ overview }) => {
+  const { t } = useTranslation('learning')
+
   return (
-    <section className="po-metrics-grid" aria-label="Các chỉ số tổng quan">
+    <section className="po-metrics-grid" aria-label={t('progress.statsTitle')}>
       {/* 1. Current Level */}
       <div className="po-metric-card">
         <div className="po-metric-header">
           <div className="po-metric-icon po-icon-blue" aria-hidden="true">
             🎓
           </div>
-          <span className="po-metric-label">Trình độ hiện tại</span>
+          <span className="po-metric-label">{t('progress.currentLevel')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.currentLevel?.level_name || 'N/A'}</span>
         </div>
-        <p className="po-metric-sub">Thứ tự cấp độ: #{overview.currentLevel?.order || 1}</p>
+        <p className="po-metric-sub">{t('progress.levelOrder', { order: overview.currentLevel?.order || 1 })}</p>
       </div>
 
       {/* 2. Level Completion Percentage */}
@@ -28,7 +31,7 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
           <div className="po-metric-icon po-icon-green" aria-hidden="true">
             🎯
           </div>
-          <span className="po-metric-label">Tiến độ trình độ</span>
+          <span className="po-metric-label">{t('progress.levelProgress')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.levelCompletionPercentage}%</span>
@@ -36,7 +39,7 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
         <div
           className="po-metric-bar"
           role="progressbar"
-          aria-label={`Tiến độ hoàn thành trình độ ${overview.currentLevel?.level_name || ''}`}
+          aria-label={`${t('progress.levelProgress')} ${overview.currentLevel?.level_name || ''}`}
           aria-valuenow={overview.levelCompletionPercentage}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -54,13 +57,13 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
           <div className="po-metric-icon po-icon-orange" aria-hidden="true">
             📚
           </div>
-          <span className="po-metric-label">Bài học đã xong</span>
+          <span className="po-metric-label">{t('progress.lessonsCompleted')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.lessonsCompleted}</span>
-          <span className="po-metric-total">/ {overview.totalLessons} bài</span>
+          <span className="po-metric-total">{t('progress.totalLessonsCount', { total: overview.totalLessons })}</span>
         </div>
-        <p className="po-metric-sub">Đã hoàn tất tất cả dạng bài tập</p>
+        <p className="po-metric-sub">{t('progress.lessonsCompletedDesc')}</p>
       </div>
 
       {/* 4. Total XP */}
@@ -69,13 +72,13 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
           <div className="po-metric-icon po-icon-yellow" aria-hidden="true">
             ⚡
           </div>
-          <span className="po-metric-label">Tổng điểm thưởng XP</span>
+          <span className="po-metric-label">{t('progress.totalXp')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.totalXp}</span>
-          <span className="po-metric-total">XP</span>
+          <span className="po-metric-total">{t('progress.xpTotal')}</span>
         </div>
-        <p className="po-metric-sub">Tích lũy qua các bài học & bài tập</p>
+        <p className="po-metric-sub">{t('progress.totalXpDesc')}</p>
       </div>
 
       {/* 5. Streak */}
@@ -84,14 +87,14 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
           <div className="po-metric-icon po-icon-red" aria-hidden="true">
             🔥
           </div>
-          <span className="po-metric-label">Chuỗi ngày Streak</span>
+          <span className="po-metric-label">{t('progress.streak')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.streak}</span>
-          <span className="po-metric-total">ngày</span>
+          <span className="po-metric-total">{t('progress.streakDays')}</span>
         </div>
         <p className="po-metric-sub">
-          {overview.streak > 0 ? 'Phong độ rất tốt! Giữ vững nhé!' : 'Hãy học một bài để bắt đầu chuỗi streak!'}
+          {overview.streak > 0 ? t('progress.streakGreat') : t('progress.streakStart')}
         </p>
       </div>
 
@@ -101,13 +104,13 @@ export const ProgressOverviewGrid: React.FC<ProgressOverviewGridProps> = ({ over
           <div className="po-metric-icon po-icon-purple" aria-hidden="true">
             ⏱️
           </div>
-          <span className="po-metric-label">Thời gian học tập</span>
+          <span className="po-metric-label">{t('progress.studyTime')}</span>
         </div>
         <div className="po-metric-value-row">
           <span className="po-metric-value">{overview.estimatedStudyMinutes}</span>
-          <span className="po-metric-total">phút</span>
+          <span className="po-metric-total">{t('progress.minutes')}</span>
         </div>
-        <p className="po-metric-sub">Thời gian học tập ước tính tích lũy</p>
+        <p className="po-metric-sub">{t('progress.studyTimeDesc')}</p>
       </div>
     </section>
   )

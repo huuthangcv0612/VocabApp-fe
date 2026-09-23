@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 interface FeatureLockOverlayProps {
   title?: string
@@ -8,11 +9,15 @@ interface FeatureLockOverlayProps {
 }
 
 export const FeatureLockOverlay: React.FC<FeatureLockOverlayProps> = ({
-  title = '🔒 Tính Năng Nâng Cao (Premium Feature)',
-  description = 'Tính năng này yêu cầu nâng cấp Gói Premium hoặc Pro để truy cập.',
+  title,
+  description,
   requiredPlan = 'Premium',
 }) => {
+  const { t } = useTranslation('common')
   const navigate = useNavigate()
+
+  const displayTitle = title || t('lock.premiumFeature')
+  const displayDesc = description || t('lock.upgradeRequired')
 
   return (
     <div
@@ -28,10 +33,10 @@ export const FeatureLockOverlay: React.FC<FeatureLockOverlayProps> = ({
     >
       <div style={{ fontSize: '3.2rem', marginBottom: '12px' }}>🔒</div>
       <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
-        {title}
+        {displayTitle}
       </h3>
       <p style={{ color: '#64748b', fontSize: '0.95rem', maxWidth: '480px', margin: '0 auto 24px auto', lineHeight: 1.6 }}>
-        {description}
+        {displayDesc}
       </p>
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -46,7 +51,7 @@ export const FeatureLockOverlay: React.FC<FeatureLockOverlayProps> = ({
           }}
           onClick={() => navigate('/pricing')}
         >
-          ✨ Nâng Cấp Gói {requiredPlan} Ngay
+          ✨ {t('lock.upgradeNow')} ({requiredPlan})
         </button>
 
         <button
@@ -54,7 +59,7 @@ export const FeatureLockOverlay: React.FC<FeatureLockOverlayProps> = ({
           style={{ padding: '12px 24px', borderRadius: '9999px', fontSize: '0.92rem' }}
           onClick={() => navigate('/subscription')}
         >
-          Xem Trạng Thái Gói
+          {t('lock.viewSubscription')}
         </button>
       </div>
     </div>
