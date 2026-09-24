@@ -12,6 +12,7 @@ import { AIConversationInput } from '../components/AIConversationInput'
 import { AITargetVocabulary } from '../components/AITargetVocabulary'
 import { AIConversationLoading } from '../components/AIConversationLoading'
 import { AIConversationError } from '../components/AIConversationError'
+import { useSubscription } from '../../../hooks/useSubscription'
 import '../styles/aiConversation.css'
 
 export const AIConversationPage: React.FC = () => {
@@ -22,6 +23,7 @@ export const AIConversationPage: React.FC = () => {
   const chatBoxRef = useRef<HTMLDivElement>(null)
   const lastSpokenTurnIdRef = useRef<string | null>(null)
   const loadedSessionIdRef = useRef<string | null>(null)
+  const { isPremium, loading: subLoading } = useSubscription()
 
   const {
     session,
@@ -51,7 +53,7 @@ export const AIConversationPage: React.FC = () => {
 
   // Initialize session: use router state for immediate start or load from API
   useEffect(() => {
-    if (!sessionId) return
+    if (!sessionId || (!subLoading && !isPremium)) return
 
     // If hook state already has this session and messages initialized in memory, do not re-fetch
     if (session && session.session_id === sessionId && messages.length > 0) {
@@ -150,6 +152,21 @@ export const AIConversationPage: React.FC = () => {
 
   const handleReplayMessage = (text: string) => {
     speak(text)
+  }
+
+  if (!subLoading && !isPremium) {
+    return (
+      <div className="ai-conversation-page">
+        <Header />
+        <main className="ai-conversation-container">
+          <AIConversationError
+            statusCode={403}
+            onExit={handleExit}
+          />
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
   if (loading && !session) {

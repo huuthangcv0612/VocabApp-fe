@@ -129,7 +129,11 @@
     "spinBtn": "Chơi Vòng Quay AI ▶",
     "guidedTitle": "Bài Học Tương Tác Cụ Thể",
     "guidedDesc": "Chuỗi bài tập tương tác: Nghe phát âm, Ghép câu, Điền từ & Dịch thuật.",
-    "guidedBtn": "Bắt Đầu Bài Học ▶"
+    "guidedBtn": "Bắt Đầu Bài Học ▶",
+    "aiConversationTitle": "AI Hội Thoại (Luyện Nói 1-1)",
+    "aiConversationDesc": "Thực hành giao tiếp tiếng Đức theo ngữ cảnh bài học với gia sư AI, sửa lỗi phát âm và phản hồi tức thì.",
+    "aiConversationBtn": "Luyện Nói Cùng AI ▶",
+    "aiConversationLockedBtn": "Mở Khóa Premium ▶"
   },
   "exercises": {
     "vocabPreviewTitle": "XEM TRƯỚC TỪ VỰNG: {{current}} / {{total}}",

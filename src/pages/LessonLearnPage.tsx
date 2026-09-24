@@ -12,6 +12,8 @@ import type { LessonLearningStep } from '../types/student'
 import { formatSubmitAnswer, getFillBlankQuestion } from '../utils/exerciseAdapter'
 import { MatchingExercise } from '../components/exercise/MatchingExercise'
 import { toast } from 'react-hot-toast'
+import { useSubscription } from '../hooks/useSubscription'
+import { PremiumRequiredModal } from '../components/modals/PremiumRequiredModal'
 import '../styles/pages/lesson.css'
 
 export const LessonLearnPage: React.FC = () => {
@@ -57,8 +59,14 @@ export const LessonLearnPage: React.FC = () => {
   const [totalXpEarned, setTotalXpEarned] = useState(0)
   const [startTime] = useState(Date.now())
   const [isStartingAI, setIsStartingAI] = useState(false)
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const { isPremium } = useSubscription()
 
   const handleStartAIConversation = async () => {
+    if (!isPremium) {
+      setShowPremiumModal(true)
+      return
+    }
     if (!activeLessonId || isStartingAI) return
     try {
       setIsStartingAI(true)
@@ -69,6 +77,14 @@ export const LessonLearnPage: React.FC = () => {
         toast.error(t('exercises.createAiSessionError'))
       }
     } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { code?: string } } }
+      if (
+        axiosErr?.response?.status === 403 ||
+        axiosErr?.response?.data?.code === 'PREMIUM_REQUIRED'
+      ) {
+        setShowPremiumModal(true)
+        return
+      }
       const msg = err instanceof Error ? err.message : t('exercises.startAiError')
       toast.error(msg)
     } finally {
@@ -824,13 +840,37 @@ export const LessonLearnPage: React.FC = () => {
                 style={{
                   padding: '14px 28px',
                   borderRadius: '9999px',
-                  backgroundColor: '#8b5cf6',
-                  boxShadow: '0 4px 14px rgba(139,92,246,0.35)',
+                  backgroundColor: !isPremium ? '#475569' : '#8b5cf6',
+                  boxShadow: !isPremium ? '0 4px 14px rgba(71, 85, 105, 0.25)' : '0 4px 14px rgba(139, 92, 246, 0.35)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                  opacity: !isPremium ? 0.92 : 1,
+                  transition: 'all 0.2s ease',
                 }}
                 disabled={isStartingAI}
                 onClick={handleStartAIConversation}
               >
-                {isStartingAI ? t('exercises.startingAI') : t('exercises.practiceAI')}
+                {!isPremium && <span style={{ fontSize: '1.05rem' }}>🔒</span>}
+                <span>{isStartingAI ? t('exercises.startingAI') : t('exercises.practiceAI')}</span>
+                {!isPremium && (
+                  <span
+                    style={{
+                      backgroundColor: '#f59e0b',
+                      color: '#ffffff',
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    PREMIUM
+                  </span>
+                )}
               </button>
 
               <button
@@ -852,6 +892,11 @@ export const LessonLearnPage: React.FC = () => {
       </main>
 
       <Footer />
+
+      <PremiumRequiredModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </div>
   )
 }

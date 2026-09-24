@@ -82,6 +82,18 @@
     "upgradeNow": "Nâng cấp ngay",
     "viewSubscription": "Xem trạng thái gói"
   },
+  "premiumModal": {
+    "title": "🔒 Tính năng Premium",
+    "content": "Chế độ học AI chỉ dành cho tài khoản Premium. Hãy đăng ký gói Premium để mở khóa tính năng này.",
+    "upgradeBtn": "Đăng ký Premium",
+    "closeBtn": "Đóng"
+  },
+  "customModal": {
+    "title": "⭐ Tính năng Gói Custom",
+    "content": "Tính năng tạo và quản lý lớp học tương tác chỉ dành cho tài khoản gói Custom. Hãy nâng cấp gói Custom để mở khóa tính năng này.",
+    "upgradeBtn": "Khám phá Gói Custom",
+    "closeBtn": "Đóng"
+  },
   "errorBoundary": {
     "title": "Đã xảy ra lỗi giao diện ⚠️",
     "desc": "Có lỗi phát sinh trong khi tải giao diện ứng dụng.",

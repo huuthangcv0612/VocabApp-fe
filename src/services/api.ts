@@ -77,6 +77,15 @@ api.interceptors.response.use(
     if (error?.response?.status === 401) {
       clearExpiredAuth()
       window.dispatchEvent(new CustomEvent('auth:logout'))
+    } else if (
+      error?.response?.status === 403 ||
+      error?.response?.data?.code === 'PREMIUM_REQUIRED'
+    ) {
+      window.dispatchEvent(
+        new CustomEvent('premium:required', {
+          detail: error?.response?.data,
+        }),
+      )
     }
     return Promise.reject(error)
   },

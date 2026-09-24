@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'react-hot-toast'
 import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { lessonApi } from '../services/lessonApi'
 import { progressService } from '../services/progressService'
+import { useSubscription } from '../hooks/useSubscription'
+import { PremiumRequiredModal } from '../components/modals/PremiumRequiredModal'
+import { aiConversationService } from '../features/ai-conversation/services/aiConversation.service'
 import type { LessonDetailData } from '../types/lesson'
 import type { LevelItem } from '../types/level'
 import '../styles/pages/lesson.css'
@@ -14,6 +18,9 @@ export const Lektion: React.FC = () => {
   const { lektionId, lessonId } = useParams<{ lektionId?: string; lessonId?: string }>()
   const activeLessonId = lessonId || lektionId || ''
   const navigate = useNavigate()
+  const { isPremium } = useSubscription()
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
+  const [isStartingAI, setIsStartingAI] = useState(false)
 
   const handleStartAndNavigate = async (targetPath: string) => {
     if (activeLessonId) {
@@ -22,6 +29,35 @@ export const Lektion: React.FC = () => {
       })
     }
     navigate(targetPath)
+  }
+
+  const handleStartAI = async () => {
+    if (!isPremium) {
+      setShowPremiumModal(true)
+      return
+    }
+    if (!activeLessonId || isStartingAI) return
+    try {
+      setIsStartingAI(true)
+      const data = await aiConversationService.startConversation(activeLessonId)
+      if (data && data.session_id) {
+        navigate(`/ai-conversation/${data.session_id}`, { state: { sessionData: data } })
+      } else {
+        toast.error(t('exercises.createAiSessionError', 'Không thể tạo phiên học AI.'))
+      }
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number; data?: { code?: string } } }
+      if (
+        axiosErr?.response?.status === 403 ||
+        axiosErr?.response?.data?.code === 'PREMIUM_REQUIRED'
+      ) {
+        setShowPremiumModal(true)
+        return
+      }
+      toast.error(t('exercises.startAiError', 'Lỗi khi kết nối với AI.'))
+    } finally {
+      setIsStartingAI(false)
+    }
   }
 
   const [lessonData, setLessonData] = useState<LessonDetailData | null>(null)
@@ -328,6 +364,69 @@ export const Lektion: React.FC = () => {
               {t('lektion.guidedBtn')}
             </button>
           </div>
+
+          {/* Main Mode 5: AI Conversation Practice (AI Learning Mode) */}
+          <div
+            className="admin-card"
+            style={{
+              padding: '24px',
+              borderRadius: '20px',
+              border: isPremium ? '2px solid #8b5cf6' : '2px dashed #cbd5e1',
+              backgroundColor: isPremium ? '#ffffff' : '#f8fafc',
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              position: 'relative',
+              opacity: isPremium ? 1 : 0.95,
+            }}
+            onClick={handleStartAI}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '1.8rem' }}>🤖</span>
+                {isPremium ? (
+                  <span style={{ backgroundColor: '#f3e8ff', color: '#6b21a8', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
+                    AI
+                  </span>
+                ) : (
+                  <span style={{ backgroundColor: '#fef3c7', color: '#b45309', padding: '4px 10px', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', border: '1px solid #fde68a' }}>
+                    🔒 PREMIUM
+                  </span>
+                )}
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a', margin: '0 0 8px 0' }}>
+                {t('lektion.aiConversationTitle')}
+              </h3>
+              <p style={{ fontSize: '0.88rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.4 }}>
+                {t('lektion.aiConversationDesc')}
+              </p>
+            </div>
+            <button
+              className="btn-admin-primary"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '12px',
+                backgroundColor: isPremium ? '#8b5cf6' : '#475569',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+              }}
+              disabled={isStartingAI}
+            >
+              {!isPremium && <span>🔒</span>}
+              <span>
+                {isStartingAI
+                  ? t('exercises.startingAI', 'Đang kết nối...')
+                  : isPremium
+                  ? t('lektion.aiConversationBtn')
+                  : t('lektion.aiConversationLockedBtn')}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Detailed API Exercises List (if lesson has specific items) */}
@@ -369,6 +468,11 @@ export const Lektion: React.FC = () => {
       </main>
 
       <Footer />
+
+      <PremiumRequiredModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </div>
   )
 }

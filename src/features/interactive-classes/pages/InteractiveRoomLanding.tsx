@@ -13,6 +13,7 @@ import {
 import { ClassCard } from '../components/ClassCard'
 import { CreateClassModal } from '../components/CreateClassModal'
 import { JoinClassModal } from '../components/JoinClassModal'
+import { PremiumRequiredModal } from '../../../components/modals/PremiumRequiredModal'
 import type { ClassItem } from '../../../types/interactiveClass'
 import '../../../styles/pages/interactive-classes.css'
 
@@ -31,6 +32,7 @@ export const InteractiveRoomLanding = () => {
   const [loading, setLoading] = useState(true)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isJoinOpen, setIsJoinOpen] = useState(false)
+  const [showCustomModal, setShowCustomModal] = useState(false)
   const [joinCodeParam, setJoinCodeParam] = useState<string>('')
 
   // Check if URL has ?joinCode=...
@@ -177,13 +179,40 @@ export const InteractiveRoomLanding = () => {
                 🔑 Tham gia bằng mã
               </button>
 
-              {canManageClasses && (
+              {canManageClasses ? (
                 <button
                   type="button"
                   className="ic-btn ic-btn-primary"
                   onClick={() => setIsCreateOpen(true)}
                 >
                   + Tạo lớp học mới
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="ic-btn ic-btn-primary"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    opacity: 0.95,
+                  }}
+                  onClick={() => setShowCustomModal(true)}
+                >
+                  <span>⭐ + Tạo lớp học mới</span>
+                  <span
+                    style={{
+                      backgroundColor: '#f59e0b',
+                      color: '#ffffff',
+                      fontSize: '0.65rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '9999px',
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    CUSTOM
+                  </span>
                 </button>
               )}
             </div>
@@ -244,7 +273,7 @@ export const InteractiveRoomLanding = () => {
                 >
                   🔑 Nhập mã tham gia
                 </button>
-                {canManageClasses && activeTab === 'managed' && (
+                {canManageClasses && activeTab === 'managed' ? (
                   <button
                     type="button"
                     className="ic-btn ic-btn-primary"
@@ -252,7 +281,34 @@ export const InteractiveRoomLanding = () => {
                   >
                     + Tạo lớp học ngay
                   </button>
-                )}
+                ) : !canManageClasses ? (
+                  <button
+                    type="button"
+                    className="ic-btn ic-btn-primary"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      opacity: 0.95,
+                    }}
+                    onClick={() => setShowCustomModal(true)}
+                  >
+                    <span>⭐ + Tạo lớp học</span>
+                    <span
+                      style={{
+                        backgroundColor: '#f59e0b',
+                        color: '#ffffff',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      CUSTOM
+                    </span>
+                  </button>
+                ) : null}
               </div>
             </div>
           ) : (
@@ -304,6 +360,12 @@ export const InteractiveRoomLanding = () => {
         initialCode={joinCodeParam}
         onClose={() => setIsJoinOpen(false)}
         onSuccess={handleClassJoined}
+      />
+
+      <PremiumRequiredModal
+        isOpen={showCustomModal}
+        onClose={() => setShowCustomModal(false)}
+        planType="CUSTOM"
       />
     </div>
   )

@@ -5,6 +5,8 @@ import Header from '../components/Header'
 import Footer from '../components/Footer'
 import { useVocabulary } from '../hooks/useApi'
 import { vocabularyApi } from '../services/api'
+import { useSubscription } from '../hooks/useSubscription'
+import { PremiumRequiredModal } from '../components/modals/PremiumRequiredModal'
 import '../styles/pages/spinwheel.css'
 
 interface WindowWithWebAudio extends Window {
@@ -43,6 +45,8 @@ export const SpinWheel = () => {
   const [sentence, setSentence] = useState('')
   const [grammarFeedback, setGrammarFeedback] = useState<string | null>(null)
   const [feedbackLoading, setFeedbackLoading] = useState(false)
+  const { isPremium } = useSubscription()
+  const [showPremiumModal, setShowPremiumModal] = useState(false)
   const wheelRef = useRef<SVGSVGElement | null>(null)
 
   const segmentColors = SEGMENT_COLORS
@@ -194,6 +198,11 @@ export const SpinWheel = () => {
             <div className="sentence-actions">
               <button
                 onClick={async () => {
+                  if (!isPremium) {
+                    setShowPremiumModal(true)
+                    return
+                  }
+
                   if (!sentence.trim()) {
                     setGrammarFeedback(t('spin.enterValidSentence'))
                     return
@@ -206,27 +215,61 @@ export const SpinWheel = () => {
                     const feedback = await vocabularyApi.getSentenceFeedback(sentence)
                     setGrammarFeedback(feedback)
                   } catch (err: unknown) {
-                    let errorMessage = 'Không thể nhận xét câu này. Vui lòng thử lại.'
-
                     if (typeof err === 'object' && err !== null) {
-                      const errObj = err as { response?: { status?: number }; code?: string; message?: string }
+                      const errObj = err as {
+                        response?: { status?: number; data?: { code?: string } }
+                        code?: string
+                        message?: string
+                      }
+                      if (
+                        errObj.response?.status === 403 ||
+                        errObj.response?.data?.code === 'PREMIUM_REQUIRED'
+                      ) {
+                        setShowPremiumModal(true)
+                        return
+                      }
                       if (errObj.response?.status === 404) {
-                        errorMessage = 'Tính năng nhận xét AI chưa được kích hoạt.'
+                        setGrammarFeedback('Tính năng nhận xét AI chưa được kích hoạt.')
+                        return
                       } else if (errObj.response?.status && errObj.response.status >= 500) {
-                        errorMessage = 'Lỗi máy chủ. Vui lòng thử lại sau.'
+                        setGrammarFeedback('Lỗi máy chủ. Vui lòng thử lại sau.')
+                        return
                       } else if (errObj.code === 'NETWORK_ERROR' || errObj.message?.includes('timeout')) {
-                        errorMessage = 'Không thể kết nối đến máy chủ.'
+                        setGrammarFeedback('Không thể kết nối đến máy chủ.')
+                        return
                       }
                     }
 
-                    setGrammarFeedback(errorMessage)
+                    setGrammarFeedback('Không thể nhận xét câu này. Vui lòng thử lại.')
                   } finally {
                     setFeedbackLoading(false)
                   }
                 }}
                 disabled={feedbackLoading}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  backgroundColor: !isPremium ? '#475569' : undefined,
+                }}
               >
-                {feedbackLoading ? t('spin.analyzing') : t('spin.aiFeedbackBtn')}
+                {!isPremium && <span>🔒</span>}
+                <span>{feedbackLoading ? t('spin.analyzing') : t('spin.aiFeedbackBtn')}</span>
+                {!isPremium && (
+                  <span
+                    style={{
+                      backgroundColor: '#f59e0b',
+                      color: '#ffffff',
+                      fontSize: '0.65rem',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '9999px',
+                      marginLeft: '4px',
+                    }}
+                  >
+                    PREMIUM
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => {
@@ -252,6 +295,11 @@ export const SpinWheel = () => {
       </main>
 
       <Footer />
+
+      <PremiumRequiredModal
+        isOpen={showPremiumModal}
+        onClose={() => setShowPremiumModal(false)}
+      />
     </div>
   )
 }

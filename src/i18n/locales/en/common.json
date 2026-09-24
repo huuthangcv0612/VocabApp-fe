@@ -82,6 +82,18 @@
     "upgradeNow": "Upgrade Now",
     "viewSubscription": "View Subscription"
   },
+  "premiumModal": {
+    "title": "🔒 Premium Feature",
+    "content": "AI Learning Mode is only available for Premium accounts. Please subscribe to a Premium plan to unlock this feature.",
+    "upgradeBtn": "Upgrade to Premium",
+    "closeBtn": "Close"
+  },
+  "customModal": {
+    "title": "⭐ Custom Plan Feature",
+    "content": "Creating and managing interactive classes is only available for Custom plan accounts. Please upgrade to a Custom plan to unlock this feature.",
+    "upgradeBtn": "Explore Custom Plan",
+    "closeBtn": "Close"
+  },
   "errorBoundary": {
     "title": "UI Error Occurred ⚠️",
     "desc": "An unexpected error occurred while loading this page.",

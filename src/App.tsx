@@ -1,7 +1,9 @@
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext'
+import { PremiumRequiredModal } from './components/modals/PremiumRequiredModal'
 import Home from './pages/Home'
 import LevelDetail from './pages/LevelDetail'
 import TopicsPage from './pages/TopicsPage'
@@ -49,6 +51,58 @@ import LearningPathPage from './features/learning-path/pages/LearningPathPage'
 import AIConversationPage from './features/ai-conversation/pages/AIConversationPage'
 import AIFaqChatbot from './components/faq-chatbot/AIFaqChatbot'
 import LanguageSwitcher from './components/LanguageSwitcher'
+
+const GlobalPremiumModal = () => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [modalInfo, setModalInfo] = useState<{
+    title?: string
+    message?: string
+    planType?: 'PREMIUM' | 'CUSTOM'
+  }>({})
+
+  useEffect(() => {
+    const handlePremiumRequired = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        message?: string
+        title?: string
+        code?: string
+        planType?: 'PREMIUM' | 'CUSTOM'
+      }>
+      const detail = customEvent.detail
+      const code = (detail?.code || '').toUpperCase()
+      const msg = (detail?.message || '').toLowerCase()
+
+      const isCustomReq =
+        detail?.planType === 'CUSTOM' ||
+        code === 'CUSTOM_REQUIRED' ||
+        code.includes('CUSTOM') ||
+        code.includes('CLASS') ||
+        msg.includes('custom') ||
+        msg.includes('lớp') ||
+        msg.includes('class')
+
+      setModalInfo({
+        title: detail?.title,
+        message: detail?.message,
+        planType: isCustomReq ? 'CUSTOM' : 'PREMIUM',
+      })
+      setIsOpen(true)
+    }
+
+    window.addEventListener('premium:required', handlePremiumRequired)
+    return () => window.removeEventListener('premium:required', handlePremiumRequired)
+  }, [])
+
+  return (
+    <PremiumRequiredModal
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
+      planType={modalInfo.planType}
+      title={modalInfo.title}
+      content={modalInfo.message}
+    />
+  )
+}
 
 function App() {
   return (
@@ -124,6 +178,7 @@ function App() {
         </Routes>
         <AIFaqChatbot />
         <LanguageSwitcher />
+        <GlobalPremiumModal />
       </Router>
     </AuthProvider>
     </ErrorBoundary>

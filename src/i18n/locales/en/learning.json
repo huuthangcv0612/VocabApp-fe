@@ -129,7 +129,11 @@
     "spinBtn": "Play Spin Wheel AI ▶",
     "guidedTitle": "Guided Step-by-Step Lesson",
     "guidedDesc": "Complete interactive flow: Listening, Matching, Fill-in-the-blank & Translation.",
-    "guidedBtn": "Start Lesson ▶"
+    "guidedBtn": "Start Lesson ▶",
+    "aiConversationTitle": "AI Conversation (1-on-1 Speaking)",
+    "aiConversationDesc": "Practice German conversation with AI tutor based on the lesson context, get instant feedback and pronunciation tips.",
+    "aiConversationBtn": "Practice with AI ▶",
+    "aiConversationLockedBtn": "Unlock Premium ▶"
   },
   "exercises": {
     "vocabPreviewTitle": "VOCABULARY PREVIEW: {{current}} / {{total}}",
