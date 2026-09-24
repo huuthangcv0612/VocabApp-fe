@@ -1,4 +1,4 @@
-import { normalizeExercise, formatSubmitAnswer, evaluateAnswerLocally, extractExerciseFormState } from './exerciseAdapter'
+import { normalizeExercise, formatSubmitAnswer, evaluateAnswerLocally, extractExerciseFormState, getArrangementSentence, cleanArrangementText } from './exerciseAdapter'
 import type { LessonExercise } from '../types/exercise'
 
 export const runExerciseAdapterTests = () => {
@@ -446,6 +446,55 @@ export const runExerciseAdapterTests = () => {
         (formatted as Array<{ left: string; right: string }>)[0].right === 'was ist los',
       'Expected first pair to match user answer',
     )
+  })
+
+  // Test 17: getArrangementSentence displays complete sentence and ignores "Sắp xếp các từ thành câu đúng:"
+  testCase('getArrangementSentence extracts complete sentence from answer.correct_sentence', () => {
+    const rawArr: LessonExercise = {
+      _id: 'ex_arr_1',
+      order: 1,
+      type: 'sentence_arrangement',
+      xp: 15,
+      question: 'Sắp xếp các từ thành câu đúng:',
+      content: {
+        question: 'Sắp xếp các từ thành câu đúng:',
+        words: ['Ich', 'wohne', 'in', 'Berlin.'],
+      },
+      answer: {
+        correct_sentence: 'Ich wohne in Berlin.',
+        correct_answer: 'Ich wohne in Berlin.',
+      },
+    }
+
+    const sentence = getArrangementSentence(rawArr)
+    assert(sentence === 'Ich wohne in Berlin.', `Expected 'Ich wohne in Berlin.', got '${sentence}'`)
+  })
+
+  // Test 18: getArrangementSentence handles array correct_answer
+  testCase('getArrangementSentence extracts complete sentence from array answer.correct_answer', () => {
+    const rawArr: LessonExercise = {
+      _id: 'ex_arr_2',
+      order: 1,
+      type: 'word_arrangement',
+      xp: 15,
+      question: 'Sắp xếp các từ thành câu đúng:',
+      content: {
+        words: ['Ich', 'habe', 'einen', 'Bruder.'],
+      },
+      answer: {
+        correct_answer: ['Ich', 'habe', 'einen', 'Bruder.'],
+      },
+    }
+
+    const sentence = getArrangementSentence(rawArr)
+    assert(sentence === 'Ich habe einen Bruder.', `Expected 'Ich habe einen Bruder.', got '${sentence}'`)
+  })
+
+  // Test 19: cleanArrangementText strips various prefixes
+  testCase('cleanArrangementText strips prompt prefixes correctly', () => {
+    assert(cleanArrangementText('Sắp xếp các từ thành câu đúng:') === '', 'Expected empty string')
+    assert(cleanArrangementText('Sắp xếp các từ thành câu đúng: Ich lerne Deutsch.') === 'Ich lerne Deutsch.', 'Expected sentence without prefix')
+    assert(cleanArrangementText('Sắp xếp các từ: Das ist gut.') === 'Das ist gut.', 'Expected sentence without prefix')
   })
 
   return results

@@ -8,7 +8,7 @@ import Modal from '../../components/admin/Modal'
 import SearchableSelect from '../../components/admin/SearchableSelect'
 import { adminService } from '../../services/adminService'
 import type { LessonExercise, LessonItem, StatusType, ExerciseType } from '../../types/admin'
-import { cleanFillBlankText, extractExerciseFormState, getFillBlankQuestion } from '../../utils/exerciseAdapter'
+import { cleanFillBlankText, extractExerciseFormState, getArrangementSentence, getFillBlankQuestion } from '../../utils/exerciseAdapter'
 import { toast } from 'react-hot-toast'
 
 export const AdminExercises: React.FC = () => {
@@ -91,21 +91,24 @@ export const AdminExercises: React.FC = () => {
   }, [fetchExercisesData])
 
   const filteredExercises = exercises.filter((ex) => {
-    const qText =
-      ex.question ||
-      ex.content?.question ||
-      ex.content?.prompt ||
-      ex.content?.sentence ||
-      (Array.isArray(ex.content?.words) ? ex.content.words.join(' ') : '') ||
-      (Array.isArray(ex.wordTokens) ? ex.wordTokens.join(' ') : '') ||
-      ''
+    const isArrangement = ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement'
+    const isFillBlank = ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
+
+    const qText = isFillBlank
+      ? getFillBlankQuestion(ex)
+      : isArrangement
+      ? getArrangementSentence(ex)
+      : ex.question ||
+        ex.content?.question ||
+        ex.content?.prompt ||
+        ex.content?.sentence ||
+        (Array.isArray(ex.content?.words) ? ex.content.words.join(' ') : '') ||
+        (Array.isArray(ex.wordTokens) ? ex.wordTokens.join(' ') : '') ||
+        ''
     const vocabText = ex.vocabularyName || ''
     const matchesSearch =
       qText.toLowerCase().includes(search.toLowerCase()) ||
       vocabText.toLowerCase().includes(search.toLowerCase())
-
-    const isArrangement = ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement'
-    const isFillBlank = ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
 
     const matchesType =
       typeFilter === 'all' ||
@@ -389,6 +392,8 @@ export const AdminExercises: React.FC = () => {
                     <td style={{ fontWeight: 700, maxWidth: '320px' }}>
                       {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
                         ? getFillBlankQuestion(ex)
+                        : ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement'
+                        ? getArrangementSentence(ex)
                         : (ex.question ||
                           ex.content?.question ||
                           ex.content?.prompt ||
@@ -396,7 +401,7 @@ export const AdminExercises: React.FC = () => {
                           (Array.isArray(ex.content?.words) ? `Sắp xếp: ${ex.content.words.join(' / ')}` : '') ||
                           (Array.isArray(ex.wordTokens) ? `Sắp xếp: ${ex.wordTokens.join(' / ')}` : '') ||
                           (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null ? ex.vocabulary_id.word : '') ||
-                          (ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement' ? 'Sentence Arrangement' : 'Exercise'))}
+                          'Exercise')}
                     </td>
                     <td>
                       <span className="badge-pill badge-a1">{renderTypeLabel(ex.type)}</span>

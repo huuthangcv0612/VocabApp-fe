@@ -47,6 +47,104 @@ export const getFillBlankQuestion = (ex: LessonExercise | NormalizedExercise): s
   return '___'
 }
 
+export const cleanArrangementText = (text: string): string => {
+  if (!text) return ''
+  return text
+    .replace(
+      /^(Sắp xếp các từ thành (câu đúng|câu hoàn chỉnh|một câu đúng|một câu hoàn chỉnh)|Sắp xếp các từ|Sắp xếp câu|Arrange the words into a correct sentence|Arrange the words)\s*:?\s*/i,
+      '',
+    )
+    .replace(/^:\s*/, '')
+    .trim()
+}
+
+export const getArrangementSentence = (ex: LessonExercise | NormalizedExercise): string => {
+  const contentObj = (ex.content || {}) as Record<string, unknown>
+  const answerObj = (ex.answer || {}) as Record<string, unknown>
+  const rootEx = (ex as unknown) as Record<string, unknown>
+
+  // 1. Check explicit correct sentence fields (string)
+  const stringCandidates = [
+    typeof answerObj.correct_sentence === 'string' ? answerObj.correct_sentence : '',
+    typeof contentObj.correct_sentence === 'string' ? contentObj.correct_sentence : '',
+    typeof rootEx.correct_sentence === 'string' ? (rootEx.correct_sentence as string) : '',
+    typeof ex.correctAnswer === 'string' ? ex.correctAnswer : '',
+    typeof answerObj.correct_answer === 'string' ? answerObj.correct_answer : '',
+    typeof contentObj.correct_answer === 'string' ? contentObj.correct_answer : '',
+    typeof rootEx.correct_answer === 'string' ? (rootEx.correct_answer as string) : '',
+    typeof contentObj.sentence === 'string' ? contentObj.sentence : '',
+    typeof rootEx.sentence === 'string' ? (rootEx.sentence as string) : '',
+  ]
+
+  for (const cand of stringCandidates) {
+    if (!cand) continue
+    const cleaned = cleanArrangementText(cand)
+    if (cleaned.length > 0) {
+      return cleaned
+    }
+  }
+
+  // 2. Check array candidates (e.g. correct_answer: ['Ich', 'wohne', 'in', 'Berlin.'])
+  const arrayCandidates = [
+    answerObj.correct_answer,
+    contentObj.correct_answer,
+    rootEx.correct_answer,
+  ]
+
+  for (const arr of arrayCandidates) {
+    if (Array.isArray(arr) && arr.length > 0) {
+      const joined = arr.map((item) => String(item).trim()).filter(Boolean).join(' ')
+      const cleaned = cleanArrangementText(joined)
+      if (cleaned.length > 0) {
+        return cleaned
+      }
+    }
+  }
+
+  // 3. Question / Prompt candidates after cleaning
+  const questionCandidates = [
+    typeof ex.question === 'string' ? ex.question : '',
+    typeof contentObj.question === 'string' ? contentObj.question : '',
+    typeof contentObj.prompt === 'string' ? contentObj.prompt : '',
+    typeof rootEx.question === 'string' ? (rootEx.question as string) : '',
+  ]
+
+  for (const q of questionCandidates) {
+    if (!q) continue
+    const cleaned = cleanArrangementText(q)
+    if (cleaned.length > 0) {
+      if (cleaned.includes('/')) {
+        return cleaned.split('/').map((s) => s.trim()).filter(Boolean).join(' ')
+      }
+      return cleaned
+    }
+  }
+
+  // 4. Explanation fallback (often contains the complete sentence)
+  const explanationCandidates = [
+    ex.explanation || '',
+    typeof answerObj.explanation === 'string' ? answerObj.explanation : '',
+    typeof contentObj.explanation === 'string' ? contentObj.explanation : '',
+    typeof rootEx.explanation === 'string' ? (rootEx.explanation as string) : '',
+  ]
+
+  for (const exp of explanationCandidates) {
+    if (!exp) continue
+    const cleaned = cleanArrangementText(exp)
+    if (cleaned.length > 0) {
+      return cleaned
+    }
+  }
+
+  // 5. Raw words fallback
+  const rawWords = contentObj.words ?? ex.wordTokens ?? rootEx.words ?? contentObj.tokens
+  if (Array.isArray(rawWords) && rawWords.length > 0) {
+    return rawWords.map((w) => String(w).trim()).filter(Boolean).join(' ')
+  }
+
+  return 'Câu sắp xếp'
+}
+
 export interface ExtractedExerciseFormState {
   question: string
   mcQuestion: string
