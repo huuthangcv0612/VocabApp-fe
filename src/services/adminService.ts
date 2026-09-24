@@ -26,6 +26,74 @@ import type {
   LessonExercise,
 } from '../types/admin'
 
+const normalizeUser = (rawUser: unknown, idx: number): UserAdminItem => {
+  const u = (rawUser || {}) as Record<string, unknown>
+  const idVal = String(u._id || u.id || `u_${idx}`)
+  const nameVal = String(
+    u.name ||
+      u.username ||
+      u.fullName ||
+      u.displayName ||
+      (typeof u.email === 'string' && u.email ? u.email.split('@')[0] : `Người dùng #${idx + 1}`)
+  )
+  const emailVal = String(u.email || u.user_email || '—')
+
+  let roleVal: 'user' | 'admin' = 'user'
+  const rawRole = String(u.role || (Array.isArray(u.roles) ? u.roles[0] : '')).toLowerCase()
+  if (rawRole === 'admin' || rawRole === 'superadmin') {
+    roleVal = 'admin'
+  }
+
+  let statusVal: 'active' | 'inactive' | 'locked' = 'active'
+  if (u.status === 'locked' || u.isLocked === true || u.is_locked === true) {
+    statusVal = 'locked'
+  } else if (u.status === 'inactive' || u.isActive === false || u.is_active === false) {
+    statusVal = 'inactive'
+  } else if (u.status === 'active') {
+    statusVal = 'active'
+  }
+
+  return {
+    _id: idVal,
+    name: nameVal,
+    email: emailVal,
+    role: roleVal,
+    status: statusVal,
+    isVerified: Boolean(u.isVerified ?? u.is_verified ?? false),
+    createdAt: typeof u.createdAt === 'string' ? u.createdAt : typeof u.created_at === 'string' ? u.created_at : undefined,
+  }
+}
+
+const extractUsersArray = (responseData: unknown): UserAdminItem[] => {
+  if (!responseData) return []
+  let rawList: unknown[] = []
+
+  if (Array.isArray(responseData)) {
+    rawList = responseData
+  } else if (responseData && typeof responseData === 'object') {
+    const resObj = responseData as Record<string, unknown>
+    const dataObj = resObj.data || resObj
+
+    if (Array.isArray(dataObj)) {
+      rawList = dataObj
+    } else if (dataObj && typeof dataObj === 'object') {
+      const dataRecord = dataObj as Record<string, unknown>
+      if (Array.isArray(dataRecord.users)) rawList = dataRecord.users
+      else if (Array.isArray(dataRecord.docs)) rawList = dataRecord.docs
+      else if (Array.isArray(dataRecord.items)) rawList = dataRecord.items
+      else if (Array.isArray(dataRecord.data)) rawList = dataRecord.data
+    }
+
+    if (rawList.length === 0) {
+      if (Array.isArray(resObj.users)) rawList = resObj.users
+      else if (Array.isArray(resObj.docs)) rawList = resObj.docs
+      else if (Array.isArray(resObj.items)) rawList = resObj.items
+    }
+  }
+
+  return rawList.map((item, idx) => normalizeUser(item, idx))
+}
+
 export const adminService = {
   // 1. Dashboard Statistics
   getStatistics: async (): Promise<AdminStatistics> => {
@@ -43,7 +111,6 @@ export const adminService = {
     if (query.q) params.append('q', query.q)
     if (query.page) params.append('page', String(query.page))
     if (query.limit) params.append('limit', String(query.limit))
-
     const response = await api.get<ApiResponse<QuestionsResponseData>>(`/questions?${params.toString()}`)
     return response.data.data
   },
@@ -84,22 +151,96 @@ export const adminService = {
 
   // 4. User Management
   getUsers: async (): Promise<UserAdminItem[]> => {
-    const response = await api.get<ApiResponse<UserAdminItem[]>>('/admin/users')
-    return Array.isArray(response.data.data) ? response.data.data : []
+    // 1. Try GET /admin/users
+    try {
+      const response = await api.get<unknown>('/admin/users')
+      const users = extractUsersArray(response.data)
+      if (users.length > 0) return users
+    } catch {
+      // try fallback endpoints
+    }
+
+    // 2. Try GET /users
+    try {
+      const response = await api.get<unknown>('/users')
+      const users = extractUsersArray(response.data)
+      if (users.length > 0) return users
+    } catch {
+      // try fallback endpoints
+    }
+
+    // 3. Try GET /users/admin/all
+    try {
+      const response = await api.get<unknown>('/users/admin/all')
+      const users = extractUsersArray(response.data)
+      if (users.length > 0) return users
+    } catch {
+      // try fallback endpoints
+    }
+
+    // 4. Try GET /admin/users/all
+    try {
+      const response = await api.get<unknown>('/admin/users/all')
+      const users = extractUsersArray(response.data)
+      if (users.length > 0) return users
+    } catch {
+      // try fallback endpoints
+    }
+
+    // 5. Fallback from /admin/statistics recentUsers
+    try {
+      const stats = await adminService.getStatistics()
+      if (stats && Array.isArray(stats.recentUsers) && stats.recentUsers.length > 0) {
+        return extractUsersArray(stats.recentUsers)
+      }
+    } catch {
+      // ignore
+    }
+
+    return []
   },
 
   updateUserRole: async (id: string, role: string): Promise<UserAdminItem> => {
-    const response = await api.put<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/role`, { role })
-    const resData = response.data.data
-    if ('user' in resData) return resData.user
-    return resData
+    try {
+      const response = await api.put<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/role`, { role })
+      const resData = response.data.data
+      if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+      return resData as UserAdminItem
+    } catch {
+      try {
+        const response = await api.patch<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/role`, { role })
+        const resData = response.data.data
+        if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+        return resData as UserAdminItem
+      } catch {
+        const response = await api.put<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}`, { role })
+        const resData = response.data.data
+        if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+        return resData as UserAdminItem
+      }
+    }
   },
 
-  toggleUserStatus: async (id: string): Promise<UserAdminItem> => {
-    const response = await api.patch<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/toggle-status`)
-    const resData = response.data.data
-    if ('user' in resData) return resData.user
-    return resData
+  toggleUserStatus: async (id: string, currentStatus?: string): Promise<UserAdminItem> => {
+    try {
+      const response = await api.patch<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/toggle-status`)
+      const resData = response.data.data
+      if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+      return resData as UserAdminItem
+    } catch {
+      const nextStatus = currentStatus === 'locked' ? 'active' : 'locked'
+      try {
+        const response = await api.put<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}/status`, { status: nextStatus })
+        const resData = response.data.data
+        if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+        return resData as UserAdminItem
+      } catch {
+        const response = await api.put<ApiResponse<{ user: UserAdminItem } | UserAdminItem>>(`/admin/users/${encodeURIComponent(id)}`, { status: nextStatus })
+        const resData = response.data.data
+        if (resData && typeof resData === 'object' && 'user' in resData) return resData.user
+        return resData as UserAdminItem
+      }
+    }
   },
 
   deleteUser: async (id: string): Promise<void> => {
