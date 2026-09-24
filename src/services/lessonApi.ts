@@ -1,6 +1,7 @@
 import api from './api'
+import { exerciseApi } from './exerciseApi'
 import type { ApiResponse } from '../types/api'
-import type { LessonItem, LessonDetailData, LessonDetailResponse } from '../types/lesson'
+import type { LessonItem, LessonDetailData, LessonDetailResponse, LessonPreviewVocabulary } from '../types/lesson'
 import type { LessonExercise } from '../types/exercise'
 import { normalizeExercise } from '../utils/exerciseAdapter'
 
@@ -33,8 +34,19 @@ export const lessonApi = {
     const resData = response.data.data
 
     const rawLesson = resData?.lesson || (resData as unknown as LessonItem)
-    const rawPreviewVocabs = resData?.preview?.vocabularies || resData?.vocabularies || []
-    const rawExercises = resData?.exercises || []
+    const rawLessonRecord = (rawLesson || {}) as unknown as Record<string, unknown>
+    const previewRecord = (resData?.preview || {}) as Record<string, unknown>
+    const rawPreviewVocabs: LessonPreviewVocabulary[] =
+      (Array.isArray(resData?.preview?.vocabularies) && resData.preview.vocabularies) ||
+      (Array.isArray(resData?.vocabularies) && resData.vocabularies) ||
+      (Array.isArray(rawLessonRecord.vocabularies) ? (rawLessonRecord.vocabularies as unknown as LessonPreviewVocabulary[]) : []) ||
+      []
+
+    const rawExercises: LessonExercise[] =
+      (Array.isArray(resData?.exercises) && resData.exercises) ||
+      (Array.isArray(rawLessonRecord.exercises) && (rawLessonRecord.exercises as LessonExercise[])) ||
+      (Array.isArray(previewRecord.exercises) && (previewRecord.exercises as LessonExercise[])) ||
+      []
 
     const vocabularies = rawPreviewVocabs.map((v, idx) => {
       const vRec = v as unknown as Record<string, string | number | boolean>
@@ -52,7 +64,7 @@ export const lessonApi = {
       }
     })
 
-    const exercises = rawExercises.map((ex, idx) => {
+    let exercises = rawExercises.map((ex, idx) => {
       const vocabObj = ex.vocabulary_id
       const vocabIdVal = typeof vocabObj === 'object' && vocabObj !== null ? vocabObj._id : (typeof vocabObj === 'string' ? vocabObj : ex.vocabularyId)
       const vocabNameVal = typeof vocabObj === 'object' && vocabObj !== null ? vocabObj.word : (ex.vocabularyName || 'Tổng hợp')
@@ -68,6 +80,13 @@ export const lessonApi = {
       }
       return normalizeExercise(baseEx)
     })
+
+    if (exercises.length === 0) {
+      const extraExercises = await exerciseApi.getByLesson(id).catch(() => [])
+      if (extraExercises.length > 0) {
+        exercises = extraExercises.map((ex) => normalizeExercise(ex))
+      }
+    }
 
     return { lesson: rawLesson, vocabularies, exercises }
   },

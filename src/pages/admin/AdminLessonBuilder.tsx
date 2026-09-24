@@ -17,7 +17,8 @@ import type {
   ExerciseType,
 } from '../../types/admin'
 import type { ExerciseContentPayload, ExerciseAnswerPayload } from '../../types/exercise'
-import { cleanFillBlankText, extractExerciseFormState, getFillBlankQuestion } from '../../utils/exerciseAdapter'
+import { cleanFillBlankText, extractExerciseFormState, getArrangementSentence, getFillBlankQuestion } from '../../utils/exerciseAdapter'
+import { exerciseApi } from '../../services/exerciseApi'
 import { toast } from 'react-hot-toast'
 
 export const AdminLessonBuilder: React.FC = () => {
@@ -107,7 +108,12 @@ export const AdminLessonBuilder: React.FC = () => {
 
       setLesson(detailData.lesson)
       setVocabularies(detailData.vocabularies.sort((a, b) => a.order - b.order))
-      setExercises(detailData.exercises.sort((a, b) => a.order - b.order))
+
+      let lessonExercises = detailData.exercises || []
+      if (lessonExercises.length === 0) {
+        lessonExercises = await exerciseApi.getByLesson(lessonId).catch(() => [])
+      }
+      setExercises(lessonExercises.sort((a, b) => (a.order || 0) - (b.order || 0)))
       setUnits(unitList)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Không thể tải chi tiết bài học.'
@@ -764,19 +770,30 @@ export const AdminLessonBuilder: React.FC = () => {
               </thead>
               <tbody>
                 {exercises.map((ex, idx) => (
-                  <tr key={ex._id}>
+                  <tr key={ex._id || `ex-${idx}`}>
                     <td>
                       <strong style={{ color: '#64748b' }}>#{ex.order || idx + 1}</strong>
                     </td>
                     <td style={{ fontWeight: 700, color: '#0f172a', maxWidth: '280px' }}>
                       {ex.type === 'fill_blank' || ex.type === 'fill_in_blank'
                         ? getFillBlankQuestion(ex)
-                        : ex.question}
+                        : ex.type === 'sentence_arrangement' || ex.type === 'word_arrangement'
+                        ? getArrangementSentence(ex)
+                        : ex.question ||
+                          ex.content?.question ||
+                          ex.content?.prompt ||
+                          ex.content?.sentence ||
+                          'Exercise'}
                     </td>
                     <td>
                       <span className="badge-pill badge-a1">{getExerciseTypeBadgeLabel(ex.type)}</span>
                     </td>
-                    <td style={{ color: '#2a63e8', fontWeight: 600 }}>{ex.vocabularyName || 'Tổng hợp'}</td>
+                    <td style={{ color: '#2a63e8', fontWeight: 600 }}>
+                      {ex.vocabularyName ||
+                        (typeof ex.vocabulary_id === 'object' && ex.vocabulary_id !== null
+                          ? ex.vocabulary_id.word
+                          : 'Tổng hợp')}
+                    </td>
                     <td>⚡ {ex.xp || 5} XP</td>
                     <td>
                       <span className={`badge-pill ${ex.status === 'active' ? 'badge-active' : 'badge-draft'}`}>
@@ -1472,19 +1489,19 @@ export const AdminLessonBuilder: React.FC = () => {
               </div>
             )}
 
-            {viewingExercise.type === 'sentence_arrangement' && (
+            {(viewingExercise.type === 'sentence_arrangement' || viewingExercise.type === 'word_arrangement') && (
               <div>
                 <div>
                   <strong>Các từ rời rạc:</strong>
                   <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', margin: '6px 0' }}>
-                    {(viewingExercise.content?.words || []).map((w, wIdx) => (
+                    {((viewingExercise.content?.words as string[] | undefined) || viewingExercise.wordTokens || []).map((w, wIdx) => (
                       <span key={wIdx} className="badge-pill badge-a1">{w}</span>
                     ))}
                   </div>
                 </div>
                 <div>
                   <strong>Câu ghép hoàn chỉnh đúng:</strong>{' '}
-                  <span style={{ color: '#16a34a', fontWeight: 700 }}>{String((viewingExercise.answer as Record<string, unknown> | undefined)?.correct_sentence || 'N/A')}</span>
+                  <span style={{ color: '#16a34a', fontWeight: 700 }}>{getArrangementSentence(viewingExercise)}</span>
                 </div>
               </div>
             )}
