@@ -181,10 +181,10 @@ export const LessonEditorPage = () => {
   const existingVocabIds = vocabularies.map((v) => v._id || (v as { id?: string }).id || '')
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
       <Header />
 
-      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: '#F8FAFC' }}>
+      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <div className="ic-container" style={{ maxWidth: '960px' }}>
           {/* Back button */}
           <div style={{ marginBottom: '1.5rem' }}>

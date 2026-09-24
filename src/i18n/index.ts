@@ -22,7 +22,7 @@ import enAi from './locales/en/ai.json';
 export const LANGUAGE_STORAGE_KEY = 'vocabapp_language';
 
 const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-const initialLanguage = savedLanguage === 'en' || savedLanguage === 'vi' ? savedLanguage : 'vi';
+const initialLanguage = savedLanguage === 'en' || savedLanguage === 'vi' ? savedLanguage : 'en';
 
 export const resources = {
   vi: {
@@ -48,7 +48,7 @@ i18n
   .init({
     resources,
     lng: initialLanguage,
-    fallbackLng: 'vi',
+    fallbackLng: 'en',
     defaultNS: 'common',
     ns: ['common', 'auth', 'learning', 'subscription', 'payment', 'ai'],
     interpolation: {

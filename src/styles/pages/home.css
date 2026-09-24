@@ -65,14 +65,14 @@
 /* Common Titles */
 .home-section-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(2.4rem, 4vw, 4rem);
+  font-size: clamp(2.2rem, 3.8vw, 3.8rem);
   font-weight: 800;
   color: #D90000;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 1rem;
-  line-height: 1;
+  line-height: 1.18;
 }
 
 .home-section-title--dark {
@@ -219,13 +219,13 @@
 
 .home-hero__title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(3.2rem, 6.2vw, 7rem);
+  font-size: clamp(2.8rem, 5.8vw, 6.2rem);
   font-weight: 800;
   color: #D90000;
-  line-height: 0.9;
+  line-height: 1.15;
   text-transform: uppercase;
   margin-bottom: 1.25rem;
-  letter-spacing: -0.04em;
+  letter-spacing: 0.01em;
 }
 
 .home-hero__desc {
@@ -291,7 +291,7 @@
   position: relative;
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 590px;
+  height: 100%;
 }
 
 .feature-card:hover {
@@ -569,7 +569,7 @@
   color: #D90000;
   font-family: 'Oswald', sans-serif;
   font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1;
+  line-height: 1.18;
   text-transform: uppercase;
 }
 
@@ -878,8 +878,8 @@
 }
 
 .steps-header .home-section-title {
-  font-size: clamp(3rem, 5vw, 4.5rem);
-  line-height: 0.95;
+  font-size: clamp(2.8rem, 4.8vw, 4.2rem);
+  line-height: 1.18;
   text-align: left;
 }
 

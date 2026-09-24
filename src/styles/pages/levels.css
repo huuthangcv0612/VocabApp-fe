@@ -69,11 +69,11 @@
 
 .hero-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(4.5rem, 10vw, 8rem);
+  font-size: clamp(3.5rem, 8vw, 6.5rem);
   font-weight: 800;
   color: #D90000;
-  line-height: 0.92;
-  letter-spacing: -2px;
+  line-height: 1.15;
+  letter-spacing: normal;
   text-transform: uppercase;
   margin: 0;
   user-select: none;
@@ -135,11 +135,11 @@
 
 .step-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  font-size: clamp(2.4rem, 4.5vw, 3.8rem);
   font-weight: 800;
   color: #D90000;
-  line-height: 0.95;
-  letter-spacing: -1px;
+  line-height: 1.18;
+  letter-spacing: normal;
   text-transform: uppercase;
   margin: 0;
 }
@@ -307,11 +307,11 @@
 
 .topics-hero-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(4.5rem, 10vw, 8rem);
+  font-size: clamp(3.5rem, 8vw, 6.5rem);
   font-weight: 800;
   color: #D90000;
-  line-height: 0.92;
-  letter-spacing: -2px;
+  line-height: 1.15;
+  letter-spacing: normal;
   text-transform: uppercase;
   margin: 0;
   user-select: none;
@@ -506,11 +506,11 @@
 
 .lektion-hero-title {
   font-family: 'Oswald', sans-serif;
-  font-size: clamp(4.5rem, 10vw, 8rem);
+  font-size: clamp(3.5rem, 8vw, 6.5rem);
   font-weight: 800;
   color: #D90000;
-  line-height: 0.92;
-  letter-spacing: -2px;
+  line-height: 1.15;
+  letter-spacing: normal;
   text-transform: uppercase;
   margin: 0;
   user-select: none;

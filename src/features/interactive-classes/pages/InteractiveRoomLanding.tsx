@@ -14,6 +14,7 @@ import { ClassCard } from '../components/ClassCard'
 import { CreateClassModal } from '../components/CreateClassModal'
 import { JoinClassModal } from '../components/JoinClassModal'
 import type { ClassItem } from '../../../types/interactiveClass'
+import '../../../styles/pages/interactive-classes.css'
 
 export const InteractiveRoomLanding = () => {
   const navigate = useNavigate()
@@ -115,10 +116,10 @@ export const InteractiveRoomLanding = () => {
     : joinedClasses
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
       <Header />
 
-      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: '#F8FAFC' }}>
+      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <div className="ic-container">
           {/* Permission Promo Banner for Free/Premium users who don't have Custom Plan */}
           {permissions.needsCustomUpgrade && (

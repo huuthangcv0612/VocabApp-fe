@@ -69,9 +69,9 @@ export const ClassDetailPage = () => {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <Header />
-        <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center', color: '#64748B' }}>
+        <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center', color: '#64748B', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
           <p>Đang tải thông tin lớp học...</p>
         </main>
         <Footer />
@@ -81,9 +81,9 @@ export const ClassDetailPage = () => {
 
   if (!cls) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <Header />
-        <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center' }}>
+        <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
           <h2>Không tìm thấy lớp học</h2>
           <button
             type="button"
@@ -100,10 +100,10 @@ export const ClassDetailPage = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
       <Header />
 
-      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: '#F8FAFC' }}>
+      <main style={{ flex: 1, padding: '3rem 0 5rem', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <div className="ic-container">
           {/* Breadcrumb / Back button */}
           <div style={{ marginBottom: '1.5rem' }}>
