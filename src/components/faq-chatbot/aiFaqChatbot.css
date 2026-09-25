@@ -358,23 +358,42 @@
 /* Mobile Responsive */
 @media (max-width: 640px) {
   .faq-chatbot-wrapper {
-    bottom: 74px;
-    right: 16px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
   }
 
   .faq-chatbot-trigger {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
 
   .faq-window {
-    bottom: 76px;
-    right: 12px;
-    left: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    left: calc(10px + env(safe-area-inset-left, 0px));
     width: auto;
     max-width: none;
     height: 75vh;
     border-radius: 16px;
     z-index: 9995;
+  }
+}
+
+@media (max-width: 360px) {
+  .faq-chatbot-wrapper {
+    bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+  }
+
+  .faq-chatbot-trigger {
+    width: 44px;
+    height: 44px;
+  }
+
+  .faq-window {
+    bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+    right: 6px;
+    left: 6px;
+    height: 78vh;
   }
 }

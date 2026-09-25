@@ -401,4 +401,26 @@
     padding: 0.75rem 2rem 0.75rem 1rem;
     font-size: 0.9rem;
   }
+
+  .quiz-summary-card {
+    padding: 1.8rem 1.2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .quiz-content {
+    padding: 1.2rem 0.75rem;
+  }
+
+  .quiz-question {
+    font-size: 1rem;
+  }
+
+  .quiz-summary-card {
+    padding: 1.5rem 0.85rem;
+  }
+
+  .summary-score {
+    font-size: 1.2rem;
+  }
 }

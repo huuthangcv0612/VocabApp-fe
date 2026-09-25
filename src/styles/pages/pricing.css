@@ -303,39 +303,82 @@
   min-width: 160px;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1024px) and (min-width: 768px) {
   .pricing-grid {
-    grid-template-columns: 1fr;
-    max-width: 460px;
-    margin: 0 auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
   }
 
   .pricing-hero-title {
-    font-size: clamp(3.5rem, 12vw, 6rem);
-  }
-}
-
-@media (max-width: 640px) {
-  .pricing-main-section {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .pricing-hero-container {
-    padding-bottom: 28px;
+    font-size: clamp(3rem, 7vw, 4.8rem);
   }
 
   .plan-card {
-    padding: 18px 18px 16px;
+    padding: 18px 16px;
+  }
+}
+
+/* MOBILE (< 768px): Plan cards become horizontal slider */
+@media (max-width: 767px) {
+  .pricing-main-section {
+    padding-left: 16px;
+    padding-right: 16px;
+    overflow: hidden;
+  }
+
+  .pricing-hero-container {
+    padding-bottom: 24px;
+  }
+
+  .pricing-hero-title {
+    font-size: clamp(2.4rem, 10vw, 4rem);
+    line-height: 1.15;
+  }
+
+  .pricing-hero-subtitle {
+    font-size: 1.05rem;
+    margin-top: 8px;
+  }
+
+  .pricing-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 12px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    max-width: none !important;
+    scrollbar-width: none !important;
+  }
+
+  .pricing-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pricing-grid .plan-card {
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 260px !important;
+    scroll-snap-align: start !important;
+    padding: 22px 18px !important;
     border-radius: 22px;
   }
 
   .plan-price-value {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .pricing-grid .plan-card {
+    flex: 0 0 88% !important;
   }
 
   .pricing-hero-title {
-    line-height: 1.18;
+    font-size: 2.2rem;
   }
 }
 

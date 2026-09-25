@@ -394,6 +394,20 @@
   }
 }
 
+@media (max-width: 360px) {
+  .footer-card {
+    padding: 20px 10px;
+  }
+
+  .footer-logo-img {
+    height: 36px;
+  }
+
+  .footer-kid-img {
+    width: 140px;
+  }
+}
+
 /* Height-based media query for short displays (laptops, landscape tablets, resized windows) */
 @media (max-height: 720px) and (min-width: 769px) {
   .footer-sky-section {

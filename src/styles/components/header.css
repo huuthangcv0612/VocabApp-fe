@@ -256,6 +256,54 @@
   }
 }
 
+@media (max-width: 480px) {
+  .header {
+    padding: 10px 12px;
+  }
+
+  .header-container {
+    padding: 6px 8px 6px 16px;
+  }
+
+  .logo-img {
+    height: 28px;
+  }
+
+  .mobile-toggle-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .hamburger-img {
+    width: 18px;
+  }
+
+  .mobile-menu {
+    padding: 16px 18px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .header {
+    padding: 8px 10px;
+  }
+
+  .header-container {
+    padding: 6px 6px 6px 12px;
+  }
+
+  .logo-img {
+    height: 24px;
+  }
+
+  .mobile-toggle-btn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
 
 
 

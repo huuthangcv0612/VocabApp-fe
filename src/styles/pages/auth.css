@@ -164,3 +164,23 @@
     padding: 1.5rem;
   }
 }
+
+@media (max-width: 360px) {
+  .auth-page {
+    padding: 1rem 0.5rem;
+  }
+
+  .auth-page__container {
+    padding: 1.25rem 1rem;
+    border-radius: 18px;
+  }
+
+  .auth-page__title {
+    font-size: 1.75rem;
+  }
+
+  .auth-form__submit {
+    min-height: 2.9rem;
+    font-size: 0.9rem;
+  }
+}

@@ -291,3 +291,30 @@
     padding: 13px 20px;
   }
 }
+
+@media (max-width: 360px) {
+  .alm-modal {
+    padding: 20px 14px 18px;
+    border-radius: 18px;
+  }
+
+  .alm-title {
+    font-size: 1.25rem;
+  }
+
+  .alm-icon-wrapper {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+  }
+
+  .alm-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .alm-reason-card,
+  .alm-support-card {
+    padding: 10px 12px;
+  }
+}

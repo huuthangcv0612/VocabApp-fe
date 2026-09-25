@@ -60,8 +60,8 @@
 
 @media (max-width: 640px) {
   .floating-lang-toggle {
-    bottom: 16px;
-    right: 20px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    right: calc(14px + env(safe-area-inset-right, 0px));
     width: 44px;
     height: 44px;
   }
@@ -72,5 +72,14 @@
 
   .lang-toggle-text {
     font-size: 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  .floating-lang-toggle {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
+    width: 40px;
+    height: 40px;
   }
 }

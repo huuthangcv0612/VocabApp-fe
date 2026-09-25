@@ -1156,17 +1156,43 @@
   .home-hero__container {
     flex-direction: column;
     text-align: center;
+    min-height: auto;
+    padding: 3rem 1.5rem 3rem;
   }
 
   .hero-illustration {
     display: none;
   }
 
-  .home-features__grid,
-  .home-about__grid,
-  .plans-grid,
+  .home-features__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.2rem;
+  }
+
+  .home-about__vault {
+    width: min(calc(100% - 32px), 960px);
+    padding: 6rem 1.5rem 3.5rem;
+    border-radius: 9999px 9999px 120px 120px;
+  }
+
+  .home-about__intro {
+    font-size: 1.15rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .home-about__grid {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .plans-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.2rem;
+  }
+
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.2rem;
   }
 
   .activities-grid {
@@ -1200,120 +1226,198 @@
   }
 }
 
-@media (max-width: 640px) {
+/* Tablet adjustments (768px - 900px) */
+@media (max-width: 900px) and (min-width: 768px) {
+  .home-features__grid,
+  .plans-grid,
+  .testimonials-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* MOBILE (< 768px): Card collections become horizontal sliders */
+@media (max-width: 767px) {
+  /* 1. What does DeutschUp have? -> Horizontal Slider */
+  .home-features {
+    padding: 2.5rem 1rem;
+    overflow: hidden;
+  }
+
+  .home-features__grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 12px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-top: 1.8rem !important;
+    scrollbar-width: none !important;
+  }
+
+  .home-features__grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .feature-card {
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 250px !important;
+    scroll-snap-align: start !important;
+    height: auto !important;
+  }
+
+  /* 2. Learning Path Cards -> Horizontal Slider */
+  .home-path {
+    padding: 3.5rem 0 60px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
   .path-grid {
-    gap: 0.9rem;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 16px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-top: 2rem !important;
+    scrollbar-width: none !important;
+    align-items: stretch !important;
+  }
+
+  .path-grid::-webkit-scrollbar {
+    display: none !important;
   }
 
   .path-card {
-    width: 100%;
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 250px !important;
+    width: auto !important;
+    min-height: auto !important;
+    scroll-snap-align: start !important;
+    transform: none !important;
+    padding: 24px 20px !important;
   }
 
-  .home-path {
-    min-height: 0;
-  }
-
-  .home-path .path-cloud,
-  .home-path .cloud-decor--7,
-  .home-path .cloud-decor--8 {
-    width: 128px;
-  }
-
-  .home-path .path-cloud--left-1 {
-    top: 15%;
-    left: 2%;
-  }
-
-  .home-path .path-cloud--left-2 {
-    top: 58%;
-    left: 3%;
-  }
-
-  .home-path .path-cloud--right-1 {
-    top: 7%;
-    right: 2%;
-  }
-
-  .home-path .path-cloud--right-2 {
-    top: 43%;
-    right: 3%;
-  }
-
-  .home-path .cloud-decor--7 {
-    top: 78%;
-    left: 2%;
-  }
-
-  .home-path .cloud-decor--8 {
-    top: 28%;
-    right: 3%;
+  .path-card:hover {
+    transform: translateY(-4px) !important;
   }
 
   .path-ending {
-    margin-top: 3.5rem;
+    margin-top: 2.5rem;
   }
 
-  .activities-grid {
-    grid-template-columns: 1fr;
+  /* 3. Learning Plans -> Horizontal Slider */
+  .home-plans {
+    padding: 3rem 0 4rem;
+    overflow: hidden;
+  }
+
+  .home-plans .plans-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 16px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    margin-top: 1.8rem !important;
+    scrollbar-width: none !important;
+    align-items: stretch !important;
+  }
+
+  .home-plans .plans-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .home-plans .plan-card {
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 260px !important;
+    scroll-snap-align: start !important;
+    transform: none !important;
+    padding: 2rem 1.4rem !important;
+  }
+
+  /* 4. About DeutschUp: Restore content & fix typography */
+  .home-about {
+    padding-bottom: 50px;
   }
 
   .home-about__vault {
-    width: calc(100% - 48px);
+    width: calc(100% - 24px);
     margin: 0 auto;
-    padding: 2rem 1rem 1.25rem;
+    padding: 3.5rem 1.25rem 2.5rem;
+    border-radius: 9999px 9999px 60px 60px;
   }
 
   .home-about__intro {
-    display: none;
+    display: block !important; /* RESTORE CONTENT */
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+    color: #334155;
+    margin: 0 auto 2rem auto !important;
+    text-align: center;
   }
 
   .home-about__grid {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 1rem;
   }
 
   .about-block {
     min-height: 0;
-    padding: 0.35rem 0.5rem;
+    padding: 0.5rem;
     text-align: center;
   }
 
   .about-block__header {
     justify-content: center;
-    gap: 0.35rem;
-    margin-bottom: 0.2rem;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
   }
 
   .about-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
   }
 
   .about-block h3 {
-    font-size: 1.05rem;
+    font-size: 1.3rem !important;
   }
 
   .about-block p {
-    font-size: 0.62rem;
-    line-height: 1.35;
+    font-size: 0.92rem !important; /* FIX: Readable text */
+    line-height: 1.55 !important;
+    color: #334155;
   }
 
-  .home-about + .scalloped-divider {
-    height: 42px;
-  }
-
-  .steps-wrapper {
-    padding: 2rem 1.25rem;
-  }
-
+  /* 5. Start Your German Journey (Steps) */
   .home-steps {
     min-height: 0;
-    padding: 180px 0 3rem;
+    padding: 160px 0 3rem;
   }
 
   .steps-wrapper {
     display: block;
+    padding: 2rem 1.25rem;
+  }
+
+  .steps-illustration {
+    left: 50%;
+    transform: translateX(-50%);
+    width: 190px;
+    height: auto;
   }
 
   .steps-header .home-section-title {
@@ -1321,51 +1425,89 @@
   }
 
   .steps-header .home-btn {
-    margin-top: 2rem;
-  }
-
-  .steps-illustration {
-    left: 50%;
-    transform: translateX(-50%);
-    width: 210px;
-    height: auto;
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 280px;
+    align-self: center;
   }
 
   .steps-list {
-    gap: 2rem;
+    width: 100%;
+    gap: 1.8rem;
     margin-top: 2rem;
   }
 
   .step-item {
     gap: 1rem;
+    align-items: flex-start;
   }
 
   .home-steps .step-item .step-title {
-    font-size: 28px;
+    font-size: 1.25rem;
+    margin: 0 0 6px;
   }
 
   .step-desc {
-    font-size: 0.76rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
   }
 
   .step-icon {
-    width: 52px;
-    height: 52px;
+    width: 50px;
+    height: 50px;
   }
 
   .journey-cloud--top {
-    width: 220px;
-    left: 60%;
+    width: 180px;
+    left: 55%;
   }
 
   .journey-cloud--small {
-    top: 100px;
-    right: -2rem;
+    top: 90px;
+    right: 2%; /* FIX: no negative right to prevent overflow */
+    width: 110px;
+  }
+
+  /* 6. Activities & Clouds */
+  .activities-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-path .path-cloud,
+  .home-path .cloud-decor--7,
+  .home-path .cloud-decor--8 {
+    width: 110px;
   }
 
   .home-btn--lg {
     padding: 14px 28px;
     font-size: 1.1rem;
+  }
+}
+
+/* Small mobile (320px - 375px) */
+@media (max-width: 375px) {
+  .home-hero__title {
+    font-size: 2.2rem;
+  }
+
+  .home-section-title {
+    font-size: 1.9rem;
+  }
+
+  .home-hero__cta {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .home-hero__cta .home-btn {
+    width: 100%;
+  }
+
+  .feature-card,
+  .path-card,
+  .home-plans .plan-card {
+    flex: 0 0 88% !important;
   }
 }
 

@@ -694,69 +694,162 @@
   }
 }
 
+/* MOBILE (< 768px): Card collections become horizontal sliders */
 @media (max-width: 768px) {
+  .card-level-section {
+    padding: 30px 16px 60px 16px;
+    overflow: hidden;
+  }
+
   .card-level-container {
     flex-direction: column;
-    gap: 32px;
+    gap: 28px;
   }
 
   .card-level-left {
     width: 100%;
     align-items: center;
     text-align: center;
-  }
-
-  .step-title {
-    font-size: 2.8rem;
-  }
-
-  .card-level-grid {
-    grid-template-columns: 1fr;
+    padding-top: 0;
     gap: 20px;
   }
 
-  .card-level-item {
-    min-height: auto;
+  .step-title {
+    font-size: 2.6rem;
   }
 
+  /* 1. Level Selection -> Horizontal Slider */
+  .card-level-right {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .card-level-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 10px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    scrollbar-width: none !important;
+  }
+
+  .card-level-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .card-level-item {
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 250px !important;
+    min-height: auto !important;
+    scroll-snap-align: start !important;
+    padding: 26px 22px 28px !important;
+  }
+
+  /* 2. Topics & Lektion Hero Sections */
+  .levels-hero-section,
   .topics-hero-section,
   .lektion-hero-section {
-    padding: 24px 16px 50px 16px;
-    min-height: 360px;
+    padding: 24px 16px 44px 16px;
+    min-height: 320px;
   }
 
+  .hero-container,
   .topics-hero-container,
   .lektion-hero-container {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 20px;
+    gap: 16px;
+    padding: 0;
   }
 
+  .hero-title-wrapper,
   .topics-hero-title-wrapper,
   .lektion-hero-title-wrapper {
     width: 100%;
     text-align: center;
   }
 
+  .hero-title,
   .topics-hero-title,
   .lektion-hero-title {
-    font-size: clamp(3.2rem, 13vw, 5rem);
+    font-size: clamp(2.6rem, 11vw, 4.5rem);
+    line-height: 1.12;
   }
 
+  .hero-school-img,
   .topics-hero-kid-img,
   .lektion-hero-girl-img {
-    width: 200px;
+    width: clamp(160px, 35vw, 220px);
+    margin: 0 auto;
   }
 
+  /* 3. Topics & Lektion Cards -> Horizontal Sliders */
   .topics-selection-section,
   .lektion-selection-section {
-    padding: 40px 16px 70px 16px;
+    padding: 36px 16px 60px 16px;
+    overflow: hidden;
+  }
+
+  .topics-section-title,
+  .lektion-section-title {
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    margin-bottom: 24px;
   }
 
   .topics-cards-grid,
   .lektion-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 16px !important;
+    padding: 12px 16px 24px !important;
+    margin-left: -16px !important;
+    margin-right: -16px !important;
+    scrollbar-width: none !important;
+  }
+
+  .topics-cards-grid::-webkit-scrollbar,
+  .lektion-cards-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .topic-card-item,
+  .lektion-card-item {
+    flex: 0 0 84% !important;
+    max-width: 320px !important;
+    min-width: 250px !important;
+    scroll-snap-align: start !important;
+    padding: 22px 18px !important;
+  }
+
+  .topic-card-image-wrapper,
+  .lektion-card-image-wrapper {
+    height: 160px;
+  }
+
+  .topic-card-icon-lg,
+  .lektion-card-icon-lg {
+    font-size: 3.8rem;
+  }
+}
+
+/* Small mobile (320px - 375px) */
+@media (max-width: 375px) {
+  .card-level-item,
+  .topic-card-item,
+  .lektion-card-item {
+    flex: 0 0 88% !important;
+  }
+
+  .step-title {
+    font-size: 2.2rem;
   }
 }

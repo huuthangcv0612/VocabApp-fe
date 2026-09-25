@@ -201,6 +201,7 @@
   height: 250px;
   margin: 0 auto;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .policy-sky-decor__cloud,
