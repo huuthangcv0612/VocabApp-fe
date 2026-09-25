@@ -74,16 +74,35 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401) {
+    const status = error?.response?.status
+    const data = error?.response?.data
+    const code = data?.code
+
+    if (status === 401) {
       clearExpiredAuth()
       window.dispatchEvent(new CustomEvent('auth:logout'))
     } else if (
-      error?.response?.status === 403 ||
-      error?.response?.data?.code === 'PREMIUM_REQUIRED'
+      status === 403 &&
+      (code === 'ACCOUNT_LOCKED' || data?.error === 'ACCOUNT_LOCKED')
+    ) {
+      window.dispatchEvent(
+        new CustomEvent('account:locked', {
+          detail: {
+            message: data?.message,
+            code: code || data?.error,
+            lockReason: data?.data?.lockReason || data?.lockReason,
+            lockedAt: data?.data?.lockedAt || data?.lockedAt,
+            data: data?.data,
+          },
+        }),
+      )
+    } else if (
+      status === 403 ||
+      code === 'PREMIUM_REQUIRED'
     ) {
       window.dispatchEvent(
         new CustomEvent('premium:required', {
-          detail: error?.response?.data,
+          detail: data,
         }),
       )
     }

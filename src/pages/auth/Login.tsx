@@ -25,7 +25,9 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'admin') {
+      if (user.status === 'locked') {
+        navigate('/', { replace: true })
+      } else if (user.role === 'admin') {
         navigate('/admin', { replace: true })
       } else {
         navigate(from, { replace: true })
@@ -61,7 +63,9 @@ const Login = () => {
       const loggedUser = await login(trimmedEmail, password)
       toast.success(t('login.successToast'))
 
-      if (loggedUser?.role === 'admin') {
+      if (loggedUser?.status === 'locked') {
+        navigate('/', { replace: true })
+      } else if (loggedUser?.role === 'admin') {
         navigate('/admin', { replace: true })
       } else {
         navigate(from, { replace: true })
@@ -119,7 +123,9 @@ const Login = () => {
       const loggedUser = await googleLogin(credentialResponse.credential)
       toast.success(t('login.googleSuccess'))
 
-      if (loggedUser?.role === 'admin') {
+      if (loggedUser?.status === 'locked') {
+        navigate('/', { replace: true })
+      } else if (loggedUser?.role === 'admin') {
         navigate('/admin', { replace: true })
       } else {
         navigate(from, { replace: true })

@@ -1,0 +1,293 @@
+/* =========================================================
+   ACCOUNT LOCKED MODAL STYLES - DeutschUp Design Theme
+   Responsive: Mobile (390px), Tablet (768px), Desktop (1440px)
+   ========================================================= */
+
+.alm-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  animation: almFadeIn 0.25s ease-out;
+  cursor: default;
+  pointer-events: auto;
+}
+
+.alm-modal {
+  background-color: #ffffff;
+  border-radius: 28px;
+  border: 2px solid #fca5a5;
+  box-shadow:
+    0 25px 50px -12px rgba(220, 38, 38, 0.25),
+    0 12px 30px rgba(15, 23, 42, 0.18);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 36px 32px 30px;
+  text-align: center;
+  position: relative;
+  animation: almScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Varela Round', sans-serif;
+  color: #0f274d;
+}
+
+/* Custom scrollbar for modal content */
+.alm-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.alm-modal::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.alm-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.alm-icon-wrapper {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border: 2px solid #f87171;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.2);
+}
+
+.alm-icon {
+  width: 38px;
+  height: 38px;
+  color: #d90000;
+}
+
+.alm-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #d90000;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.alm-message {
+  font-size: 0.98rem;
+  color: #475569;
+  line-height: 1.55;
+  margin: 0 0 20px 0;
+}
+
+/* Reason Box */
+.alm-reason-card {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 18px;
+  padding: 16px 18px;
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.alm-reason-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.alm-reason-tag {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #b91c1c;
+}
+
+.alm-reason-text {
+  font-size: 0.95rem;
+  color: #1e293b;
+  line-height: 1.5;
+  margin: 0;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+.alm-locked-at {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Support Box */
+.alm-support-card {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 14px 16px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.alm-support-title {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #0f274d;
+  margin: 0 0 4px 0;
+}
+
+.alm-support-desc {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.alm-support-email {
+  display: inline-block;
+  margin-top: 6px;
+  color: #2a63e8;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  word-break: break-all;
+  transition: color 0.2s ease;
+}
+
+.alm-support-email:hover {
+  color: #1d4ed8;
+}
+
+/* Action Button */
+.alm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alm-btn-switch {
+  width: 100%;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  background-color: #d90000;
+  color: #ffffff;
+  border: 2px solid #d90000;
+  box-shadow: 0 4px 14px rgba(217, 0, 0, 0.35);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.alm-btn-switch:hover {
+  background-color: #b80000;
+  border-color: #b80000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(217, 0, 0, 0.45);
+}
+
+.alm-btn-switch:active {
+  transform: translateY(0);
+}
+
+.alm-btn-switch:focus-visible {
+  outline: 3px solid #fca5a5;
+  outline-offset: 2px;
+}
+
+/* Animations */
+@keyframes almFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes almScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive: Mobile (~390px) */
+@media (max-width: 480px) {
+  .alm-overlay {
+    padding: 12px;
+  }
+
+  .alm-modal {
+    padding: 28px 20px 24px;
+    border-radius: 22px;
+    max-height: 92vh;
+  }
+
+  .alm-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  .alm-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .alm-title {
+    font-size: 1.45rem;
+  }
+
+  .alm-message {
+    font-size: 0.92rem;
+    margin-bottom: 16px;
+  }
+
+  .alm-reason-card {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .alm-reason-text {
+    font-size: 0.9rem;
+  }
+
+  .alm-support-card {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+
+  .alm-btn-switch {
+    font-size: 0.95rem;
+    padding: 13px 20px;
+  }
+}

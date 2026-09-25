@@ -8,6 +8,9 @@ interface AuthContextValue {
   user: AuthUser | null
   token: string | null
   isAuthenticated: boolean
+  isAccountLocked: boolean
+  accountLockReason?: string
+  accountLockedAt?: string
   loading: boolean
   login: (email: string, password: string) => Promise<AuthUser>
   register: (name: string, email: string, password: string, passwordConfirm: string, username?: string) => Promise<void>
@@ -83,6 +86,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener('auth:logout', handleLogout)
   }, [])
 
+  useEffect(() => {
+    const handleAccountLocked = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        message?: string
+        code?: string
+        lockReason?: string
+        lockedAt?: string
+        data?: { lockReason?: string; lockedAt?: string }
+      }>
+      const detail = customEvent.detail
+      const reason =
+        detail?.data?.lockReason ||
+        detail?.lockReason ||
+        (detail?.message && detail.message !== 'Tài khoản của bạn đã bị khóa' ? detail.message : undefined)
+      const lockedTime = detail?.data?.lockedAt || detail?.lockedAt
+
+      setUser((prevUser) => {
+        const baseUser = prevUser || getInitialUser()
+        if (!baseUser) return null
+
+        const finalReason = reason || baseUser.lockReason
+        const finalLockedAt = lockedTime || baseUser.lockedAt
+
+        if (
+          baseUser.status === 'locked' &&
+          baseUser.lockReason === finalReason &&
+          baseUser.lockedAt === finalLockedAt
+        ) {
+          return baseUser
+        }
+
+        const updatedUser: AuthUser = {
+          ...baseUser,
+          status: 'locked',
+          lockReason: finalReason,
+          lockedAt: finalLockedAt,
+        }
+        localStorage.setItem(STORAGE_USER, JSON.stringify(updatedUser))
+        return updatedUser
+      })
+    }
+
+    window.addEventListener('account:locked', handleAccountLocked)
+    return () => window.removeEventListener('account:locked', handleAccountLocked)
+  }, [])
+
   const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     console.log('AuthContext login called:', { email })
     const response = await authService.login(email, password)
@@ -150,11 +199,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return currentUser
   }, [])
 
+  const isAccountLocked = user?.status === 'locked'
+  const accountLockReason = user?.lockReason
+  const accountLockedAt = user?.lockedAt
+
   const value = useMemo(
     () => ({
       user,
       token,
       isAuthenticated: Boolean(token),
+      isAccountLocked,
+      accountLockReason,
+      accountLockedAt,
       loading,
       login,
       register,
@@ -172,6 +228,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       loading,
       token,
       user,
+      isAccountLocked,
+      accountLockReason,
+      accountLockedAt,
       login,
       register,
       logout,

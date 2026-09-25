@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast'
 import './App.css'
 import { AuthProvider } from './contexts/AuthContext'
 import { PremiumRequiredModal } from './components/modals/PremiumRequiredModal'
+import { GlobalAccountLockedModal } from './components/modals/GlobalAccountLockedModal'
 import Home from './pages/Home'
 import LevelDetail from './pages/LevelDetail'
 import TopicsPage from './pages/TopicsPage'
@@ -179,6 +180,7 @@ function App() {
         <AIFaqChatbot />
         <LanguageSwitcher />
         <GlobalPremiumModal />
+        <GlobalAccountLockedModal />
       </Router>
     </AuthProvider>
     </ErrorBoundary>

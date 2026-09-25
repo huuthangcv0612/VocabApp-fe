@@ -49,8 +49,29 @@ export const normalizeAuthUser = (resData: unknown): AuthUser => {
     (typeof data.isTeacher === 'boolean' ? data.isTeacher : undefined) ??
     (typeof userCandidate.isTeacher === 'boolean' ? userCandidate.isTeacher : undefined)
 
+  const status =
+    (typeof userCandidate.status === 'string' && userCandidate.status) ||
+    (typeof data.status === 'string' && data.status) ||
+    (typeof root.status === 'string' && root.status) ||
+    'active'
+
+  const lockReason =
+    (typeof userCandidate.lockReason === 'string' && userCandidate.lockReason) ||
+    (typeof data.lockReason === 'string' && data.lockReason) ||
+    (typeof root.lockReason === 'string' && root.lockReason) ||
+    undefined
+
+  const lockedAt =
+    (typeof userCandidate.lockedAt === 'string' && userCandidate.lockedAt) ||
+    (typeof data.lockedAt === 'string' && data.lockedAt) ||
+    (typeof root.lockedAt === 'string' && root.lockedAt) ||
+    undefined
+
   return {
     ...userCandidate,
+    status,
+    lockReason,
+    lockedAt,
     plan,
     permissions,
     subscription: subscription as AuthUser['subscription'],

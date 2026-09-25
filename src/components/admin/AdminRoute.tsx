@@ -23,6 +23,11 @@ export function AdminRoute() {
     return <Navigate to="/login" replace state={{ from: location }} />
   }
 
+  // Nếu tài khoản bị khóa -> Chuyển về trang Home để hiển thị Lock Modal
+  if (user.status === 'locked') {
+    return <Navigate to="/" replace />
+  }
+
   // 3. Nếu role không phải admin -> Mới hiển thị Từ chối truy cập 403
   if (user.role !== 'admin') {
     return (

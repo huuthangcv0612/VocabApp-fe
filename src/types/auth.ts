@@ -1,5 +1,7 @@
 import type { UserPlan } from './plan'
 
+export type AccountStatus = 'active' | 'locked' | string
+
 export interface AuthUser {
   _id: string
   id?: string
@@ -24,6 +26,9 @@ export interface AuthUser {
   canManageClasses?: boolean
   can_create_class?: boolean
   isTeacher?: boolean
+  status?: AccountStatus
+  lockReason?: string
+  lockedAt?: string
   [key: string]: unknown
 }
 
