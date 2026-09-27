@@ -13,6 +13,9 @@ const InteractiveRoomPage = () => {
       <Route path="/classes/:classId/lessons" element={<ClassDetailPage />} />
       <Route path="/classes/:classId/lessons/new" element={<LessonEditorPage />} />
       <Route path="/classes/:classId/lessons/:lessonId/edit" element={<LessonEditorPage />} />
+      <Route path="/classes/:classId/lessons/:lessonId" element={<LiveSessionPage />} />
+      <Route path="/lesson/:lessonId" element={<LiveSessionPage />} />
+      <Route path="/lessons/:lessonId" element={<LiveSessionPage />} />
       <Route path="/session/:sessionId" element={<LiveSessionPage />} />
       <Route path="/sessions/:sessionId" element={<LiveSessionPage />} />
     </Routes>

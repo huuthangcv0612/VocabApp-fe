@@ -13,6 +13,7 @@ interface SpinResultData {
 interface LiveSpinStudentProps {
   vocabularyList: VocabularyItem[]
   spinResult?: SpinResultData | VocabularyItem | string | null
+  onSpin?: () => void
 }
 
 const describeArc = (x: number, y: number, radius: number, startAngle: number, endAngle: number) => {
@@ -41,6 +42,7 @@ const SEGMENT_COLORS = ['#2A63E8', '#D90000', '#FFCC00', '#16A34A', '#9333EA', '
 export const LiveSpinStudent = ({
   vocabularyList,
   spinResult,
+  onSpin,
 }: LiveSpinStudentProps) => {
   const { t } = useTranslation('interactive')
   const [rotation, setRotation] = useState(0)
@@ -266,15 +268,38 @@ export const LiveSpinStudent = ({
 
       {animating && (
         <div style={{ marginTop: '20px', color: '#FFCC00', fontWeight: 700, fontSize: '1.1rem' }}>
-          {t('interactiveRoom.spin.teacherSpinning')}
+          {t('interactiveRoom.spin.spinning')}
         </div>
       )}
 
-      {!animating && !selectedWord && (
-        <div style={{ marginTop: '20px', color: '#94A3B8', fontStyle: 'italic', fontSize: '0.9rem' }}>
-          {t('interactiveRoom.spin.waitingNextSpin')}
-        </div>
-      )}
+      <div style={{ marginTop: '24px' }}>
+        <button
+          type="button"
+          className="ic-btn ic-btn-secondary"
+          onClick={() => {
+            if (animating || vocabularyList.length === 0) return
+            if (onSpin) {
+              onSpin()
+              return
+            }
+            setAnimating(true)
+            setSelectedWord(null)
+            playSpinAudio()
+            const targetIdx = Math.floor(Math.random() * vocabularyList.length)
+            const centerAngle = targetIdx * angle + angle / 2
+            const targetDegree = 90 - centerAngle
+            const extraTurns = 360 * 5
+            setRotation((prev) => prev + extraTurns + targetDegree)
+            setTimeout(() => {
+              setAnimating(false)
+              setSelectedWord(vocabularyList[targetIdx])
+            }, 3000)
+          }}
+          disabled={animating || vocabularyList.length === 0}
+        >
+          {animating ? t('interactiveRoom.spin.spinning') : t('interactiveRoom.spin.spinBtn')}
+        </button>
+      </div>
     </div>
   )
 }

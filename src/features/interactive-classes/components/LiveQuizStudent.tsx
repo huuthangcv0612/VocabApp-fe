@@ -13,39 +13,49 @@ interface LiveQuizStudentProps {
   } | null
   showAnswer: boolean
   onSubmitAnswer: (answer: string) => void
+  onScoreIncrease?: () => void
 }
 
 export const LiveQuizStudent = ({
   currentQuestion,
   showAnswer,
   onSubmitAnswer,
+  onScoreIncrease,
 }: LiveQuizStudentProps) => {
   const { t } = useTranslation('interactive')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
+  const [localRevealed, setLocalRevealed] = useState(false)
 
   // Reset state on question change
   useEffect(() => {
     setSelectedOption(null)
     setHasSubmitted(false)
+    setLocalRevealed(false)
   }, [currentQuestion?.currentIndex, currentQuestion?.questionText])
 
   if (!currentQuestion) {
     return (
       <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❓</div>
-        <h3>{t('interactiveRoom.quiz.waitingTeacher')}</h3>
+        <h3>{t('interactiveRoom.quiz.noQuestion')}</h3>
       </div>
     )
   }
 
   const optionLetters = ['A', 'B', 'C', 'D']
+  const isRevealed = showAnswer || localRevealed
 
   const handleSelect = (option: string) => {
-    if (hasSubmitted || showAnswer) return
+    if (hasSubmitted || isRevealed) return
     setSelectedOption(option)
     setHasSubmitted(true)
+    setLocalRevealed(true)
     onSubmitAnswer(option)
+
+    if (option === currentQuestion.correctAnswer) {
+      onScoreIncrease?.()
+    }
   }
 
   return (
@@ -100,8 +110,8 @@ export const LiveQuizStudent = ({
         {currentQuestion.options.map((opt, idx) => {
           const letter = optionLetters[idx] || String(idx + 1)
           const isSelected = selectedOption === opt
-          const isCorrect = showAnswer && opt === currentQuestion.correctAnswer
-          const isIncorrect = showAnswer && isSelected && opt !== currentQuestion.correctAnswer
+          const isCorrect = isRevealed && opt === currentQuestion.correctAnswer
+          const isIncorrect = isRevealed && isSelected && opt !== currentQuestion.correctAnswer
 
           let btnClass = 'ic-quiz-btn'
           if (isCorrect) {
@@ -118,10 +128,10 @@ export const LiveQuizStudent = ({
               type="button"
               className={btnClass}
               onClick={() => handleSelect(opt)}
-              disabled={hasSubmitted || showAnswer}
+              disabled={hasSubmitted || isRevealed}
               style={{
                 width: '100%',
-                cursor: hasSubmitted || showAnswer ? 'default' : 'pointer',
+                cursor: hasSubmitted || isRevealed ? 'default' : 'pointer',
               }}
             >
               <div className="ic-quiz-badge">{letter}</div>
@@ -133,7 +143,7 @@ export const LiveQuizStudent = ({
 
       {/* Status banner */}
       <div style={{ marginTop: '20px', fontSize: '0.95rem' }}>
-        {hasSubmitted && !showAnswer && (
+        {hasSubmitted && !isRevealed && (
           <div
             style={{
               color: '#38BDF8',
@@ -147,7 +157,7 @@ export const LiveQuizStudent = ({
           </div>
         )}
 
-        {showAnswer && (
+        {isRevealed && (
           <div
             style={{
               color: selectedOption === currentQuestion.correctAnswer ? '#4ADE80' : '#F87171',

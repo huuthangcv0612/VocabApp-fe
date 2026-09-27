@@ -52,17 +52,38 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
   const handleStartSession = async (lessonId: string) => {
     setStartingSessionId(lessonId)
     try {
-      const session = await interactiveClassService.createSession({
-        class_id: classId,
-        lesson_id: lessonId,
-      })
-      toast.success(t('lessons.startSessionSuccess'))
-      const sessId = session._id || session.id
-      navigate(`/interactive-room/session/${sessId}`)
+      if (isTeacher) {
+        const session = await interactiveClassService.createSession({
+          class_id: classId,
+          lesson_id: lessonId,
+        })
+        toast.success(t('lessons.startSessionSuccess'))
+        const sessId = session._id || session.id
+        navigate(`/interactive-room/session/${sessId}`)
+      } else {
+        try {
+          const session = await interactiveClassService.createSession({
+            class_id: classId,
+            lesson_id: lessonId,
+          })
+          const sessId = session._id || session.id
+          if (sessId) {
+            navigate(`/interactive-room/session/${sessId}`)
+            return
+          }
+        } catch {
+          // If student cannot create session, enter lesson room directly
+        }
+        navigate(`/interactive-room/classes/${classId}/lessons/${lessonId}`)
+      }
     } catch (err: unknown) {
-      console.error('Error starting live session:', err)
-      const errorObj = err as { response?: { data?: { message?: string } } }
-      toast.error(errorObj?.response?.data?.message || t('lessons.startSessionError'))
+      console.error('Error starting interactive session:', err)
+      if (isTeacher) {
+        const errorObj = err as { response?: { data?: { message?: string } } }
+        toast.error(errorObj?.response?.data?.message || t('lessons.startSessionError'))
+      } else {
+        navigate(`/interactive-room/classes/${classId}/lessons/${lessonId}`)
+      }
     } finally {
       setStartingSessionId(null)
     }
@@ -229,9 +250,14 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                   )}
 
                   {!isTeacher && (
-                    <span style={{ fontSize: '0.9rem', color: '#64748B', fontStyle: 'italic' }}>
-                      {t('lessons.readyForLive')}
-                    </span>
+                    <button
+                      type="button"
+                      className="ic-btn ic-btn-primary ic-btn-sm"
+                      onClick={() => handleStartSession(lId)}
+                      disabled={startingSessionId === lId}
+                    >
+                      {startingSessionId === lId ? t('lessons.starting') : t('lessons.startClass')}
+                    </button>
                   )}
                 </div>
               </div>
