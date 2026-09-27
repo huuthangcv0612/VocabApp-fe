@@ -1,4 +1,17 @@
-import type { VocabularyItem } from './vocabulary'
+import type {
+  VocabularyItem,
+  VocabularySource,
+  InteractiveVocabulary,
+  TeacherVocabularyItem,
+  CreateTeacherVocabularyPayload,
+} from './vocabulary'
+
+export type {
+  VocabularySource,
+  InteractiveVocabulary,
+  TeacherVocabularyItem,
+  CreateTeacherVocabularyPayload,
+}
 
 export type ActivityType = 'flashcard' | 'quiz' | 'spin'
 
@@ -49,6 +62,7 @@ export interface InteractiveLesson {
   level_id?: string
   level?: string
   vocabulary_ids?: string[]
+  teacher_vocabulary_ids?: string[]
   vocabularies?: Array<string | VocabularyItem>
   vocabulary_count?: number
   activities?: InteractiveActivity[]
@@ -187,6 +201,7 @@ export interface CreateLessonPayload {
   level_id?: string
   vocabularies?: string[]
   vocabulary_ids?: string[]
+  teacher_vocabulary_ids?: string[]
   status?: 'draft' | 'published'
   published?: boolean
   language?: 'vi' | 'en'
@@ -200,6 +215,7 @@ export interface UpdateLessonPayload {
   level_id?: string
   vocabularies?: string[]
   vocabulary_ids?: string[]
+  teacher_vocabulary_ids?: string[]
   status?: 'draft' | 'published'
   published?: boolean
   language?: 'vi' | 'en'

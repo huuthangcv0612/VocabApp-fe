@@ -11,7 +11,7 @@ import { interactiveClassService } from '../../../services/interactiveClassServi
 import type {
   InteractiveActivity,
 } from '../../../types/interactiveClass'
-import type { VocabularyItem } from '../../../types/vocabulary'
+import type { VocabularyItem, InteractiveVocabulary } from '../../../types/vocabulary'
 import { VocabularySearchAutocomplete } from '../components/VocabularySearchAutocomplete'
 import { CreateVocabularyModal } from '../components/CreateVocabularyModal'
 import { ActivityBuilder } from '../components/ActivityBuilder'
@@ -38,7 +38,7 @@ export const LessonEditorPage = () => {
   const [level, setLevel] = useState('A1.1')
   const [status, setStatus] = useState<'draft' | 'published'>('published')
   const [language, setLanguage] = useState<'vi' | 'en'>('vi')
-  const [vocabularies, setVocabularies] = useState<VocabularyItem[]>([])
+  const [vocabularies, setVocabularies] = useState<InteractiveVocabulary[]>([])
   const [activities, setActivities] = useState<InteractiveActivity[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -60,8 +60,10 @@ export const LessonEditorPage = () => {
 
       // Unpack vocabularies
       if (Array.isArray(data.vocabularies)) {
-        const fullVocabs: VocabularyItem[] = data.vocabularies.map((v: VocabularyItem | string) =>
-          typeof v === 'object' ? (v as VocabularyItem) : ({ _id: v, word: v, meaning: '' } as VocabularyItem),
+        const fullVocabs: InteractiveVocabulary[] = data.vocabularies.map((v: InteractiveVocabulary | VocabularyItem | string) =>
+          typeof v === 'object'
+            ? { ...(v as InteractiveVocabulary), source: (v as InteractiveVocabulary).source || 'system' }
+            : ({ _id: v, word: v, meaning: '', source: 'system' } as InteractiveVocabulary),
         )
         setVocabularies(fullVocabs)
       }
@@ -91,7 +93,7 @@ export const LessonEditorPage = () => {
     }
   }, [isEditing, loadLesson])
 
-  const handleAddVocabulary = (vocab: VocabularyItem) => {
+  const handleAddVocabulary = (vocab: InteractiveVocabulary) => {
     const vId = vocab._id || (vocab as { id?: string }).id || ''
     const exists = vocabularies.some((v) => (v._id || (v as { id?: string }).id) === vId)
     if (exists) {
@@ -99,7 +101,7 @@ export const LessonEditorPage = () => {
       return
     }
 
-    setVocabularies((prev) => [...prev, vocab])
+    setVocabularies((prev) => [...prev, { ...vocab, source: vocab.source || 'system' }])
     toast.success(t('editor.vocabAddedSuccess', { word: vocab.word }))
   }
 
@@ -113,8 +115,8 @@ export const LessonEditorPage = () => {
     setIsCreateVocabOpen(true)
   }
 
-  const handleCreatedVocabulary = (newVocab: VocabularyItem) => {
-    handleAddVocabulary(newVocab)
+  const handleCreatedVocabulary = (newVocab: InteractiveVocabulary) => {
+    handleAddVocabulary({ ...newVocab, source: 'teacher' })
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -142,6 +144,7 @@ export const LessonEditorPage = () => {
           description: description.trim() || undefined,
           level,
           vocabularies: vocabIds,
+          vocabulary_ids: vocabIds,
           status,
           language,
           activities: formattedActivities,
@@ -154,6 +157,7 @@ export const LessonEditorPage = () => {
           description: description.trim() || undefined,
           level,
           vocabularies: vocabIds,
+          vocabulary_ids: vocabIds,
           status,
           language,
           activities: formattedActivities,
@@ -382,6 +386,7 @@ export const LessonEditorPage = () => {
                         const displayWord = vocab.article
                           ? `${vocab.article} ${vocab.word}`
                           : vocab.word
+                        const isTeacherVocab = vocab.source === 'teacher'
 
                         return (
                           <div
@@ -398,8 +403,25 @@ export const LessonEditorPage = () => {
                             }}
                           >
                             <div style={{ overflow: 'hidden' }}>
-                              <div style={{ fontWeight: 700, color: '#0F172A', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {displayWord}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ fontWeight: 700, color: '#0F172A', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                  {displayWord}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: '0.7rem',
+                                    fontWeight: 700,
+                                    backgroundColor: isTeacherVocab ? '#DCFCE7' : '#EFF6FF',
+                                    color: isTeacherVocab ? '#15803D' : '#1D4ED8',
+                                    border: `1px solid ${isTeacherVocab ? '#86EFAC' : '#BFDBFE'}`,
+                                    padding: '1px 6px',
+                                    borderRadius: '6px',
+                                    letterSpacing: '0.3px',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {isTeacherVocab ? t('vocabulary.badgeTeacher') : t('vocabulary.badgeSystem')}
+                                </span>
                               </div>
                               <div style={{ color: '#64748B', fontSize: '0.85rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {vocab.meaning}

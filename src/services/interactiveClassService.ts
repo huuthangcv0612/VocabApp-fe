@@ -17,7 +17,11 @@ import type {
   CreateSessionPayload,
   SessionResponsePayload,
 } from '../types/interactiveClass'
-import type { VocabularyItem, VocabularyPayload } from '../types/vocabulary'
+import type {
+  VocabularyItem,
+  InteractiveVocabulary,
+  CreateTeacherVocabularyPayload,
+} from '../types/vocabulary'
 
 // Helper to safely unpack diverse API responses
 const unpack = <T>(res: { data: ApiResponse<T> | T }): T => {
@@ -26,6 +30,24 @@ const unpack = <T>(res: { data: ApiResponse<T> | T }): T => {
     return d.data as T
   }
   return res.data as T
+}
+
+const normalizeLessonVocabs = (list: unknown[]): Array<string | VocabularyItem> => {
+  return list.map((item, idx) => {
+    if (typeof item === 'object' && item !== null) {
+      const v = item as Record<string, unknown>
+      const id = String(v._id || v.id || `v_${idx}`)
+      return {
+        ...v,
+        _id: id,
+        id,
+        word: String(v.word || ''),
+        meaning: String(v.meaning || ''),
+        source: (v.source as 'system' | 'teacher') || 'system',
+      } as unknown as VocabularyItem
+    }
+    return item as string
+  })
 }
 
 export const interactiveClassService = {
@@ -231,14 +253,15 @@ export const interactiveClassService = {
       (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
       (Array.isArray(data?.activities) ? data.activities : undefined) ??
       []
-    const vocabs =
+    const vocabs = normalizeLessonVocabs(
       (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
       (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
       []
+    )
     return {
       ...(rawLesson as unknown as InteractiveLesson),
       activities: acts as InteractiveActivity[],
-      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabularies: vocabs,
       vocabulary_count:
         (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
         vocabs.length,
@@ -262,7 +285,7 @@ export const interactiveClassService = {
       else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
     }
     return list.map((item) => {
-      const vocabs = Array.isArray(item.vocabularies) ? (item.vocabularies as Array<string | VocabularyItem>) : []
+      const vocabs = normalizeLessonVocabs(Array.isArray(item.vocabularies) ? (item.vocabularies as Array<unknown>) : [])
       const acts = Array.isArray(item.activities) ? (item.activities as InteractiveActivity[]) : []
       const vocabCount =
         (typeof item.vocabulary_count === 'number' ? item.vocabulary_count : undefined) ??
@@ -293,10 +316,11 @@ export const interactiveClassService = {
       (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
       (Array.isArray(data?.activities) ? data.activities : undefined) ??
       []
-    const vocabs =
+    const vocabs = normalizeLessonVocabs(
       (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
       (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
       []
+    )
     const vocabCount =
       (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
       (typeof data?.vocabulary_count === 'number' ? (data.vocabulary_count as number) : undefined) ??
@@ -311,7 +335,7 @@ export const interactiveClassService = {
       _id: lessonId,
       id: lessonId,
       activities: acts as InteractiveActivity[],
-      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabularies: vocabs,
       vocabulary_count: vocabCount,
       activity_count: actCount,
       status: (rawLesson.status as 'draft' | 'published') || (rawLesson.published ? 'published' : 'draft'),
@@ -333,17 +357,18 @@ export const interactiveClassService = {
       (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
       (Array.isArray(data?.activities) ? data.activities : undefined) ??
       []
-    const vocabs =
+    const vocabs = normalizeLessonVocabs(
       (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
       (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
       []
+    )
     const lessonId = String(rawLesson._id || rawLesson.id || id)
     return {
       ...(rawLesson as unknown as InteractiveLesson),
       _id: lessonId,
       id: lessonId,
       activities: acts as InteractiveActivity[],
-      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabularies: vocabs,
       vocabulary_count:
         (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
         vocabs.length,
@@ -546,44 +571,163 @@ export const interactiveClassService = {
   },
 
   // ==========================================
-  // VOCABULARY SEARCH & CREATION
+  // VOCABULARY SEARCH & TEACHER VOCABULARY CRUD
   // ==========================================
 
-  searchVocabulary: async (q: string): Promise<VocabularyItem[]> => {
+  searchVocabulary: async (q: string): Promise<InteractiveVocabulary[]> => {
     const trimmed = q.trim()
     if (!trimmed) return []
     try {
+      // Primary: Unified search endpoint for Interactive Lessons
       const res = await api.get(
-        `/vocabularies/search?q=${encodeURIComponent(trimmed)}`,
+        `/interactive-lessons/vocabularies/search?q=${encodeURIComponent(trimmed)}`,
       )
       const data = unpack<unknown>(res)
-      if (Array.isArray(data)) return data as VocabularyItem[]
-      const record = data as Record<string, unknown>
-      if (Array.isArray(record?.vocabularies)) return record.vocabularies as VocabularyItem[]
-      if (Array.isArray(record?.data)) return record.data as VocabularyItem[]
-      return []
+      let list: Record<string, unknown>[] = []
+      if (Array.isArray(data)) list = data as Record<string, unknown>[]
+      else {
+        const record = data as Record<string, unknown>
+        if (Array.isArray(record?.vocabularies)) list = record.vocabularies as Record<string, unknown>[]
+        else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
+      }
+      return list.map((item, idx) => ({
+        ...item,
+        _id: String(item._id || item.id || `vocab_${idx}`),
+        id: String(item._id || item.id || `vocab_${idx}`),
+        word: String(item.word || ''),
+        meaning: String(item.meaning || ''),
+        source: (item.source as 'system' | 'teacher') || 'system',
+      } as unknown as InteractiveVocabulary))
     } catch {
-      // Fallback to /vocabularies?search=...
+      // Fallback: master vocabularies search if unified search is unavailable
       try {
         const fallbackRes = await api.get(
-          `/vocabularies?search=${encodeURIComponent(trimmed)}&limit=20`,
+          `/vocabularies/search?q=${encodeURIComponent(trimmed)}`,
         )
         const fbData = unpack<unknown>(fallbackRes)
-        if (Array.isArray(fbData)) return fbData as VocabularyItem[]
-        const fbRecord = fbData as Record<string, unknown>
-        if (Array.isArray(fbRecord?.vocabularies)) return fbRecord.vocabularies as VocabularyItem[]
-        return []
+        let fbList: Record<string, unknown>[] = []
+        if (Array.isArray(fbData)) fbList = fbData as Record<string, unknown>[]
+        else {
+          const fbRecord = fbData as Record<string, unknown>
+          if (Array.isArray(fbRecord?.vocabularies)) fbList = fbRecord.vocabularies as Record<string, unknown>[]
+          else if (Array.isArray(fbRecord?.data)) fbList = fbRecord.data as Record<string, unknown>[]
+        }
+        return fbList.map((item, idx) => ({
+          ...item,
+          _id: String(item._id || item.id || `vocab_${idx}`),
+          id: String(item._id || item.id || `vocab_${idx}`),
+          word: String(item.word || ''),
+          meaning: String(item.meaning || ''),
+          source: (item.source as 'system' | 'teacher') || 'system',
+        } as unknown as InteractiveVocabulary))
       } catch {
         return []
       }
     }
   },
 
-  createVocabulary: async (
-    payload: VocabularyPayload & { article?: string; gender?: string },
-  ): Promise<VocabularyItem> => {
-    const res = await api.post('/vocabularies', payload)
+  createTeacherVocabulary: async (
+    payload: CreateTeacherVocabularyPayload,
+  ): Promise<InteractiveVocabulary> => {
+    // Backend assigns teacher_id from req.user._id; NEVER send teacher_id from FE
+    const body: Record<string, unknown> = {
+      word: payload.word.trim(),
+      meaning: payload.meaning.trim(),
+      partOfSpeech: payload.partOfSpeech || payload.part_of_speech || undefined,
+      article: payload.article || undefined,
+      plural: payload.plural?.trim() || undefined,
+      example: payload.example?.trim() || undefined,
+      exampleMeaning: payload.exampleMeaning?.trim() || payload.example_translation?.trim() || undefined,
+      pronunciation: payload.pronunciation?.trim() || undefined,
+      level: payload.level || undefined,
+      audioUrl: payload.audioUrl || undefined,
+      imageUrl: payload.imageUrl || undefined,
+    }
+    const res = await api.post('/teacher-vocabularies', body)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.vocabulary as VocabularyItem) || (data as unknown as VocabularyItem)
+    const rawVocab = ((data?.vocabulary || data?.data || data || {}) as Record<string, unknown>)
+    const id = String(rawVocab._id || rawVocab.id || '')
+    return {
+      ...(rawVocab as unknown as InteractiveVocabulary),
+      _id: id,
+      id,
+      word: String(rawVocab.word || payload.word),
+      meaning: String(rawVocab.meaning || payload.meaning),
+      source: 'teacher',
+    }
+  },
+
+  createVocabulary: async (
+    payload: CreateTeacherVocabularyPayload & { article?: string; gender?: string },
+  ): Promise<InteractiveVocabulary> => {
+    return interactiveClassService.createTeacherVocabulary(payload)
+  },
+
+  getTeacherVocabularies: async (params?: {
+    search?: string
+    level?: string
+    page?: number
+    limit?: number
+  }): Promise<{ vocabularies: InteractiveVocabulary[]; total?: number }> => {
+    const query = new URLSearchParams()
+    if (params?.search) query.append('search', params.search.trim())
+    if (params?.level) query.append('level', params.level)
+    if (params?.page) query.append('page', String(params.page))
+    if (params?.limit) query.append('limit', String(params.limit))
+    const qs = query.toString()
+    const res = await api.get(`/teacher-vocabularies${qs ? `?${qs}` : ''}`)
+    const data = unpack<Record<string, unknown>>(res)
+    let list: Record<string, unknown>[] = []
+    if (Array.isArray(data)) list = data as Record<string, unknown>[]
+    else if (Array.isArray(data?.vocabularies)) list = data.vocabularies as Record<string, unknown>[]
+    else if (Array.isArray(data?.data)) list = data.data as Record<string, unknown>[]
+    const total = typeof data?.total === 'number' ? data.total : list.length
+    return {
+      vocabularies: list.map((item, idx) => ({
+        ...item,
+        _id: String(item._id || item.id || `tv_${idx}`),
+        id: String(item._id || item.id || `tv_${idx}`),
+        word: String(item.word || ''),
+        meaning: String(item.meaning || ''),
+        source: 'teacher',
+      } as unknown as InteractiveVocabulary)),
+      total,
+    }
+  },
+
+  updateTeacherVocabulary: async (
+    id: string,
+    payload: Partial<CreateTeacherVocabularyPayload>,
+  ): Promise<InteractiveVocabulary> => {
+    const body: Record<string, unknown> = {
+      ...(payload.word !== undefined ? { word: payload.word.trim() } : {}),
+      ...(payload.meaning !== undefined ? { meaning: payload.meaning.trim() } : {}),
+      ...(payload.partOfSpeech !== undefined || payload.part_of_speech !== undefined
+        ? { partOfSpeech: payload.partOfSpeech || payload.part_of_speech }
+        : {}),
+      ...(payload.article !== undefined ? { article: payload.article } : {}),
+      ...(payload.plural !== undefined ? { plural: payload.plural.trim() } : {}),
+      ...(payload.example !== undefined ? { example: payload.example.trim() } : {}),
+      ...(payload.exampleMeaning !== undefined || payload.example_translation !== undefined
+        ? { exampleMeaning: payload.exampleMeaning?.trim() || payload.example_translation?.trim() }
+        : {}),
+      ...(payload.pronunciation !== undefined ? { pronunciation: payload.pronunciation.trim() } : {}),
+      ...(payload.level !== undefined ? { level: payload.level } : {}),
+      ...(payload.audioUrl !== undefined ? { audioUrl: payload.audioUrl } : {}),
+      ...(payload.imageUrl !== undefined ? { imageUrl: payload.imageUrl } : {}),
+    }
+    const res = await api.put(`/teacher-vocabularies/${encodeURIComponent(id)}`, body)
+    const data = unpack<Record<string, unknown>>(res)
+    const rawVocab = ((data?.vocabulary || data?.data || data || {}) as Record<string, unknown>)
+    return {
+      ...(rawVocab as unknown as InteractiveVocabulary),
+      _id: id,
+      id,
+      source: 'teacher',
+    }
+  },
+
+  deleteTeacherVocabulary: async (id: string): Promise<void> => {
+    await api.delete(`/teacher-vocabularies/${encodeURIComponent(id)}`)
   },
 }
