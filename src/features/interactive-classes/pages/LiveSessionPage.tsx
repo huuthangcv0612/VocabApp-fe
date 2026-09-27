@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSubscription } from '../../../hooks/useSubscription'
 import { checkInteractivePermissions } from '../../../utils/interactivePermissions'
@@ -23,6 +24,7 @@ import { LiveSpinStudent } from '../components/LiveSpinStudent'
 import '../../../styles/pages/interactive-classes.css'
 
 export const LiveSessionPage = () => {
+  const { t } = useTranslation('interactive')
   const { sessionId = '' } = useParams<{ sessionId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -45,7 +47,14 @@ export const LiveSessionPage = () => {
       const s = await interactiveClassService.getSessionById(sessionId)
       setSession(s)
 
-      const lId = s.lesson_id || (s.lesson_info as { _id?: string } | undefined)?._id
+      const lId =
+        s.lesson_id ||
+        s.interactive_lesson_id ||
+        (s as unknown as { lessonId?: string }).lessonId ||
+        (s.lesson_info as { _id?: string; id?: string } | undefined)?._id ||
+        (s.lesson_info as { _id?: string; id?: string } | undefined)?.id ||
+        ''
+
       if (lId) {
         try {
           const l = await interactiveClassService.getLessonById(lId)
@@ -56,18 +65,23 @@ export const LiveSessionPage = () => {
             )
             setVocabularyList(vocabs)
           }
-        } catch (err) {
-          console.error('Error loading lesson for session:', err)
-        }
 
-        try {
-          const acts = await interactiveClassService.getActivities(lId)
+          let acts: InteractiveActivity[] = []
+          if (Array.isArray(l.activities) && l.activities.length > 0) {
+            acts = l.activities
+          } else {
+            try {
+              acts = await interactiveClassService.getActivities(lId)
+            } catch {
+              acts = []
+            }
+          }
           setActivities(acts)
           if (acts.length > 0 && !s.current_activity_id) {
             setSelectedActivityId(acts[0]._id || acts[0].id || '')
           }
         } catch (err) {
-          console.error('Error loading activities for session:', err)
+          console.error('Error loading lesson for session:', err)
         }
       }
     } catch (err: unknown) {
@@ -128,12 +142,12 @@ export const LiveSessionPage = () => {
       setSession((prev) => ({ ...(prev || {}), ...updated } as InteractiveSession))
     },
     onActivityStarted: (data) => {
-      toast('Hoạt động mới đã bắt đầu!', { icon: '🎯' })
+      toast(t('interactiveRoom.newActivityStarted'), { icon: '🎯' })
       const actId = typeof data.activity_id === 'string' ? data.activity_id : typeof data.id === 'string' ? data.id : ''
       if (actId) setSelectedActivityId(actId)
     },
     onSessionEnded: () => {
-      toast('Buổi học đã kết thúc!', { icon: '🏁' })
+      toast(t('interactiveRoom.sessionEndedToast'), { icon: '🏁' })
     },
   })
 
@@ -204,7 +218,7 @@ export const LiveSessionPage = () => {
           show_answer: false,
         }
       })
-      toast.success('Đã bắt đầu hoạt động mới!')
+      toast.success(t('interactiveRoom.activityStartedSuccess'))
     } catch (err: unknown) {
       console.error('Error starting activity:', err)
       emitStartActivity(activityId, type)
@@ -266,7 +280,7 @@ export const LiveSessionPage = () => {
   }
 
   const handleTeacherEndSession = async () => {
-    if (!window.confirm('Bạn có chắc chắn muốn kết thúc buổi học Live này?')) {
+    if (!window.confirm(t('interactiveRoom.endConfirm'))) {
       return
     }
 
@@ -274,7 +288,7 @@ export const LiveSessionPage = () => {
     try {
       await interactiveClassService.endSession(sessionId)
       emitEndSession()
-      toast.success('Đã kết thúc buổi học!')
+      toast.success(t('interactiveRoom.sessionEndedToast'))
       navigate('/interactive-room')
     } catch (err: unknown) {
       console.error('Error ending session:', err)
@@ -300,7 +314,7 @@ export const LiveSessionPage = () => {
     return (
       <div className="ic-live-page" style={{ alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔴</div>
-        <h2>Đang kết nối vào phòng học trực tiếp...</h2>
+        <h2>{t('interactiveRoom.connecting')}</h2>
       </div>
     )
   }
@@ -322,10 +336,10 @@ export const LiveSessionPage = () => {
         >
           <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🏁</div>
           <h2 style={{ fontFamily: 'Oswald', fontSize: '2.2rem', color: '#FFFFFF', margin: '0 0 12px' }}>
-            Buổi Học Đã Kết Thúc
+            {t('interactiveRoom.sessionEndedTitle')}
           </h2>
           <p style={{ color: '#94A3B8', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '28px' }}>
-            Cảm ơn bạn đã tham gia buổi học trực tiếp cùng lớp! Hãy tiếp tục luyện tập từ vựng mỗi ngày.
+            {t('interactiveRoom.sessionEndedDesc')}
           </p>
           <button
             type="button"
@@ -333,7 +347,7 @@ export const LiveSessionPage = () => {
             style={{ width: '100%' }}
             onClick={() => navigate('/interactive-room')}
           >
-            Quay lại Lớp học
+            {t('interactiveRoom.backToClasses')}
           </button>
         </div>
       </div>
@@ -346,7 +360,7 @@ export const LiveSessionPage = () => {
       <header className="ic-live-header">
         <div className="ic-live-title-box">
           <h2>
-            🔴 {lesson?.title || 'Phòng Học Trực Tiếp'}
+            🔴 {lesson?.title || t('interactiveRoom.title')}
             {lesson?.level && (
               <span style={{ fontSize: '0.8rem', color: '#38BDF8', marginLeft: '8px' }}>
                 ({lesson.level})
@@ -354,11 +368,11 @@ export const LiveSessionPage = () => {
             )}
           </h2>
           <p>
-            {isTeacher ? 'Chế độ Giáo Viên (Teacher Control)' : 'Chế độ Học Viên (Student View)'} •{' '}
+            {isTeacher ? t('interactiveRoom.teacherMode') : t('interactiveRoom.studentMode')} •{' '}
             {isConnected ? (
-              <span style={{ color: '#4ADE80' }}>● Socket Kết nối thời gian thực</span>
+              <span style={{ color: '#4ADE80' }}>● {t('interactiveRoom.socketConnected')}</span>
             ) : (
-              <span style={{ color: '#FACC15' }}>● Đang kết nối lại...</span>
+              <span style={{ color: '#FACC15' }}>● {t('interactiveRoom.socketReconnecting')}</span>
             )}
           </p>
         </div>
@@ -373,7 +387,7 @@ export const LiveSessionPage = () => {
               onClick={handleTeacherEndSession}
               disabled={ending}
             >
-              {ending ? 'Đang kết thúc...' : '🛑 Kết thúc buổi học'}
+              {ending ? t('interactiveRoom.ending') : t('interactiveRoom.endSession')}
             </button>
           ) : (
             <button
@@ -381,7 +395,7 @@ export const LiveSessionPage = () => {
               className="ic-btn ic-btn-outline ic-btn-sm"
               onClick={() => navigate('/interactive-room')}
             >
-              Rời phòng
+              {t('interactiveRoom.leaveRoom')}
             </button>
           )}
         </div>
@@ -401,7 +415,7 @@ export const LiveSessionPage = () => {
           }}
         >
           <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-            CHUYỂN HOẠT ĐỘNG:
+            {t('interactiveRoom.switchActivity')}
           </span>
 
           {activities.map((act) => {
@@ -496,7 +510,7 @@ export const LiveSessionPage = () => {
       {/* Live Bottom Bar (Teacher Quick Controls or Student Info) */}
       <footer className="ic-live-bottom-bar">
         <div style={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-          Đồng bộ thời gian thực qua <strong>Socket.IO</strong> • DeutschUp Interactive Room
+          {t('interactiveRoom.realtimeSync')}
         </div>
 
         {isTeacher ? (
@@ -506,19 +520,19 @@ export const LiveSessionPage = () => {
               className="ic-btn ic-btn-outline ic-btn-sm"
               onClick={handleTeacherShowAnswer}
             >
-              👁️ {isAnswerRevealed ? 'Đáp án đang mở' : 'Hiện đáp án'}
+              👁️ {isAnswerRevealed ? t('interactiveRoom.answerRevealed') : t('interactiveRoom.showAnswer')}
             </button>
             <button
               type="button"
               className="ic-btn ic-btn-primary ic-btn-sm"
               onClick={handleTeacherNext}
             >
-              Tiếp theo ➔
+              {t('interactiveRoom.next')}
             </button>
           </div>
         ) : (
           <div style={{ color: '#E2E8F0', fontSize: '0.9rem' }}>
-            Đang tham gia cùng <strong>{connectedStudents.length}</strong> học viên
+            {t('interactiveRoom.participatingWith', { count: connectedStudents.length })}
           </div>
         )}
       </footer>

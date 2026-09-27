@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import type { ClassItem } from '../../../types/interactiveClass'
 
@@ -15,6 +16,7 @@ export const ClassCard = ({
   canManage,
   onDelete,
 }: ClassCardProps) => {
+  const { t } = useTranslation('interactive')
   const navigate = useNavigate()
   const isManager = canManage !== undefined ? canManage : isTeacher
   const classId = cls._id || cls.id || ''
@@ -24,7 +26,7 @@ export const ClassCard = ({
     cls.teacher_name ||
     (typeof cls.teacher_id === 'object' && cls.teacher_id !== null
       ? cls.teacher_id.name
-      : 'Giáo viên')
+      : t('classes.teacher', 'Giáo viên'))
 
   const studentsCount =
     cls.students_count ??
@@ -35,13 +37,13 @@ export const ClassCard = ({
     e.stopPropagation()
     if (code) {
       navigator.clipboard.writeText(code)
-      toast.success(`Đã chép mã lớp: ${code}`)
+      toast.success(t('classes.copyCodeSuccess', { code, defaultValue: `Đã chép mã lớp: ${code}` }))
     }
   }
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (window.confirm(`Bạn có chắc chắn muốn xóa lớp "${cls.name}"?`)) {
+    if (window.confirm(t('classes.deleteConfirm', { name: cls.name, defaultValue: `Bạn có chắc chắn muốn xóa lớp "${cls.name}"?` }))) {
       onDelete?.(classId)
     }
   }
@@ -54,9 +56,9 @@ export const ClassCard = ({
         <div className="ic-class-card-header">
           <h3 className="ic-class-card-title">{cls.name}</h3>
           {hasActiveSession ? (
-            <span className="ic-badge ic-badge-live">● ĐANG LIVE</span>
+            <span className="ic-badge ic-badge-live">● {t('classes.live', 'ĐANG LIVE')}</span>
           ) : (
-            <span className="ic-badge ic-badge-active">Hoạt động</span>
+            <span className="ic-badge ic-badge-active">{t('classes.active', 'Hoạt động')}</span>
           )}
         </div>
 
@@ -70,7 +72,7 @@ export const ClassCard = ({
 
           <div className="ic-class-card-meta-item">
             <span>👥</span>
-            <span>{studentsCount} học viên</span>
+            <span>{studentsCount} {t('classes.students', 'học viên')}</span>
           </div>
 
           {code && (
@@ -78,7 +80,7 @@ export const ClassCard = ({
               className="ic-class-card-meta-item"
               onClick={handleCopyCode}
               style={{ cursor: 'pointer' }}
-              title="Click để sao chép mã"
+              title={t('classes.copyCode', 'Click để sao chép mã')}
             >
               <span>🔑</span>
               <span className="ic-badge ic-badge-code">{code}</span>
@@ -97,7 +99,7 @@ export const ClassCard = ({
               navigate(`/interactive-room/session/${cls.active_session_id}`)
             }}
           >
-            🔴 Vào phòng Live
+            🔴 {t('classes.enterLiveRoom', 'Vào phòng Live')}
           </button>
         )}
 
@@ -109,7 +111,7 @@ export const ClassCard = ({
             navigate(`/interactive-room/classes/${classId}`)
           }}
         >
-          {isManager ? 'Quản lý lớp' : 'Vào lớp'}
+          {isManager ? t('classes.manageClass', 'Quản lý lớp') : t('classes.enterClass', 'Vào lớp')}
         </button>
 
         {isManager && onDelete && (
@@ -118,9 +120,9 @@ export const ClassCard = ({
             className="ic-btn ic-btn-outline ic-btn-sm"
             style={{ color: '#EF4444', borderColor: '#FECACA' }}
             onClick={handleDelete}
-            title="Xóa lớp học"
+            title={t('classes.deleteClass', 'Xóa lớp học')}
           >
-            🗑️ Xóa
+            🗑️ {t('classes.deleteClass', 'Xóa')}
           </button>
         )}
       </div>

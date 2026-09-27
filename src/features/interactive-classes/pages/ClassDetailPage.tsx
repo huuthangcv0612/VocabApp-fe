@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
@@ -16,6 +17,7 @@ import { ClassLessonsTab } from '../components/ClassLessonsTab'
 import '../../../styles/pages/interactive-classes.css'
 
 export const ClassDetailPage = () => {
+  const { t } = useTranslation('interactive')
   const { classId = '' } = useParams<{ classId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -34,12 +36,12 @@ export const ClassDetailPage = () => {
       setCls(data)
     } catch (err: unknown) {
       console.error('Error fetching class details:', err)
-      toast.error('Không tìm thấy thông tin lớp học.')
+      toast.error(t('classes.loadClassError', 'Không tìm thấy thông tin lớp học.'))
       navigate('/interactive-room')
     } finally {
       setLoading(false)
     }
-  }, [classId, navigate])
+  }, [classId, navigate, t])
 
   useEffect(() => {
     fetchClass()
@@ -57,14 +59,14 @@ export const ClassDetailPage = () => {
   const handleCopyCode = () => {
     if (code) {
       navigator.clipboard.writeText(code)
-      toast.success(`Đã sao chép mã lớp: ${code}`)
+      toast.success(t('classes.copyCodeSuccess', { code, defaultValue: `Đã sao chép mã lớp: ${code}` }))
     }
   }
 
   const handleCopyLink = () => {
     const link = `${window.location.origin}/interactive-room?joinCode=${encodeURIComponent(code)}`
     navigator.clipboard.writeText(link)
-    toast.success('Đã sao chép liên kết mời học viên!')
+    toast.success(t('classes.copyLinkSuccess', 'Đã sao chép liên kết mời học viên!'))
   }
 
   if (loading) {
@@ -72,7 +74,7 @@ export const ClassDetailPage = () => {
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <Header />
         <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center', color: '#64748B', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
-          <p>Đang tải thông tin lớp học...</p>
+          <p>{t('classes.loadingClass', 'Đang tải thông tin lớp học...')}</p>
         </main>
         <Footer />
       </div>
@@ -84,14 +86,14 @@ export const ClassDetailPage = () => {
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
         <Header />
         <main style={{ flex: 1, padding: '4rem 0', textAlign: 'center', backgroundColor: 'var(--color-accent, #FFF2B7)' }}>
-          <h2>Không tìm thấy lớp học</h2>
+          <h2>{t('classes.classNotFound', 'Không tìm thấy lớp học')}</h2>
           <button
             type="button"
             className="ic-btn ic-btn-primary"
             style={{ marginTop: '16px' }}
             onClick={() => navigate('/interactive-room')}
           >
-            Quay lại danh sách lớp
+            {t('classes.backToList', 'Quay lại danh sách lớp')}
           </button>
         </main>
         <Footer />
@@ -112,7 +114,7 @@ export const ClassDetailPage = () => {
               className="ic-btn ic-btn-outline ic-btn-sm"
               onClick={() => navigate('/interactive-room')}
             >
-              ← Quay lại danh sách lớp
+              {t('classes.backToList', '← Quay lại danh sách lớp')}
             </button>
           </div>
 
@@ -146,9 +148,9 @@ export const ClassDetailPage = () => {
                 </h1>
 
                 {cls.active_session_id ? (
-                  <span className="ic-badge ic-badge-live">● ĐANG LIVE</span>
+                  <span className="ic-badge ic-badge-live">● {t('classes.live', 'ĐANG LIVE')}</span>
                 ) : (
-                  <span className="ic-badge ic-badge-active">Hoạt động</span>
+                  <span className="ic-badge ic-badge-active">{t('classes.active', 'Hoạt động')}</span>
                 )}
               </div>
 
@@ -160,16 +162,16 @@ export const ClassDetailPage = () => {
 
               <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', fontSize: '0.95rem', color: '#475569' }}>
                 <span>
-                  👨‍🏫 Giáo viên:{' '}
+                  👨‍🏫 {t('classes.teacher', 'Giáo viên')}:{' '}
                   <strong>
                     {cls.teacher_name ||
                       (typeof cls.teacher_id === 'object' && cls.teacher_id !== null
                         ? cls.teacher_id.name
-                        : 'Giáo viên')}
+                        : t('classes.teacher', 'Giáo viên'))}
                   </strong>
                 </span>
                 <span>
-                  👥 Học viên: <strong>{studentsCount}</strong>
+                  👥 {t('classes.students', 'Học viên')}: <strong>{studentsCount}</strong>
                 </span>
               </div>
             </div>
@@ -186,7 +188,7 @@ export const ClassDetailPage = () => {
                 }}
               >
                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1D4ED8', textTransform: 'uppercase' }}>
-                  MÃ LỚP HỌC (CLASS CODE)
+                  {t('classes.classCode', 'MÃ LỚP HỌC (CLASS CODE)')}
                 </div>
                 <div
                   style={{
@@ -206,14 +208,14 @@ export const ClassDetailPage = () => {
                     className="ic-btn ic-btn-secondary ic-btn-sm"
                     onClick={handleCopyCode}
                   >
-                    📋 Chép mã
+                    📋 {t('classes.copyCode', 'Chép mã')}
                   </button>
                   <button
                     type="button"
                     className="ic-btn ic-btn-outline ic-btn-sm"
                     onClick={handleCopyLink}
                   >
-                    🔗 Link mời
+                    🔗 {t('classes.inviteLink', 'Link mời')}
                   </button>
                 </div>
               </div>
@@ -227,28 +229,28 @@ export const ClassDetailPage = () => {
               className={`ic-tab ${activeTab === 'overview' ? 'active' : ''}`}
               onClick={() => setActiveTab('overview')}
             >
-              Tổng quan
+              {t('classes.tabs.overview', 'Tổng quan')}
             </button>
             <button
               type="button"
               className={`ic-tab ${activeTab === 'lessons' ? 'active' : ''}`}
               onClick={() => setActiveTab('lessons')}
             >
-              Bài học tương tác
+              {t('classes.tabs.lessons', 'Bài học tương tác')}
             </button>
             <button
               type="button"
               className={`ic-tab ${activeTab === 'students' ? 'active' : ''}`}
               onClick={() => setActiveTab('students')}
             >
-              Học viên ({studentsCount})
+              {t('classes.tabs.students', 'Học viên')} ({studentsCount})
             </button>
             <button
               type="button"
               className={`ic-tab ${activeTab === 'live' ? 'active' : ''}`}
               onClick={() => setActiveTab('live')}
             >
-              Phòng học Live {cls.active_session_id && '🔴'}
+              {t('classes.tabs.live', 'Phòng học Live')} {cls.active_session_id && '🔴'}
             </button>
           </div>
 
@@ -264,10 +266,10 @@ export const ClassDetailPage = () => {
                 }}
               >
                 <h3 style={{ fontFamily: 'Oswald', fontSize: '1.4rem', color: '#0F172A', marginTop: 0 }}>
-                  Thông tin chung
+                  {t('classes.overview.generalInfo', 'Thông tin chung')}
                 </h3>
                 <p style={{ color: '#64748B', lineHeight: '1.6' }}>
-                  {cls.description || 'Lớp học chưa có mô tả chi tiết.'}
+                  {cls.description || t('classes.overview.noDesc', 'Lớp học chưa có mô tả chi tiết.')}
                 </p>
 
                 <div style={{ marginTop: '20px' }}>
@@ -276,7 +278,7 @@ export const ClassDetailPage = () => {
                     className="ic-btn ic-btn-secondary ic-btn-sm"
                     onClick={() => setActiveTab('lessons')}
                   >
-                    Xem bài học tương tác →
+                    {t('classes.overview.viewLessons', 'Xem bài học tương tác →')}
                   </button>
                 </div>
               </div>
@@ -290,7 +292,7 @@ export const ClassDetailPage = () => {
                 }}
               >
                 <h3 style={{ fontFamily: 'Oswald', fontSize: '1.4rem', color: '#0F172A', marginTop: 0 }}>
-                  Trạng thái phòng Live
+                  {t('classes.overview.liveStatus', 'Trạng thái phòng Live')}
                 </h3>
 
                 {cls.active_session_id ? (
@@ -304,9 +306,9 @@ export const ClassDetailPage = () => {
                         marginBottom: '16px',
                       }}
                     >
-                      <strong style={{ color: '#DC2626' }}>🔴 Buổi học Live đang diễn ra!</strong>
+                      <strong style={{ color: '#DC2626' }}>🔴 {t('classes.overview.liveInProgress', 'Buổi học Live đang diễn ra!')}</strong>
                       <p style={{ margin: '4px 0 0', color: '#7F1D1D', fontSize: '0.9rem' }}>
-                        Giáo viên đang mở phòng học tương tác thời gian thực cho lớp này.
+                        {t('classes.overview.liveInProgressDesc', 'Giáo viên đang mở phòng học tương tác thời gian thực cho lớp này.')}
                       </p>
                     </div>
 
@@ -316,17 +318,17 @@ export const ClassDetailPage = () => {
                       style={{ width: '100%' }}
                       onClick={() => navigate(`/interactive-room/session/${cls.active_session_id}`)}
                     >
-                      🔴 Tham gia buổi học Live ngay
+                      🔴 {t('classes.overview.joinLiveNow', 'Tham gia buổi học Live ngay')}
                     </button>
                   </div>
                 ) : (
                   <div>
                     <p style={{ color: '#64748B', fontSize: '0.95rem' }}>
-                      Hiện tại chưa có phòng Live nào đang mở cho lớp học này.
+                      {t('classes.overview.noLive', 'Hiện tại chưa có phòng Live nào đang mở cho lớp học này.')}
                     </p>
                     {isTeacher && (
                       <p style={{ color: '#475569', fontSize: '0.9rem' }}>
-                        👉 Chuyển sang tab <strong>&ldquo;Bài học tương tác&rdquo;</strong> và chọn <strong>&ldquo;Start Class&rdquo;</strong> để bắt đầu giảng dạy trực tiếp!
+                        👉 {t('classes.overview.startLiveHint', 'Chuyển sang tab "Bài học tương tác" và chọn "Bắt đầu học" để bắt đầu giảng dạy trực tiếp!')}
                       </p>
                     )}
                   </div>
@@ -356,10 +358,10 @@ export const ClassDetailPage = () => {
             >
               <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔴</div>
               <h3 style={{ fontFamily: 'Oswald', fontSize: '2rem', color: '#0F172A', margin: '0 0 8px' }}>
-                Phòng Học Trực Tiếp (Live Session)
+                {t('classes.liveTab.title', 'Phòng Học Trực Tiếp (Live Session)')}
               </h3>
               <p style={{ color: '#64748B', lineHeight: '1.6', marginBottom: '24px' }}>
-                Phòng học Live đồng bộ thời gian thực qua Socket.IO: Giáo viên trình chiếu Flashcard, Trắc nghiệm trực tiếp và Vòng quay từ vựng ngẫu nhiên.
+                {t('classes.liveTab.desc', 'Phòng học Live đồng bộ thời gian thực qua Socket.IO: Giáo viên trình chiếu Flashcard, Trắc nghiệm trực tiếp và Vòng quay từ vựng ngẫu nhiên.')}
               </p>
 
               {cls.active_session_id ? (
@@ -369,7 +371,7 @@ export const ClassDetailPage = () => {
                   style={{ padding: '14px 36px', fontSize: '1.2rem' }}
                   onClick={() => navigate(`/interactive-room/session/${cls.active_session_id}`)}
                 >
-                  🔴 Vào phòng Live đang diễn ra
+                  🔴 {t('classes.liveTab.enterLive', 'Vào phòng Live đang diễn ra')}
                 </button>
               ) : (
                 <div>
@@ -382,7 +384,7 @@ export const ClassDetailPage = () => {
                       marginBottom: '20px',
                     }}
                   >
-                    Chưa có buổi học Live nào đang hoạt động.
+                    {t('classes.liveTab.noActiveSession', 'Chưa có buổi học Live nào đang hoạt động.')}
                   </div>
                   {isTeacher && (
                     <button
@@ -390,7 +392,7 @@ export const ClassDetailPage = () => {
                       className="ic-btn ic-btn-secondary"
                       onClick={() => setActiveTab('lessons')}
                     >
-                      Chọn bài học để bắt đầu Live →
+                      {t('classes.liveTab.chooseLessonToStart', 'Chọn bài học để bắt đầu Live →')}
                     </button>
                   )}
                 </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { SessionConnectedStudent } from '../../../types/interactiveClass'
 
 interface ConnectedStudentsBarProps {
@@ -9,6 +10,7 @@ export const ConnectedStudentsBar = ({
   students,
   showCountOnly = false,
 }: ConnectedStudentsBarProps) => {
+  const { t } = useTranslation('interactive')
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <div
@@ -33,7 +35,7 @@ export const ConnectedStudentsBar = ({
           }}
         />
         <span>
-          <strong>{students.length}</strong> học viên online
+          {t('interactiveRoom.onlineStudents', { count: students.length })}
         </span>
       </div>
 

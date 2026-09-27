@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 import type { VocabularyItem } from '../../../types/vocabulary'
 
@@ -14,11 +15,13 @@ export const LiveFlashcardStudent = ({
   totalCards,
   showAnswer,
 }: LiveFlashcardStudentProps) => {
+  const { t } = useTranslation('interactive')
+
   if (!currentCard) {
     return (
       <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🗂️</div>
-        <h3>Đang chờ giáo viên chọn thẻ từ vựng...</h3>
+        <h3>{t('interactiveRoom.flashcard.waitingTeacher')}</h3>
       </div>
     )
   }
@@ -30,7 +33,11 @@ export const LiveFlashcardStudent = ({
   return (
     <div style={{ width: '100%', maxWidth: '580px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ color: '#94A3B8', fontSize: '0.9rem', marginBottom: '16px' }}>
-        Thẻ <strong>{currentIndex + 1}</strong> / {totalCards || 1} • Điều khiển bởi giáo viên
+        {t('interactiveRoom.flashcard.card', {
+          current: currentIndex + 1,
+          total: totalCards || 1,
+        })}{' '}
+        • {t('interactiveRoom.flashcard.controlledByTeacher')}
       </div>
 
       <div className="ic-live-card">
@@ -39,7 +46,9 @@ export const LiveFlashcardStudent = ({
         </div>
 
         <div style={{ fontSize: '0.85rem', color: '#64748B', textTransform: 'uppercase', fontWeight: 700 }}>
-          {showAnswer ? 'BEDEUTUNG (NGHĨA)' : 'WORT (TỪ VỰNG)'}
+          {showAnswer
+            ? t('interactiveRoom.flashcard.meaning')
+            : t('interactiveRoom.flashcard.word')}
         </div>
 
         <div className="ic-live-card-word" style={{ marginTop: '16px' }}>
@@ -75,7 +84,7 @@ export const LiveFlashcardStudent = ({
               fontStyle: 'italic',
             }}
           >
-            Chờ giáo viên lật thẻ để xem nghĩa và ví dụ...
+            {t('interactiveRoom.flashcard.waitingFlipHint')}
           </div>
         )}
       </div>

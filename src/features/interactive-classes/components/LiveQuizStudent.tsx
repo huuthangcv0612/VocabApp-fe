@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 
 interface LiveQuizStudentProps {
@@ -19,6 +20,7 @@ export const LiveQuizStudent = ({
   showAnswer,
   onSubmitAnswer,
 }: LiveQuizStudentProps) => {
+  const { t } = useTranslation('interactive')
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [hasSubmitted, setHasSubmitted] = useState(false)
 
@@ -32,7 +34,7 @@ export const LiveQuizStudent = ({
     return (
       <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
         <div style={{ fontSize: '3rem', marginBottom: '16px' }}>❓</div>
-        <h3>Đang chờ giáo viên bắt đầu câu hỏi...</h3>
+        <h3>{t('interactiveRoom.quiz.waitingTeacher')}</h3>
       </div>
     )
   }
@@ -49,7 +51,10 @@ export const LiveQuizStudent = ({
   return (
     <div style={{ width: '100%', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: '16px' }}>
-        Câu hỏi <strong>{currentQuestion.currentIndex + 1}</strong> / {currentQuestion.totalQuestions}
+        {t('interactiveRoom.quiz.questionNumber', {
+          current: currentQuestion.currentIndex + 1,
+          total: currentQuestion.totalQuestions,
+        })}
       </div>
 
       {/* Question Card */}
@@ -138,7 +143,7 @@ export const LiveQuizStudent = ({
               display: 'inline-block',
             }}
           >
-            ✓ Đã gửi câu trả lời. Chờ giáo viên công bố kết quả...
+            {t('interactiveRoom.quiz.submittedWaiting')}
           </div>
         )}
 
@@ -152,8 +157,8 @@ export const LiveQuizStudent = ({
             }}
           >
             {selectedOption === currentQuestion.correctAnswer
-              ? '🎉 Chính xác! Bạn làm rất tốt!'
-              : `Đáp án đúng là: ${currentQuestion.correctAnswer}`}
+              ? t('interactiveRoom.quiz.correct')
+              : t('interactiveRoom.quiz.correctAnswerIs', { answer: currentQuestion.correctAnswer })}
           </div>
         )}
       </div>

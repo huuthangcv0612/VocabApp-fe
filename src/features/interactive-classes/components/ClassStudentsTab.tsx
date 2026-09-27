@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import { interactiveClassService } from '../../../services/interactiveClassService'
 import type { ClassStudent } from '../../../types/interactiveClass'
@@ -9,6 +10,7 @@ interface ClassStudentsTabProps {
 }
 
 export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTabProps) => {
+  const { t } = useTranslation('interactive')
   const [students, setStudents] = useState<ClassStudent[]>([])
   const [loading, setLoading] = useState(true)
   const [removingId, setRemovingId] = useState<string | null>(null)
@@ -20,11 +22,11 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
       setStudents(list)
     } catch (err: unknown) {
       console.error('Error fetching students:', err)
-      toast.error('Không thể tải danh sách học viên.')
+      toast.error(t('classes.studentsTab.loadError', 'Không thể tải danh sách học viên.'))
     } finally {
       setLoading(false)
     }
-  }, [classId])
+  }, [classId, t])
 
   useEffect(() => {
     fetchStudents()
@@ -43,19 +45,19 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
     ).trim()
 
     if (!removalId) {
-      toast.error('Không tìm thấy ID học viên để xóa.')
+      toast.error(t('classes.studentsTab.notFoundId', 'Không tìm thấy ID học viên để xóa.'))
       return
     }
 
-    const studentName = (student.name || (studentUser.name as string) || '').trim() || 'Học viên'
-    if (!window.confirm(`Xóa học viên "${studentName}" khỏi lớp học này?`)) {
+    const studentName = (student.name || (studentUser.name as string) || '').trim() || t('interactiveRoom.quiz.student', 'Học viên')
+    if (!window.confirm(t('classes.studentsTab.removeConfirm', { name: studentName, defaultValue: `Xóa học viên "${studentName}" khỏi lớp học này?` }))) {
       return
     }
 
     setRemovingId(removalId)
     try {
       await interactiveClassService.removeStudent(classId, removalId)
-      toast.success(`Đã xóa học viên ${studentName} khỏi lớp`)
+      toast.success(t('classes.studentsTab.removeSuccess', { name: studentName, defaultValue: `Đã xóa học viên ${studentName} khỏi lớp` }))
       setStudents((prev) =>
         prev.filter((s) => {
           const u = (s.user as Record<string, unknown>) || {}
@@ -66,7 +68,7 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
     } catch (err: unknown) {
       console.error('Error removing student:', err)
       const errorObj = err as { response?: { data?: { message?: string } } }
-      toast.error(errorObj?.response?.data?.message || 'Lỗi khi xóa học viên.')
+      toast.error(errorObj?.response?.data?.message || t('classes.studentsTab.removeError', 'Lỗi khi xóa học viên.'))
     } finally {
       setRemovingId(null)
     }
@@ -75,7 +77,7 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748B' }}>
-        <p>Đang tải danh sách học viên...</p>
+        <p>{t('classes.studentsTab.loadingList', 'Đang tải danh sách học viên...')}</p>
       </div>
     )
   }
@@ -84,11 +86,11 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
     return (
       <div className="ic-empty-state">
         <div className="ic-empty-icon">👥</div>
-        <h3>Chưa có học viên nào tham gia</h3>
+        <h3>{t('classes.studentsTab.emptyTitle', 'Chưa có học viên nào tham gia')}</h3>
         <p>
           {isTeacher
-            ? 'Hãy gửi mã lớp hoặc liên kết mời cho học viên để họ tham gia lớp học này.'
-            : 'Lớp học hiện tại chưa có thêm học viên nào.'}
+            ? t('classes.studentsTab.emptyTeacher', 'Hãy gửi mã lớp hoặc liên kết mời cho học viên để họ tham gia lớp học này.')
+            : t('classes.studentsTab.emptyStudent', 'Lớp học hiện tại chưa có thêm học viên nào.')}
         </p>
       </div>
     )
@@ -106,17 +108,17 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
         >
           <thead>
             <tr style={{ color: '#64748B', textAlign: 'left', fontSize: '0.9rem' }}>
-              <th style={{ padding: '12px 16px' }}>HỌC VIÊN</th>
-              <th style={{ padding: '12px 16px' }}>EMAIL</th>
-              <th style={{ padding: '12px 16px' }}>TRẠNG THÁI</th>
-              <th style={{ padding: '12px 16px' }}>NGÀY THAM GIA</th>
-              {isTeacher && <th style={{ padding: '12px 16px', textAlign: 'right' }}>THAO TÁC</th>}
+              <th style={{ padding: '12px 16px' }}>{t('classes.studentsTab.colStudent', 'HỌC VIÊN')}</th>
+              <th style={{ padding: '12px 16px' }}>{t('classes.studentsTab.colEmail', 'EMAIL')}</th>
+              <th style={{ padding: '12px 16px' }}>{t('classes.studentsTab.colStatus', 'TRẠNG THÁI')}</th>
+              <th style={{ padding: '12px 16px' }}>{t('classes.studentsTab.colJoined', 'NGÀY THAM GIA')}</th>
+              {isTeacher && <th style={{ padding: '12px 16px', textAlign: 'right' }}>{t('classes.studentsTab.colAction', 'THAO TÁC')}</th>}
             </tr>
           </thead>
           <tbody>
             {students.map((student, idx) => {
               const studentUser = (student.user as Record<string, unknown>) || {}
-              const studentName = (student.name || (studentUser.name as string) || '').trim() || 'Học viên'
+              const studentName = (student.name || (studentUser.name as string) || '').trim() || t('interactiveRoom.quiz.student', 'Học viên')
               const studentEmail = (student.email || (studentUser.email as string) || '').trim() || '—'
               const studentAvatar = student.avatar || (studentUser.avatar as string)
               const studentJoinedAt = student.joined_at || (studentUser.joined_at as string) || (studentUser.created_at as string)
@@ -221,7 +223,7 @@ export const ClassStudentsTab = ({ classId, isTeacher = false }: ClassStudentsTa
                         onClick={() => handleRemove(student)}
                         disabled={removingId === sId}
                       >
-                        {removingId === sId ? 'Đang xóa...' : 'Xóa học viên'}
+                        {removingId === sId ? t('classes.studentsTab.removing', 'Đang xóa...') : t('classes.studentsTab.removeStudent', 'Xóa học viên')}
                       </button>
                     </td>
                   )}

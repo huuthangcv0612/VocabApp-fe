@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 import type { VocabularyItem } from '../../../types/vocabulary'
 
@@ -19,13 +20,14 @@ export const LiveFlashcardTeacher = ({
   onPrev,
   onToggleAnswer,
 }: LiveFlashcardTeacherProps) => {
+  const { t } = useTranslation('interactive')
   const [localFlipped, setLocalFlipped] = useState(false)
   const currentCard = vocabularyList[currentIndex]
 
   if (!currentCard) {
     return (
       <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
-        <h3>Chưa có từ vựng cho hoạt động Flashcard này.</h3>
+        <h3>{t('interactiveRoom.flashcard.noVocab')}</h3>
       </div>
     )
   }
@@ -38,7 +40,10 @@ export const LiveFlashcardTeacher = ({
   return (
     <div style={{ width: '100%', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: '16px' }}>
-        Thẻ <strong>{currentIndex + 1}</strong> / {vocabularyList.length}
+        {t('interactiveRoom.flashcard.card', {
+          current: currentIndex + 1,
+          total: vocabularyList.length,
+        })}
       </div>
 
       <div
@@ -54,7 +59,9 @@ export const LiveFlashcardTeacher = ({
         </div>
 
         <div style={{ fontSize: '0.9rem', color: '#64748B', textTransform: 'uppercase', fontWeight: 700 }}>
-          {isRevealed ? 'NGHĨA & VÍ DỤ' : 'TỪ VỰNG TIẾNG ĐỨC'}
+          {isRevealed
+            ? t('interactiveRoom.flashcard.meaningAndExample')
+            : t('interactiveRoom.flashcard.germanVocab')}
         </div>
 
         <div className="ic-live-card-word" style={{ marginTop: '16px' }}>
@@ -83,7 +90,7 @@ export const LiveFlashcardTeacher = ({
           </div>
         ) : (
           <div style={{ color: '#94A3B8', fontSize: '0.95rem', marginTop: '20px' }}>
-            (Chạm hoặc nhấn &ldquo;Lật thẻ / Hiện đáp án&rdquo; để mở nghĩa)
+            {t('interactiveRoom.flashcard.flipHint')}
           </div>
         )}
       </div>
@@ -103,7 +110,7 @@ export const LiveFlashcardTeacher = ({
           onClick={onPrev}
           disabled={currentIndex <= 0}
         >
-          ← Thẻ trước
+          {t('interactiveRoom.flashcard.prevCard')}
         </button>
 
         <button
@@ -114,7 +121,9 @@ export const LiveFlashcardTeacher = ({
             onToggleAnswer()
           }}
         >
-          🔄 {isRevealed ? 'Ẩn nghĩa' : 'Lật thẻ / Hiện đáp án'}
+          {isRevealed
+            ? t('interactiveRoom.flashcard.hideAnswer')
+            : t('interactiveRoom.flashcard.flipAnswer')}
         </button>
 
         <button
@@ -123,7 +132,7 @@ export const LiveFlashcardTeacher = ({
           onClick={onNext}
           disabled={currentIndex >= vocabularyList.length - 1}
         >
-          Thẻ tiếp theo →
+          {t('interactiveRoom.flashcard.nextCard')}
         </button>
       </div>
     </div>

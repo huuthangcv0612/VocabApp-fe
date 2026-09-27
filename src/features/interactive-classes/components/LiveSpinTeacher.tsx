@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 import type { VocabularyItem } from '../../../types/vocabulary'
 
@@ -45,6 +46,7 @@ export const LiveSpinTeacher = ({
   isSpinning = false,
   onSpin,
 }: LiveSpinTeacherProps) => {
+  const { t } = useTranslation('interactive')
   const [rotation, setRotation] = useState(0)
   const [animating, setAnimating] = useState(false)
   const [selectedWord, setSelectedWord] = useState<VocabularyItem | null>(null)
@@ -118,7 +120,7 @@ export const LiveSpinTeacher = ({
   return (
     <div style={{ width: '100%', maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ color: '#94A3B8', fontSize: '0.95rem', marginBottom: '16px' }}>
-        Vòng quay từ vựng ngẫu nhiên • <strong>{items.length}</strong> từ
+        {t('interactiveRoom.spin.title', { count: items.length })}
       </div>
 
       {/* Wheel SVG */}
@@ -226,7 +228,7 @@ export const LiveSpinTeacher = ({
           }}
         >
           <div style={{ color: '#16A34A', fontWeight: 800, fontSize: '0.9rem', textTransform: 'uppercase' }}>
-            🎉 KẾT QUẢ VÒNG QUAY
+            {t('interactiveRoom.spin.resultTitle')}
           </div>
 
           <div
@@ -283,7 +285,7 @@ export const LiveSpinTeacher = ({
           onClick={handleTriggerSpin}
           disabled={animating || isSpinning || items.length === 0}
         >
-          {animating ? '🎡 Đang quay...' : '🎡 QUAY TỪ VỰNG'}
+          {animating ? t('interactiveRoom.spin.spinning') : t('interactiveRoom.spin.spinBtn')}
         </button>
       </div>
     </div>

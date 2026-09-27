@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 import type { VocabularyItem } from '../../../types/vocabulary'
 
@@ -41,6 +42,7 @@ export const LiveSpinStudent = ({
   vocabularyList,
   spinResult,
 }: LiveSpinStudentProps) => {
+  const { t } = useTranslation('interactive')
   const [rotation, setRotation] = useState(0)
   const [animating, setAnimating] = useState(false)
   const [selectedWord, setSelectedWord] = useState<VocabularyItem | null>(null)
@@ -109,7 +111,7 @@ export const LiveSpinStudent = ({
   return (
     <div style={{ width: '100%', maxWidth: '580px', margin: '0 auto', textAlign: 'center' }}>
       <div style={{ color: '#94A3B8', fontSize: '0.9rem', marginBottom: '16px' }}>
-        Vòng quay từ vựng • Giáo viên điều khiển quay
+        {t('interactiveRoom.spin.studentTitle')}
       </div>
 
       {/* Wheel SVG */}
@@ -214,7 +216,7 @@ export const LiveSpinStudent = ({
           }}
         >
           <div style={{ color: '#16A34A', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-            🎉 TỪ VỰNG ĐƯỢC CHỌN
+            {t('interactiveRoom.spin.studentResultTitle')}
           </div>
 
           <div
@@ -264,13 +266,13 @@ export const LiveSpinStudent = ({
 
       {animating && (
         <div style={{ marginTop: '20px', color: '#FFCC00', fontWeight: 700, fontSize: '1.1rem' }}>
-          🎡 Giáo viên đang quay vòng quay...
+          {t('interactiveRoom.spin.teacherSpinning')}
         </div>
       )}
 
       {!animating && !selectedWord && (
         <div style={{ marginTop: '20px', color: '#94A3B8', fontStyle: 'italic', fontSize: '0.9rem' }}>
-          Chờ giáo viên bấm quay từ vựng tiếp theo...
+          {t('interactiveRoom.spin.waitingNextSpin')}
         </div>
       )}
     </div>

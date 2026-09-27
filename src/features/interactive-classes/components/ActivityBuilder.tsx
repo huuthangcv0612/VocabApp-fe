@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type {
   ActivityType,
   ActivityConfig,
@@ -19,6 +20,7 @@ export const ActivityBuilder = ({
   onChange,
   disabled = false,
 }: ActivityBuilderProps) => {
+  const { t } = useTranslation('interactive')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   // Default configs
@@ -99,7 +101,7 @@ export const ActivityBuilder = ({
           onClick={() => handleAddActivity('flashcard')}
           disabled={disabled}
         >
-          🗂️ + Thêm Flashcard
+          {t('editor.addFlashcard')}
         </button>
 
         <button
@@ -108,7 +110,7 @@ export const ActivityBuilder = ({
           onClick={() => handleAddActivity('quiz')}
           disabled={disabled}
         >
-          ❓ + Thêm Trắc Nghiệm (Quiz)
+          {t('editor.addQuiz')}
         </button>
 
         <button
@@ -117,7 +119,7 @@ export const ActivityBuilder = ({
           onClick={() => handleAddActivity('spin')}
           disabled={disabled}
         >
-          🎡 + Thêm Vòng Quay (Spin)
+          {t('editor.addSpin')}
         </button>
       </div>
 
@@ -131,7 +133,7 @@ export const ActivityBuilder = ({
             color: '#64748B',
           }}
         >
-          Chưa có hoạt động nào. Hãy chọn thêm Flashcard, Quiz hoặc Vòng quay từ vựng cho buổi học!
+          {t('editor.noActivities')}
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -174,7 +176,7 @@ export const ActivityBuilder = ({
                         {act.title || typeLabel}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: '#64748B' }}>
-                        Hoạt động #{idx + 1} • {typeLabel}
+                        {t('editor.activityNumber', { num: idx + 1 })} • {typeLabel}
                       </div>
                     </div>
                   </div>
@@ -195,7 +197,7 @@ export const ActivityBuilder = ({
                         setEditingIndex(isEditing ? null : idx)
                       }}
                     >
-                      {isEditing ? 'Đóng cấu hình ▲' : 'Cấu hình ▼'}
+                      {isEditing ? t('editor.closeConfig') : t('editor.openConfig')}
                     </button>
 
                     <button
@@ -212,7 +214,7 @@ export const ActivityBuilder = ({
                         e.stopPropagation()
                         handleRemoveActivity(idx)
                       }}
-                      title="Xóa hoạt động"
+                      title={t('editor.removeActivity')}
                     >
                       🗑️
                     </button>
@@ -228,7 +230,7 @@ export const ActivityBuilder = ({
                     }}
                   >
                     <div className="ic-form-group">
-                      <label className="ic-label">Tiêu đề hoạt động</label>
+                      <label className="ic-label">{t('editor.activityTitle')}</label>
                       <input
                         type="text"
                         className="ic-input"
@@ -249,7 +251,7 @@ export const ActivityBuilder = ({
                               handleUpdateConfig(idx, { show_translation: e.target.checked })
                             }
                           />
-                          <span>Hiện dịch nghĩa</span>
+                          <span>{t('editor.flashcardConfig.showTranslation')}</span>
                         </label>
 
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -260,7 +262,7 @@ export const ActivityBuilder = ({
                               handleUpdateConfig(idx, { show_example: e.target.checked })
                             }
                           />
-                          <span>Hiện câu ví dụ</span>
+                          <span>{t('editor.flashcardConfig.showExample')}</span>
                         </label>
 
                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -271,7 +273,7 @@ export const ActivityBuilder = ({
                               handleUpdateConfig(idx, { shuffle: e.target.checked })
                             }
                           />
-                          <span>Xáo trộn từ vựng</span>
+                          <span>{t('editor.flashcardConfig.shuffle')}</span>
                         </label>
                       </div>
                     )}
@@ -280,7 +282,7 @@ export const ActivityBuilder = ({
                     {act.type === 'quiz' && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px' }}>
                         <div className="ic-form-group">
-                          <label className="ic-label">Số lượng câu hỏi</label>
+                          <label className="ic-label">{t('editor.quizConfig.questionCount')}</label>
                           <input
                             type="number"
                             min="1"
@@ -294,7 +296,7 @@ export const ActivityBuilder = ({
                         </div>
 
                         <div className="ic-form-group">
-                          <label className="ic-label">Thời gian trả lời (giây)</label>
+                          <label className="ic-label">{t('editor.quizConfig.timeLimit')}</label>
                           <input
                             type="number"
                             min="5"
@@ -316,7 +318,7 @@ export const ActivityBuilder = ({
                                 handleUpdateConfig(idx, { shuffle: e.target.checked })
                               }
                             />
-                            <span>Xáo trộn thứ tự câu hỏi</span>
+                            <span>{t('editor.quizConfig.shuffle')}</span>
                           </label>
                         </div>
                       </div>
@@ -326,7 +328,7 @@ export const ActivityBuilder = ({
                     {act.type === 'spin' && (
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                         <div className="ic-form-group">
-                          <label className="ic-label">Chế độ quay</label>
+                          <label className="ic-label">{t('editor.spinConfig.spinMode')}</label>
                           <select
                             className="ic-select"
                             value={(act.config as SpinConfig)?.spin_mode || 'word'}
@@ -334,8 +336,8 @@ export const ActivityBuilder = ({
                               handleUpdateConfig(idx, { spin_mode: e.target.value })
                             }
                           >
-                            <option value="word">Quay từ vựng ngẫu nhiên</option>
-                            <option value="student">Quay học viên ngẫu nhiên</option>
+                            <option value="word">{t('editor.spinConfig.modeWord')}</option>
+                            <option value="student">{t('editor.spinConfig.modeStudent')}</option>
                           </select>
                         </div>
 
@@ -348,7 +350,7 @@ export const ActivityBuilder = ({
                                 handleUpdateConfig(idx, { allow_repeat: e.target.checked })
                               }
                             />
-                            <span>Cho phép quay lặp lại</span>
+                            <span>{t('editor.spinConfig.allowRepeat')}</span>
                           </label>
                         </div>
                       </div>

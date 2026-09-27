@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import { interactiveClassService } from '../../../services/interactiveClassService'
 import type { ClassItem } from '../../../types/interactiveClass'
@@ -14,6 +15,7 @@ export const CreateClassModal = ({
   onClose,
   onSuccess,
 }: CreateClassModalProps) => {
+  const { t } = useTranslation('interactive')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,7 +26,7 @@ export const CreateClassModal = ({
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) {
-      toast.error('Vui lòng nhập tên lớp học')
+      toast.error(t('classes.modals.nameRequired', 'Vui lòng nhập tên lớp học'))
       return
     }
 
@@ -35,12 +37,12 @@ export const CreateClassModal = ({
         description: description.trim() || undefined,
       })
       setCreatedClass(cls)
-      toast.success('Tạo lớp học thành công!')
+      toast.success(t('classes.modals.successCreated', 'Tạo lớp học thành công!'))
       onSuccess(cls)
     } catch (err: unknown) {
       console.error('Error creating class:', err)
       const errorObj = err as { response?: { data?: { message?: string } } }
-      toast.error(errorObj?.response?.data?.message || 'Lỗi tạo lớp học. Vui lòng thử lại!')
+      toast.error(errorObj?.response?.data?.message || t('classes.modals.createError', 'Lỗi tạo lớp học. Vui lòng thử lại!'))
     } finally {
       setLoading(false)
     }
@@ -50,7 +52,7 @@ export const CreateClassModal = ({
     const code = createdClass?.class_code || createdClass?.code || ''
     if (code) {
       navigator.clipboard.writeText(code)
-      toast.success('Đã sao chép mã lớp!')
+      toast.success(t('classes.copyCodeSuccess', { code, defaultValue: 'Đã sao chép mã lớp!' }))
     }
   }
 
@@ -58,7 +60,7 @@ export const CreateClassModal = ({
     const code = createdClass?.class_code || createdClass?.code || ''
     const link = `${window.location.origin}/interactive-room?joinCode=${encodeURIComponent(code)}`
     navigator.clipboard.writeText(link)
-    toast.success('Đã sao chép liên kết mời!')
+    toast.success(t('classes.copyLinkSuccess', 'Đã sao chép liên kết mời!'))
   }
 
   const handleClose = () => {
@@ -73,7 +75,7 @@ export const CreateClassModal = ({
       <div className="ic-modal" onClick={(e) => e.stopPropagation()}>
         <div className="ic-modal-header">
           <h2 className="ic-modal-title">
-            {createdClass ? 'Lớp học đã tạo' : 'Tạo lớp học mới'}
+            {createdClass ? t('classes.modals.createdTitle', 'Lớp học đã tạo') : t('classes.modals.createTitle', 'Tạo lớp học mới')}
           </h2>
           <button type="button" className="ic-modal-close" onClick={handleClose}>
             ✕
@@ -83,12 +85,12 @@ export const CreateClassModal = ({
         {createdClass ? (
           <div>
             <p style={{ color: '#475569', marginBottom: '8px' }}>
-              Lớp <strong>{createdClass.name}</strong> đã được khởi tạo thành công. Hãy chia sẻ mã lớp hoặc liên kết mời cho học viên của bạn:
+              {t('classes.modals.createdShareDesc', { name: createdClass.name, defaultValue: `Lớp ${createdClass.name} đã được khởi tạo thành công. Hãy chia sẻ mã lớp hoặc liên kết mời cho học viên của bạn:` })}
             </p>
 
             <div className="ic-code-card">
               <div style={{ fontSize: '0.9rem', color: '#166534', fontWeight: 600 }}>
-                MÃ LỚP HỌC (CLASS CODE)
+                {t('classes.classCode', 'MÃ LỚP HỌC (CLASS CODE)')}
               </div>
               <div className="ic-code-display">
                 {createdClass.class_code || createdClass.code}
@@ -99,14 +101,14 @@ export const CreateClassModal = ({
                   className="ic-btn ic-btn-secondary ic-btn-sm"
                   onClick={handleCopyCode}
                 >
-                  📋 Sao chép mã
+                  📋 {t('classes.copyCode', 'Sao chép mã')}
                 </button>
                 <button
                   type="button"
                   className="ic-btn ic-btn-outline ic-btn-sm"
                   onClick={handleCopyLink}
                 >
-                  🔗 Sao chép liên kết
+                  🔗 {t('classes.inviteLink', 'Sao chép liên kết')}
                 </button>
               </div>
             </div>
@@ -117,20 +119,20 @@ export const CreateClassModal = ({
               style={{ width: '100%', marginTop: '16px' }}
               onClick={handleClose}
             >
-              Hoàn tất
+              {t('classes.modals.done', 'Hoàn tất')}
             </button>
           </div>
         ) : (
           <form onSubmit={handleCreate}>
             <div className="ic-form-group">
               <label className="ic-label" htmlFor="className">
-                Tên lớp học <span style={{ color: '#D90000' }}>*</span>
+                {t('classes.modals.className', 'Tên lớp học')} <span style={{ color: '#D90000' }}>*</span>
               </label>
               <input
                 id="className"
                 type="text"
                 className="ic-input"
-                placeholder="Ví dụ: Tiếng Đức Giao Tiếp A1.1"
+                placeholder={t('classes.modals.classNamePlaceholder', 'Ví dụ: Tiếng Đức Giao Tiếp A1.1')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
@@ -140,12 +142,12 @@ export const CreateClassModal = ({
 
             <div className="ic-form-group">
               <label className="ic-label" htmlFor="classDesc">
-                Mô tả lớp học
+                {t('classes.modals.classDesc', 'Mô tả lớp học')}
               </label>
               <textarea
                 id="classDesc"
                 className="ic-textarea"
-                placeholder="Nhập mục tiêu, lộ trình hoặc lưu ý cho học viên..."
+                placeholder={t('classes.modals.classDescPlaceholder', 'Nhập mục tiêu, lộ trình hoặc lưu ý cho học viên...')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -159,7 +161,7 @@ export const CreateClassModal = ({
                 onClick={handleClose}
                 disabled={loading}
               >
-                Hủy
+                {t('editor.cancel', 'Hủy')}
               </button>
               <button
                 type="submit"
@@ -167,7 +169,7 @@ export const CreateClassModal = ({
                 style={{ flex: 2 }}
                 disabled={loading}
               >
-                {loading ? 'Đang tạo...' : 'Tạo lớp'}
+                {loading ? t('classes.modals.creating', 'Đang tạo...') : t('classes.modals.createBtn', 'Tạo lớp')}
               </button>
             </div>
           </form>

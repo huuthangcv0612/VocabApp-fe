@@ -19,6 +19,9 @@ import enPayment from './locales/en/payment.json';
 import viAi from './locales/vi/ai.json';
 import enAi from './locales/en/ai.json';
 
+import viInteractive from './locales/vi/interactive.json';
+import enInteractive from './locales/en/interactive.json';
+
 export const LANGUAGE_STORAGE_KEY = 'vocabapp_language';
 
 const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
@@ -32,6 +35,7 @@ export const resources = {
     subscription: viSubscription,
     payment: viPayment,
     ai: viAi,
+    interactive: viInteractive,
   },
   en: {
     common: enCommon,
@@ -40,6 +44,7 @@ export const resources = {
     subscription: enSubscription,
     payment: enPayment,
     ai: enAi,
+    interactive: enInteractive,
   },
 } as const;
 
@@ -50,7 +55,7 @@ i18n
     lng: initialLanguage,
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'learning', 'subscription', 'payment', 'ai'],
+    ns: ['common', 'auth', 'learning', 'subscription', 'payment', 'ai', 'interactive'],
     interpolation: {
       escapeValue: false,
     },

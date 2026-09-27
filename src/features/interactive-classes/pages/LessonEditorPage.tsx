@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -8,7 +9,6 @@ import { useSubscription } from '../../../hooks/useSubscription'
 import { checkInteractivePermissions } from '../../../utils/interactivePermissions'
 import { interactiveClassService } from '../../../services/interactiveClassService'
 import type {
-  InteractiveLesson,
   InteractiveActivity,
 } from '../../../types/interactiveClass'
 import type { VocabularyItem } from '../../../types/vocabulary'
@@ -18,6 +18,7 @@ import { ActivityBuilder } from '../components/ActivityBuilder'
 import '../../../styles/pages/interactive-classes.css'
 
 export const LessonEditorPage = () => {
+  const { t } = useTranslation('interactive')
   const { classId = '', lessonId } = useParams<{ classId: string; lessonId?: string }>()
   const navigate = useNavigate()
   const isEditing = Boolean(lessonId)
@@ -36,6 +37,7 @@ export const LessonEditorPage = () => {
   const [description, setDescription] = useState('')
   const [level, setLevel] = useState('A1.1')
   const [status, setStatus] = useState<'draft' | 'published'>('published')
+  const [language, setLanguage] = useState<'vi' | 'en'>('vi')
   const [vocabularies, setVocabularies] = useState<VocabularyItem[]>([])
   const [activities, setActivities] = useState<InteractiveActivity[]>([])
   const [loading, setLoading] = useState(false)
@@ -52,8 +54,9 @@ export const LessonEditorPage = () => {
       const data = await interactiveClassService.getLessonById(lessonId)
       setTitle(data.title || '')
       setDescription(data.description || '')
-      setLevel(data.level || 'A1.1')
-      setStatus((data.status as 'draft' | 'published') || 'published')
+      setLevel(data.level || data.level_id || 'A1.1')
+      setStatus((data.status as 'draft' | 'published') || (data.published ? 'published' : 'draft'))
+      setLanguage(data.language === 'en' ? 'en' : 'vi')
 
       // Unpack vocabularies
       if (Array.isArray(data.vocabularies)) {
@@ -63,22 +66,24 @@ export const LessonEditorPage = () => {
         setVocabularies(fullVocabs)
       }
 
-      // Load activities
-      try {
-        const actList = await interactiveClassService.getActivities(lessonId)
-        setActivities(actList)
-      } catch {
-        if (Array.isArray(data.activities)) {
-          setActivities(data.activities as unknown as InteractiveActivity[])
+      // Load activities directly from lesson data (normalized by service) with fallback
+      if (Array.isArray(data.activities) && data.activities.length > 0) {
+        setActivities(data.activities)
+      } else {
+        try {
+          const actList = await interactiveClassService.getActivities(lessonId)
+          setActivities(actList)
+        } catch {
+          setActivities([])
         }
       }
     } catch (err: unknown) {
       console.error('Error loading lesson:', err)
-      toast.error('Không thể tải thông tin bài học.')
+      toast.error(t('lessons.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [lessonId])
+  }, [lessonId, t])
 
   useEffect(() => {
     if (isEditing) {
@@ -90,12 +95,12 @@ export const LessonEditorPage = () => {
     const vId = vocab._id || (vocab as { id?: string }).id || ''
     const exists = vocabularies.some((v) => (v._id || (v as { id?: string }).id) === vId)
     if (exists) {
-      toast('Từ vựng này đã có trong bài học!', { icon: 'ℹ️' })
+      toast(t('editor.vocabAlreadyAdded'), { icon: 'ℹ️' })
       return
     }
 
     setVocabularies((prev) => [...prev, vocab])
-    toast.success(`Đã thêm "${vocab.word}" vào bài học`)
+    toast.success(t('editor.vocabAddedSuccess', { word: vocab.word }))
   }
 
   // IMPORTANT: Remove vocabulary from lesson ONLY - DO NOT delete global vocabulary!
@@ -115,7 +120,7 @@ export const LessonEditorPage = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!title.trim()) {
-      toast.error('Vui lòng nhập tiêu đề bài học')
+      toast.error(t('editor.validation.titleRequired'))
       return
     }
 
@@ -123,55 +128,45 @@ export const LessonEditorPage = () => {
     try {
       const vocabIds = vocabularies.map((v) => v._id || (v as { id?: string }).id || '')
 
-      let savedLesson: InteractiveLesson
+      const formattedActivities = activities.map((act, index) => ({
+        _id: act._id && !act._id.startsWith('temp_') ? act._id : undefined,
+        type: act.type,
+        title: act.title,
+        order: typeof act.order === 'number' ? act.order : index + 1,
+        config: act.config,
+      }))
 
       if (isEditing && lessonId) {
-        savedLesson = await interactiveClassService.updateLesson(lessonId, {
+        await interactiveClassService.updateLesson(lessonId, {
           title: title.trim(),
           description: description.trim() || undefined,
           level,
           vocabularies: vocabIds,
           status,
+          language,
+          activities: formattedActivities,
         })
+        toast.success(t('editor.validation.updateSuccess'))
       } else {
-        savedLesson = await interactiveClassService.createLesson({
+        await interactiveClassService.createLesson({
           class_id: classId,
           title: title.trim(),
           description: description.trim() || undefined,
           level,
           vocabularies: vocabIds,
           status,
+          language,
+          activities: formattedActivities,
         })
+        toast.success(t('editor.validation.saveSuccess'))
       }
 
-      const currentLessonId = savedLesson._id || savedLesson.id || lessonId || ''
-
-      // Save/Create activities
-      if (currentLessonId) {
-        for (const act of activities) {
-          if (act._id && !act._id.startsWith('temp_')) {
-            await interactiveClassService.updateActivity(act._id, {
-              title: act.title,
-              config: act.config,
-              order: act.order,
-            }).catch(() => {})
-          } else {
-            await interactiveClassService.createActivity({
-              lesson_id: currentLessonId,
-              type: act.type,
-              title: act.title,
-              config: act.config,
-              order: act.order,
-            }).catch(() => {})
-          }
-        }
-      }
-
-      toast.success(isEditing ? 'Cập nhật bài học thành công!' : 'Tạo bài học tương tác thành công! 🎉')
       navigate(`/interactive-room/classes/${classId}`)
     } catch (err: unknown) {
       console.error('Error saving lesson:', err)
-      const errorMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Lỗi khi lưu bài học. Vui lòng thử lại!'
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        t('editor.validation.saveError')
       toast.error(errorMsg)
     } finally {
       setSaving(false)
@@ -193,15 +188,15 @@ export const LessonEditorPage = () => {
               className="ic-btn ic-btn-outline ic-btn-sm"
               onClick={() => navigate(`/interactive-room/classes/${classId}`)}
             >
-              ← Quay lại lớp học
+              {t('editor.back')}
             </button>
           </div>
 
           <form onSubmit={handleSave}>
             <div className="ic-page-header">
               <div className="ic-title-group">
-                <h1>{isEditing ? 'Chỉnh Sửa Bài Học' : 'Tạo Bài Học Tương Tác'}</h1>
-                <p>Thiết lập danh sách từ vựng và các hoạt động tương tác thời gian thực.</p>
+                <h1>{isEditing ? t('editor.editTitle') : t('editor.createTitle')}</h1>
+                <p>{t('editor.subtitle')}</p>
               </div>
 
               <div className="ic-actions-group">
@@ -211,21 +206,21 @@ export const LessonEditorPage = () => {
                   onClick={() => navigate(`/interactive-room/classes/${classId}`)}
                   disabled={saving}
                 >
-                  Hủy
+                  {t('editor.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="ic-btn ic-btn-primary"
                   disabled={saving}
                 >
-                  {saving ? 'Đang lưu...' : 'Lưu bài học'}
+                  {saving ? t('editor.saving') : t('editor.save')}
                 </button>
               </div>
             </div>
 
             {loading ? (
               <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
-                <p>Đang tải bài học...</p>
+                <p>{t('editor.loading')}</p>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -246,17 +241,17 @@ export const LessonEditorPage = () => {
                       margin: '0 0 20px 0',
                     }}
                   >
-                    1. THÔNG TIN BÀI HỌC
+                    {t('editor.section1')}
                   </h3>
 
                   <div className="ic-form-group">
                     <label className="ic-label">
-                      Tiêu đề bài học <span style={{ color: '#D90000' }}>*</span>
+                      {t('editor.lessonTitle')} <span style={{ color: '#D90000' }}>*</span>
                     </label>
                     <input
                       type="text"
                       className="ic-input"
-                      placeholder="VD: Familie & Freunde (Gia đình & Bạn bè)"
+                      placeholder={t('editor.lessonTitlePlaceholder')}
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       required
@@ -264,18 +259,18 @@ export const LessonEditorPage = () => {
                   </div>
 
                   <div className="ic-form-group">
-                    <label className="ic-label">Mô tả bài học</label>
+                    <label className="ic-label">{t('editor.lessonDesc')}</label>
                     <textarea
                       className="ic-textarea"
-                      placeholder="Nhập mô tả mục tiêu học tập, chủ đề giao tiếp..."
+                      placeholder={t('editor.lessonDescPlaceholder')}
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                     <div className="ic-form-group">
-                      <label className="ic-label">Cấp độ (Level)</label>
+                      <label className="ic-label">{t('editor.level')}</label>
                       <select
                         className="ic-select"
                         value={level}
@@ -291,14 +286,28 @@ export const LessonEditorPage = () => {
                     </div>
 
                     <div className="ic-form-group">
-                      <label className="ic-label">Trạng thái phát hành</label>
+                      <label className="ic-label">{t('editor.status')}</label>
                       <select
                         className="ic-select"
                         value={status}
                         onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
                       >
-                        <option value="published">Xuất bản (Published)</option>
-                        <option value="draft">Bản nháp (Draft)</option>
+                        <option value="published">{t('editor.published')}</option>
+                        <option value="draft">{t('editor.draft')}</option>
+                      </select>
+                    </div>
+
+                    <div className="ic-form-group">
+                      <label className="ic-label">
+                        {t('editor.lessonLanguage')}
+                      </label>
+                      <select
+                        className="ic-select"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value as 'vi' | 'en')}
+                      >
+                        <option value="vi">{t('editor.langVi')}</option>
+                        <option value="en">{t('editor.langEn')}</option>
                       </select>
                     </div>
                   </div>
@@ -313,7 +322,7 @@ export const LessonEditorPage = () => {
                     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)',
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
                       <h3
                         style={{
@@ -323,10 +332,10 @@ export const LessonEditorPage = () => {
                           margin: 0,
                         }}
                       >
-                        2. TỪ VỰNG BÀI HỌC ({vocabularies.length})
+                        {t('editor.section2')} ({vocabularies.length})
                       </h3>
                       <p style={{ margin: '4px 0 0', color: '#64748B', fontSize: '0.9rem' }}>
-                        Tìm kiếm từ vựng có sẵn trong từ điển hệ thống hoặc tạo từ vựng mới.
+                        {t('editor.vocabDesc')}
                       </p>
                     </div>
 
@@ -335,7 +344,7 @@ export const LessonEditorPage = () => {
                       className="ic-btn ic-btn-outline ic-btn-sm"
                       onClick={() => handleOpenCreateVocab('')}
                     >
-                      + Tạo từ vựng mới
+                      {t('editor.createNewVocab')}
                     </button>
                   </div>
 
@@ -359,7 +368,7 @@ export const LessonEditorPage = () => {
                         color: '#94A3B8',
                       }}
                     >
-                      Chưa có từ vựng nào trong bài học này. Hãy tìm kiếm ở trên để thêm từ!
+                      {t('editor.noVocabAdded')}
                     </div>
                   ) : (
                     <div
@@ -409,7 +418,7 @@ export const LessonEditorPage = () => {
                                 padding: '4px',
                                 flexShrink: 0,
                               }}
-                              title="Xóa khỏi bài học"
+                              title={t('editor.removeVocabTooltip')}
                             >
                               ✕
                             </button>
@@ -437,10 +446,10 @@ export const LessonEditorPage = () => {
                       margin: '0 0 8px 0',
                     }}
                   >
-                    3. HOẠT ĐỘNG TƯƠNG TÁC (ACTIVITIES)
+                    {t('editor.section3')}
                   </h3>
                   <p style={{ margin: '0 0 20px 0', color: '#64748B', fontSize: '0.9rem' }}>
-                    Thêm các hoạt động tương tác Flashcard, Trắc nghiệm (Quiz) và Vòng quay từ vựng (Spin).
+                    {t('editor.activityDesc')}
                   </p>
 
                   <ActivityBuilder
@@ -458,14 +467,14 @@ export const LessonEditorPage = () => {
                     onClick={() => navigate(`/interactive-room/classes/${classId}`)}
                     disabled={saving}
                   >
-                    Hủy
+                    {t('editor.cancel')}
                   </button>
                   <button
                     type="submit"
                     className="ic-btn ic-btn-primary"
                     disabled={saving}
                   >
-                    {saving ? 'Đang lưu...' : 'Lưu bài học'}
+                    {saving ? t('editor.saving') : t('editor.save')}
                   </button>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { SpeakerButton } from '../../../components/SpeakerButton'
 import type { SessionResponseRecord, SessionConnectedStudent } from '../../../types/interactiveClass'
 
@@ -25,10 +26,12 @@ export const LiveQuizTeacher = ({
   onShowAnswer,
   onNext,
 }: LiveQuizTeacherProps) => {
+  const { t } = useTranslation('interactive')
+
   if (!currentQuestion) {
     return (
       <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px' }}>
-        <h3>Chưa có câu hỏi trắc nghiệm nào.</h3>
+        <h3>{t('interactiveRoom.quiz.noQuestion')}</h3>
       </div>
     )
   }
@@ -51,14 +54,16 @@ export const LiveQuizTeacher = ({
         }}
       >
         <span>
-          Câu hỏi <strong>{currentQuestion.currentIndex + 1}</strong> / {currentQuestion.totalQuestions}
+          {t('interactiveRoom.quiz.questionNumber', {
+            current: currentQuestion.currentIndex + 1,
+            total: currentQuestion.totalQuestions,
+          })}
         </span>
         <span>
-          Đã nộp bài:{' '}
-          <strong style={{ color: '#38BDF8' }}>
-            {responseCount} / {totalStudents}
-          </strong>{' '}
-          học viên
+          {t('interactiveRoom.quiz.submittedCount', {
+            submitted: responseCount,
+            total: totalStudents,
+          })}
         </span>
       </div>
 
@@ -133,7 +138,7 @@ export const LiveQuizTeacher = ({
                     fontWeight: 700,
                   }}
                 >
-                  {selectedByCount} chọn
+                  {t('interactiveRoom.quiz.selectedBy', { count: selectedByCount })}
                 </div>
               )}
             </div>
@@ -152,11 +157,11 @@ export const LiveQuizTeacher = ({
         }}
       >
         <div style={{ fontSize: '0.9rem', color: '#94A3B8', fontWeight: 600, marginBottom: '10px' }}>
-          DANH SÁCH ĐÃ PHẢN HỒI ({responses.length}):
+          {t('interactiveRoom.quiz.respondedList', { count: responses.length })}
         </div>
         {responses.length === 0 ? (
           <div style={{ color: '#64748B', fontStyle: 'italic', fontSize: '0.9rem' }}>
-            Đang chờ học viên gửi câu trả lời...
+            {t('interactiveRoom.quiz.waitingStudentAnswers')}
           </div>
         ) : (
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -171,7 +176,7 @@ export const LiveQuizTeacher = ({
                   color: '#F8FAFC',
                 }}
               >
-                👤 {resp.student_name || `Học viên ${rIdx + 1}`}:{' '}
+                👤 {resp.student_name || `${t('interactiveRoom.quiz.student')} ${rIdx + 1}`}:{' '}
                 <strong>{String(resp.answer)}</strong>
               </span>
             ))}
@@ -195,7 +200,9 @@ export const LiveQuizTeacher = ({
           onClick={onShowAnswer}
           disabled={showAnswer}
         >
-          {showAnswer ? '✓ Đã hiện đáp án' : '📢 Hiện đáp án cho học viên'}
+          {showAnswer
+            ? t('interactiveRoom.quiz.answerShown')
+            : t('interactiveRoom.quiz.showAnswerToStudents')}
         </button>
 
         <button
@@ -204,7 +211,7 @@ export const LiveQuizTeacher = ({
           onClick={onNext}
           disabled={currentQuestion.currentIndex >= currentQuestion.totalQuestions - 1}
         >
-          Câu hỏi tiếp theo →
+          {t('interactiveRoom.quiz.nextQuestion')}
         </button>
       </div>
     </div>

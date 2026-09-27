@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { toast } from 'react-hot-toast'
 import Header from '../../../components/Header'
 import Footer from '../../../components/Footer'
@@ -18,6 +19,7 @@ import type { ClassItem } from '../../../types/interactiveClass'
 import '../../../styles/pages/interactive-classes.css'
 
 export const InteractiveRoomLanding = () => {
+  const { t } = useTranslation('interactive')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
@@ -67,11 +69,11 @@ export const InteractiveRoomLanding = () => {
       }
     } catch (err: unknown) {
       console.error('Error fetching classes:', err)
-      toast.error('Không thể tải danh sách lớp học.')
+      toast.error(t('classes.loadError', 'Không thể tải danh sách lớp học.'))
     } finally {
       setLoading(false)
     }
-  }, [canManageClasses])
+  }, [canManageClasses, t])
 
   useEffect(() => {
     if (!subLoading) {
@@ -82,11 +84,11 @@ export const InteractiveRoomLanding = () => {
   const handleDeleteClass = async (classId: string) => {
     try {
       await interactiveClassService.deleteClass(classId)
-      toast.success('Đã xóa lớp học!')
+      toast.success(t('classes.deleteSuccess', 'Đã xóa lớp học!'))
       setManagedClasses((prev) => prev.filter((c) => (c._id || c.id) !== classId))
     } catch (err: unknown) {
       console.error('Error deleting class:', err)
-      toast.error('Lỗi khi xóa lớp học.')
+      toast.error(t('classes.deleteError', 'Lỗi khi xóa lớp học.'))
     }
   }
 
@@ -141,10 +143,10 @@ export const InteractiveRoomLanding = () => {
             >
               <div>
                 <h4 style={{ margin: '0 0 4px 0', color: '#1E40AF', fontSize: '1.2rem', fontFamily: 'Oswald' }}>
-                  ⭐ NÂNG CẤP GÓI CUSTOM ĐỂ TẠO LỚP HỌC & GIẢNG DẠY TƯƠNG TÁC
+                  {t('classes.customUpgradeTitle', '⭐ NÂNG CẤP GÓI CUSTOM ĐỂ TẠO LỚP HỌC & GIẢNG DẠY TƯƠNG TÁC')}
                 </h4>
                 <p style={{ margin: 0, color: '#1E3A8A', fontSize: '0.95rem' }}>
-                  Gói <strong>CUSTOM</strong> cho phép bạn tạo không giới hạn lớp học, soạn bài giảng tương tác (Flashcard, Quiz, Spin) và khởi tạo phòng học Live thời gian thực cho học viên.
+                  {t('classes.customUpgradeDesc', 'Gói CUSTOM cho phép bạn tạo không giới hạn lớp học, soạn bài giảng tương tác (Flashcard, Quiz, Spin) và khởi tạo phòng học Live thời gian thực cho học viên.')}
                 </p>
               </div>
               <button
@@ -152,7 +154,7 @@ export const InteractiveRoomLanding = () => {
                 className="ic-btn ic-btn-primary ic-btn-sm"
                 onClick={() => navigate('/pricing')}
               >
-                Khám phá Gói Custom
+                {t('classes.exploreCustom', 'Khám phá Gói Custom')}
               </button>
             </div>
           )}
@@ -161,12 +163,12 @@ export const InteractiveRoomLanding = () => {
           <div className="ic-page-header">
             <div className="ic-title-group">
               <h1>
-                {canManageClasses ? 'Lớp Học Tương Tác' : 'Lớp Học Của Tôi'}
+                {canManageClasses ? t('classes.title', 'Lớp Học Tương Tác') : t('classes.myClassesTitle', 'Lớp Học Của Tôi')}
               </h1>
               <p>
                 {canManageClasses
-                  ? 'Quản lý lớp học, xây dựng bài giảng tương tác và giảng dạy trực tiếp thời gian thực.'
-                  : 'Tham gia lớp học và trải nghiệm các bài giảng tương tác trực tiếp cùng giảng viên.'}
+                  ? t('classes.subtitleTeacher', 'Quản lý lớp học, xây dựng bài giảng tương tác và giảng dạy trực tiếp thời gian thực.')
+                  : t('classes.subtitleStudent', 'Tham gia lớp học và trải nghiệm các bài giảng tương tác trực tiếp cùng giảng viên.')}
               </p>
             </div>
 
@@ -176,7 +178,7 @@ export const InteractiveRoomLanding = () => {
                 className="ic-btn ic-btn-outline"
                 onClick={() => setIsJoinOpen(true)}
               >
-                🔑 Tham gia bằng mã
+                🔑 {t('classes.joinWithCode', 'Tham gia bằng mã')}
               </button>
 
               {canManageClasses ? (
@@ -185,7 +187,7 @@ export const InteractiveRoomLanding = () => {
                   className="ic-btn ic-btn-primary"
                   onClick={() => setIsCreateOpen(true)}
                 >
-                  + Tạo lớp học mới
+                  + {t('classes.createNewClass', 'Tạo lớp học mới')}
                 </button>
               ) : (
                 <button
@@ -199,7 +201,7 @@ export const InteractiveRoomLanding = () => {
                   }}
                   onClick={() => setShowCustomModal(true)}
                 >
-                  <span>⭐ + Tạo lớp học mới</span>
+                  <span>⭐ + {t('classes.createNewClass', 'Tạo lớp học mới')}</span>
                   <span
                     style={{
                       backgroundColor: '#f59e0b',
@@ -234,14 +236,14 @@ export const InteractiveRoomLanding = () => {
                 className={`ic-btn ic-btn-sm ${activeTab === 'managed' ? 'ic-btn-primary' : 'ic-btn-outline'}`}
                 onClick={() => setActiveTab('managed')}
               >
-                🏫 Lớp tôi quản lý ({managedClasses.length})
+                🏫 {t('classes.managedClasses', 'Lớp tôi quản lý')} ({managedClasses.length})
               </button>
               <button
                 type="button"
                 className={`ic-btn ic-btn-sm ${activeTab === 'joined' ? 'ic-btn-primary' : 'ic-btn-outline'}`}
                 onClick={() => setActiveTab('joined')}
               >
-                👥 Lớp đã tham gia ({joinedClasses.length})
+                👥 {t('classes.joinedClasses', 'Lớp đã tham gia')} ({joinedClasses.length})
               </button>
             </div>
           )}
@@ -250,20 +252,20 @@ export const InteractiveRoomLanding = () => {
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748B' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>⏳</div>
-              <p>Đang tải danh sách lớp học...</p>
+              <p>{t('classes.loading', 'Đang tải danh sách lớp học...')}</p>
             </div>
           ) : currentList.length === 0 ? (
             <div className="ic-empty-state">
               <div className="ic-empty-icon">🏫</div>
               <h3>
                 {canManageClasses && activeTab === 'managed'
-                  ? 'Bạn chưa tạo lớp học nào'
-                  : 'Bạn chưa tham gia lớp học nào'}
+                  ? t('classes.emptyManaged', 'Bạn chưa tạo lớp học nào')
+                  : t('classes.emptyJoined', 'Bạn chưa tham gia lớp học nào')}
               </h3>
               <p>
                 {canManageClasses && activeTab === 'managed'
-                  ? 'Hãy tạo lớp học đầu tiên của bạn để mời học viên và bắt đầu bài học tương tác!'
-                  : 'Hãy nhập mã lớp học (Class Code) do giáo viên cung cấp để tham gia lớp!'}
+                  ? t('classes.emptyManagedDesc', 'Hãy tạo lớp học đầu tiên của bạn để mời học viên và bắt đầu bài học tương tác!')
+                  : t('classes.emptyJoinedDesc', 'Hãy nhập mã lớp học (Class Code) do giáo viên cung cấp để tham gia lớp!')}
               </p>
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px' }}>
                 <button
@@ -271,7 +273,7 @@ export const InteractiveRoomLanding = () => {
                   className="ic-btn ic-btn-secondary"
                   onClick={() => setIsJoinOpen(true)}
                 >
-                  🔑 Nhập mã tham gia
+                  🔑 {t('classes.enterJoinCode', 'Nhập mã tham gia')}
                 </button>
                 {canManageClasses && activeTab === 'managed' ? (
                   <button
@@ -279,7 +281,7 @@ export const InteractiveRoomLanding = () => {
                     className="ic-btn ic-btn-primary"
                     onClick={() => setIsCreateOpen(true)}
                   >
-                    + Tạo lớp học ngay
+                    + {t('classes.createFirstClass', 'Tạo lớp học ngay')}
                   </button>
                 ) : !canManageClasses ? (
                   <button
@@ -293,7 +295,7 @@ export const InteractiveRoomLanding = () => {
                     }}
                     onClick={() => setShowCustomModal(true)}
                   >
-                    <span>⭐ + Tạo lớp học</span>
+                    <span>⭐ + {t('classes.createNewClass', 'Tạo lớp học mới')}</span>
                     <span
                       style={{
                         backgroundColor: '#f59e0b',
@@ -323,8 +325,8 @@ export const InteractiveRoomLanding = () => {
               >
                 <span style={{ fontSize: '1rem', color: '#64748B', fontWeight: 600 }}>
                   {canManageClasses && activeTab === 'managed'
-                    ? `Danh sách lớp bạn đang quản lý (${currentList.length})`
-                    : `Danh sách lớp bạn đang tham gia (${currentList.length})`}
+                    ? `${t('classes.managedList', 'Danh sách lớp bạn đang quản lý')} (${currentList.length})`
+                    : `${t('classes.joinedList', 'Danh sách lớp bạn đang tham gia')} (${currentList.length})`}
                 </span>
               </div>
 

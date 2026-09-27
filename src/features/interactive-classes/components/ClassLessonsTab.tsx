@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { interactiveClassService } from '../../../services/interactiveClassService'
 import type { InteractiveLesson } from '../../../types/interactiveClass'
 
@@ -10,6 +11,7 @@ interface ClassLessonsTabProps {
 }
 
 export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabProps) => {
+  const { t } = useTranslation('interactive')
   const navigate = useNavigate()
   const [lessons, setLessons] = useState<InteractiveLesson[]>([])
   const [loading, setLoading] = useState(true)
@@ -22,28 +24,28 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
       setLessons(list)
     } catch (err: unknown) {
       console.error('Error fetching interactive lessons:', err)
-      toast.error('Không thể tải danh sách bài học tương tác.')
+      toast.error(t('lessons.loadError'))
     } finally {
       setLoading(false)
     }
-  }, [classId])
+  }, [classId, t])
 
   useEffect(() => {
     fetchLessons()
   }, [fetchLessons])
 
   const handleDelete = async (lessonId: string, title: string) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa bài học "${title}"?`)) {
+    if (!window.confirm(t('lessons.deleteConfirm', { title }))) {
       return
     }
 
     try {
       await interactiveClassService.deleteLesson(lessonId)
-      toast.success('Đã xóa bài học!')
+      toast.success(t('lessons.deleteSuccess'))
       setLessons((prev) => prev.filter((l) => (l._id || l.id) !== lessonId))
     } catch (err: unknown) {
       console.error('Error deleting lesson:', err)
-      toast.error('Lỗi khi xóa bài học.')
+      toast.error(t('lessons.deleteError'))
     }
   }
 
@@ -54,13 +56,13 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
         class_id: classId,
         lesson_id: lessonId,
       })
-      toast.success('Đã tạo phòng học Live! Đang chuyển hướng... 🚀')
+      toast.success(t('lessons.startSessionSuccess'))
       const sessId = session._id || session.id
       navigate(`/interactive-room/session/${sessId}`)
     } catch (err: unknown) {
       console.error('Error starting live session:', err)
       const errorObj = err as { response?: { data?: { message?: string } } }
-      toast.error(errorObj?.response?.data?.message || 'Không thể bắt đầu phòng học live.')
+      toast.error(errorObj?.response?.data?.message || t('lessons.startSessionError'))
     } finally {
       setStartingSessionId(null)
     }
@@ -69,7 +71,7 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
   if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748B' }}>
-        <p>Đang tải danh sách bài học tương tác...</p>
+        <p>{t('lessons.loadingList')}</p>
       </div>
     )
   }
@@ -83,7 +85,7 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
             className="ic-btn ic-btn-primary"
             onClick={() => navigate(`/interactive-room/classes/${classId}/lessons/new`)}
           >
-            + Tạo bài học tương tác mới
+            {t('lessons.createNew')}
           </button>
         </div>
       )}
@@ -91,11 +93,11 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
       {lessons.length === 0 ? (
         <div className="ic-empty-state">
           <div className="ic-empty-icon">📚</div>
-          <h3>Chưa có bài học tương tác nào</h3>
+          <h3>{t('lessons.emptyTitle')}</h3>
           <p>
             {isTeacher
-              ? 'Tạo bài học tương tác để thêm từ vựng, flashcard, trắc nghiệm và vòng quay từ vựng cho lớp.'
-              : 'Giáo viên chưa tạo bài học tương tác nào cho lớp này.'}
+              ? t('lessons.emptyTeacherDesc')
+              : t('lessons.emptyStudentDesc')}
           </p>
           {isTeacher && (
             <button
@@ -103,7 +105,7 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
               className="ic-btn ic-btn-secondary"
               onClick={() => navigate(`/interactive-room/classes/${classId}/lessons/new`)}
             >
-              Tạo bài học ngay
+              {t('lessons.createNow')}
             </button>
           )}
         </div>
@@ -111,21 +113,16 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {lessons.map((lesson) => {
             const lId = lesson._id || lesson.id || ''
-            const vocabCount =
-              typeof lesson.vocabulary_count === 'number'
-                ? lesson.vocabulary_count
-                : Array.isArray(lesson.vocabularies)
-                ? lesson.vocabularies.length
-                : 0
+            const vocabCount = (lesson.vocabularies && lesson.vocabularies.length > 0)
+              ? lesson.vocabularies.length
+              : (lesson.vocabulary_count ?? lesson.vocabularies?.length ?? 0)
 
-            const activityCount =
-              typeof lesson.activity_count === 'number'
-                ? lesson.activity_count
-                : Array.isArray(lesson.activities)
-                ? lesson.activities.length
-                : 0
+            const activityCount = (lesson.activities && lesson.activities.length > 0)
+              ? lesson.activities.length
+              : (lesson.activity_count ?? lesson.activities?.length ?? 0)
 
-            const isPublished = lesson.status === 'published'
+            const isPublished = lesson.status === 'published' || lesson.published === true
+            const lessonLang = lesson.language ? lesson.language.toUpperCase() : 'VI'
 
             return (
               <div
@@ -170,7 +167,19 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                         isPublished ? 'ic-badge-active' : 'ic-badge-code'
                       }`}
                     >
-                      {isPublished ? 'Published' : 'Draft'}
+                      {isPublished ? t('lessons.published') : t('lessons.draft')}
+                    </span>
+
+                    <span
+                      className="ic-badge"
+                      style={{
+                        backgroundColor: '#F1F5F9',
+                        color: '#475569',
+                        fontWeight: 700,
+                      }}
+                      title={t('lessons.language')}
+                    >
+                      🌐 {lessonLang}
                     </span>
                   </div>
 
@@ -181,8 +190,8 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                   )}
 
                   <div style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', color: '#475569' }}>
-                    <span>📖 <strong>{vocabCount}</strong> từ vựng</span>
-                    <span>⚡ <strong>{activityCount}</strong> hoạt động</span>
+                    <span>📖 <strong>{vocabCount}</strong> {t('lessons.vocabCount', { count: '' }).trim()}</span>
+                    <span>⚡ <strong>{activityCount}</strong> {t('lessons.activityCount', { count: '' }).trim()}</span>
                   </div>
                 </div>
 
@@ -195,7 +204,7 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                         onClick={() => handleStartSession(lId)}
                         disabled={startingSessionId === lId}
                       >
-                        {startingSessionId === lId ? 'Đang mở phòng...' : '▶ Start Class'}
+                        {startingSessionId === lId ? t('lessons.starting') : t('lessons.startClass')}
                       </button>
 
                       <button
@@ -205,7 +214,7 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                           navigate(`/interactive-room/classes/${classId}/lessons/${lId}/edit`)
                         }
                       >
-                        ✏️ Edit
+                        {t('lessons.edit')}
                       </button>
 
                       <button
@@ -214,14 +223,14 @@ export const ClassLessonsTab = ({ classId, isTeacher = false }: ClassLessonsTabP
                         style={{ color: '#EF4444', borderColor: '#FECACA' }}
                         onClick={() => handleDelete(lId, lesson.title)}
                       >
-                        🗑️ Delete
+                        {t('lessons.delete')}
                       </button>
                     </>
                   )}
 
                   {!isTeacher && (
                     <span style={{ fontSize: '0.9rem', color: '#64748B', fontStyle: 'italic' }}>
-                      Sẵn sàng cho buổi học trực tiếp cùng giáo viên
+                      {t('lessons.readyForLive')}
                     </span>
                   )}
                 </div>

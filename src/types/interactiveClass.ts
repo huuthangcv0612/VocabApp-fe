@@ -24,29 +24,42 @@ export type ActivityConfig = FlashcardConfig | QuizConfig | SpinConfig
 export interface InteractiveActivity {
   _id: string
   id?: string
+  interactive_lesson_id?: string
   lesson_id: string
+  lessonId?: string
   type: ActivityType
   title?: string
   config: ActivityConfig
   order?: number
   created_at?: string
   updated_at?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface InteractiveLesson {
   _id: string
   id?: string
   class_id: string
+  classId?: string
+  teacher_id?: string
+  teacherId?: string
   title: string
   description?: string
+  level_id?: string
   level?: string
-  vocabularies: Array<string | VocabularyItem>
+  vocabulary_ids?: string[]
+  vocabularies?: Array<string | VocabularyItem>
   vocabulary_count?: number
   activities?: InteractiveActivity[]
   activity_count?: number
-  status?: 'draft' | 'published' | string
+  status: 'draft' | 'published'
+  published?: boolean
+  language: 'vi' | 'en'
   created_at?: string
   updated_at?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface ClassStudent {
@@ -111,8 +124,11 @@ export interface SessionResponseRecord {
 export interface InteractiveSession {
   _id: string
   id?: string
-  class_id: string
+  interactive_lesson_id?: string
   lesson_id: string
+  lessonId?: string
+  class_id: string
+  classId?: string
   class_info?: Partial<ClassItem>
   lesson_info?: Partial<InteractiveLesson>
   status: 'waiting' | 'active' | 'in_progress' | 'ended' | string
@@ -153,21 +169,41 @@ export interface JoinClassPayload {
   code?: string
 }
 
+export interface ActivityPayloadItem {
+  _id?: string
+  id?: string
+  type: ActivityType
+  title?: string
+  order?: number
+  config: ActivityConfig
+}
+
 export interface CreateLessonPayload {
   class_id: string
+  classId?: string
   title: string
   description?: string
   level?: string
+  level_id?: string
   vocabularies?: string[]
+  vocabulary_ids?: string[]
   status?: 'draft' | 'published'
+  published?: boolean
+  language?: 'vi' | 'en'
+  activities?: ActivityPayloadItem[]
 }
 
 export interface UpdateLessonPayload {
   title?: string
   description?: string
   level?: string
+  level_id?: string
   vocabularies?: string[]
+  vocabulary_ids?: string[]
   status?: 'draft' | 'published'
+  published?: boolean
+  language?: 'vi' | 'en'
+  activities?: ActivityPayloadItem[]
 }
 
 export interface CreateActivityPayload {

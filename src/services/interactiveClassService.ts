@@ -226,7 +226,27 @@ export const interactiveClassService = {
   createLesson: async (payload: CreateLessonPayload): Promise<InteractiveLesson> => {
     const res = await api.post('/interactive-lessons', payload)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.lesson as InteractiveLesson) || (data as unknown as InteractiveLesson)
+    const rawLesson = ((data?.lesson as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    const acts =
+      (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
+      (Array.isArray(data?.activities) ? data.activities : undefined) ??
+      []
+    const vocabs =
+      (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
+      (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
+      []
+    return {
+      ...(rawLesson as unknown as InteractiveLesson),
+      activities: acts as InteractiveActivity[],
+      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabulary_count:
+        (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
+        vocabs.length,
+      activity_count:
+        (typeof rawLesson.activity_count === 'number' ? rawLesson.activity_count : undefined) ??
+        acts.length,
+      language: (rawLesson.language as 'vi' | 'en') || (data?.language as 'vi' | 'en') || payload.language || 'vi',
+    }
   },
 
   getLessons: async (classId: string): Promise<InteractiveLesson[]> => {
@@ -234,16 +254,69 @@ export const interactiveClassService = {
       `/interactive-lessons?class_id=${encodeURIComponent(classId)}`,
     )
     const data = unpack<unknown>(res)
-    if (Array.isArray(data)) return data as InteractiveLesson[]
-    const record = data as Record<string, unknown>
-    if (Array.isArray(record?.lessons)) return record.lessons as InteractiveLesson[]
-    return []
+    let list: Record<string, unknown>[] = []
+    if (Array.isArray(data)) list = data as Record<string, unknown>[]
+    else {
+      const record = data as Record<string, unknown>
+      if (Array.isArray(record?.lessons)) list = record.lessons as Record<string, unknown>[]
+      else if (Array.isArray(record?.data)) list = record.data as Record<string, unknown>[]
+    }
+    return list.map((item) => {
+      const vocabs = Array.isArray(item.vocabularies) ? (item.vocabularies as Array<string | VocabularyItem>) : []
+      const acts = Array.isArray(item.activities) ? (item.activities as InteractiveActivity[]) : []
+      const vocabCount =
+        (typeof item.vocabulary_count === 'number' ? item.vocabulary_count : undefined) ??
+        vocabs.length
+      const actCount =
+        (typeof item.activity_count === 'number' ? item.activity_count : undefined) ??
+        acts.length
+      const id = String(item._id || item.id || '')
+      return {
+        ...(item as unknown as InteractiveLesson),
+        _id: id,
+        id,
+        vocabularies: vocabs,
+        activities: acts,
+        vocabulary_count: vocabCount,
+        activity_count: actCount,
+        status: (item.status as 'draft' | 'published') || (item.published ? 'published' : 'draft'),
+        language: (item.language as 'vi' | 'en') || 'vi',
+      }
+    })
   },
 
   getLessonById: async (id: string): Promise<InteractiveLesson> => {
     const res = await api.get(`/interactive-lessons/${encodeURIComponent(id)}`)
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.lesson as InteractiveLesson) || (data as unknown as InteractiveLesson)
+    const rawLesson = ((data?.lesson as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    const acts =
+      (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
+      (Array.isArray(data?.activities) ? data.activities : undefined) ??
+      []
+    const vocabs =
+      (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
+      (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
+      []
+    const vocabCount =
+      (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
+      (typeof data?.vocabulary_count === 'number' ? (data.vocabulary_count as number) : undefined) ??
+      vocabs.length
+    const actCount =
+      (typeof rawLesson.activity_count === 'number' ? rawLesson.activity_count : undefined) ??
+      (typeof data?.activity_count === 'number' ? (data.activity_count as number) : undefined) ??
+      acts.length
+    const lessonId = String(rawLesson._id || rawLesson.id || id)
+    return {
+      ...(rawLesson as unknown as InteractiveLesson),
+      _id: lessonId,
+      id: lessonId,
+      activities: acts as InteractiveActivity[],
+      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabulary_count: vocabCount,
+      activity_count: actCount,
+      status: (rawLesson.status as 'draft' | 'published') || (rawLesson.published ? 'published' : 'draft'),
+      language: (rawLesson.language as 'vi' | 'en') || (data?.language as 'vi' | 'en') || 'vi',
+    }
   },
 
   updateLesson: async (
@@ -255,7 +328,30 @@ export const interactiveClassService = {
       payload,
     )
     const data = unpack<Record<string, unknown>>(res)
-    return (data?.lesson as InteractiveLesson) || (data as unknown as InteractiveLesson)
+    const rawLesson = ((data?.lesson as Record<string, unknown>) || data || {}) as Record<string, unknown>
+    const acts =
+      (Array.isArray(rawLesson.activities) ? rawLesson.activities : undefined) ??
+      (Array.isArray(data?.activities) ? data.activities : undefined) ??
+      []
+    const vocabs =
+      (Array.isArray(rawLesson.vocabularies) ? rawLesson.vocabularies : undefined) ??
+      (Array.isArray(data?.vocabularies) ? data.vocabularies : undefined) ??
+      []
+    const lessonId = String(rawLesson._id || rawLesson.id || id)
+    return {
+      ...(rawLesson as unknown as InteractiveLesson),
+      _id: lessonId,
+      id: lessonId,
+      activities: acts as InteractiveActivity[],
+      vocabularies: vocabs as Array<string | VocabularyItem>,
+      vocabulary_count:
+        (typeof rawLesson.vocabulary_count === 'number' ? rawLesson.vocabulary_count : undefined) ??
+        vocabs.length,
+      activity_count:
+        (typeof rawLesson.activity_count === 'number' ? rawLesson.activity_count : undefined) ??
+        acts.length,
+      language: (rawLesson.language as 'vi' | 'en') || (data?.language as 'vi' | 'en') || payload.language || 'vi',
+    }
   },
 
   deleteLesson: async (id: string): Promise<void> => {
@@ -370,8 +466,28 @@ export const interactiveClassService = {
         : undefined) ??
       connectedStudents.length
 
+    const lessonId = String(
+      sessionObj.lesson_id ??
+      sessionObj.interactive_lesson_id ??
+      sessionObj.lessonId ??
+      (sessionObj.lesson_info as { _id?: string; id?: string })?._id ??
+      (sessionObj.lesson_info as { _id?: string; id?: string })?.id ??
+      ''
+    ).trim()
+    const classId = String(
+      sessionObj.class_id ??
+      sessionObj.classId ??
+      (sessionObj.class_info as { _id?: string; id?: string })?._id ??
+      (sessionObj.class_info as { _id?: string; id?: string })?.id ??
+      ''
+    ).trim()
+
     return {
       ...(sessionObj as unknown as InteractiveSession),
+      lesson_id: lessonId,
+      interactive_lesson_id: lessonId,
+      class_id: classId,
+      classId,
       connected_students: connectedStudents,
       connected_students_count: connectedCount,
     }
