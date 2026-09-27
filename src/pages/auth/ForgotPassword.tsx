@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
+import { AuthLayout } from '../../components/auth/AuthLayout'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
@@ -33,7 +34,7 @@ const ForgotPassword = () => {
   }
 
   return (
-    <main className="auth-page">
+    <AuthLayout>
       <section className="auth-page__container">
         <div className="auth-page__header">
           <h1 className="auth-page__title">{t('forgotPassword.title')}</h1>
@@ -62,7 +63,7 @@ const ForgotPassword = () => {
           <Link to="/login">{t('forgotPassword.backToLogin')}</Link>
         </p>
       </section>
-    </main>
+    </AuthLayout>
   )
 }
 

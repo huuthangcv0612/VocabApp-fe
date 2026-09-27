@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../contexts/AuthContext'
 import { FormInput } from '../../components/auth/FormInput'
+import { AuthLayout } from '../../components/auth/AuthLayout'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
@@ -67,7 +68,7 @@ const Register = () => {
   }
 
   return (
-    <main className="auth-page">
+    <AuthLayout>
       <section className="auth-page__container">
         <div className="auth-page__header">
           <h1 className="auth-page__title">{t('register.title')}</h1>
@@ -136,7 +137,7 @@ const Register = () => {
           </Link>
         </p>
       </section>
-    </main>
+    </AuthLayout>
   )
 }
 

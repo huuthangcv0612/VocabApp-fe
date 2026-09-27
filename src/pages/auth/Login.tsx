@@ -5,6 +5,7 @@ import { GoogleLogin, type CredentialResponse } from '@react-oauth/google'
 import { useAuth } from '../../contexts/AuthContext'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
+import { AuthLayout } from '../../components/auth/AuthLayout'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
@@ -146,7 +147,7 @@ const Login = () => {
   }
 
   return (
-    <main className="auth-page">
+    <AuthLayout>
       <section className="auth-page__container">
         <div className="auth-page__header">
           <h1 className="auth-page__title">{t('login.title')}</h1>
@@ -244,7 +245,7 @@ const Login = () => {
           </Link>
         </p>
       </section>
-    </main>
+    </AuthLayout>
   )
 }
 

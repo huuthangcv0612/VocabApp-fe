@@ -11,14 +11,87 @@
   --auth-error-text: #b91c1c;
 }
 
-.auth-page {
+.auth-page-wrapper {
   min-height: 100vh;
+  background-color: var(--color-accent, #FFF2B7);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background Clouds Container */
+.auth-bg-clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.auth-cloud {
+  position: absolute;
+  opacity: 0.65;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.04));
+  animation: floatCloudAuth 18s ease-in-out infinite alternate;
+}
+
+.auth-cloud-1 {
+  top: 80px;
+  left: -20px;
+  width: 220px;
+  animation-duration: 20s;
+}
+
+.auth-cloud-2 {
+  top: 140px;
+  right: -30px;
+  width: 260px;
+  animation-duration: 24s;
+  animation-delay: -5s;
+}
+
+.auth-cloud-3 {
+  bottom: 80px;
+  left: 5%;
+  width: 190px;
+  animation-duration: 22s;
+  animation-delay: -2s;
+}
+
+.auth-cloud-4 {
+  bottom: 130px;
+  right: 6%;
+  width: 220px;
+  animation-duration: 26s;
+  animation-delay: -7s;
+}
+
+@keyframes floatCloudAuth {
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(25px) translateY(-14px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.auth-page {
+  flex: 1;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem;
   background: transparent;
+  position: relative;
+  z-index: 1;
 }
 
 .auth-page__container {
@@ -29,6 +102,8 @@
   background: var(--auth-card);
   border: 1px solid var(--auth-border);
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  position: relative;
+  z-index: 2;
 }
 
 .auth-page__header {
@@ -165,22 +240,32 @@
   }
 }
 
-@media (max-width: 360px) {
-  .auth-page {
-    padding: 1rem 0.5rem;
+@media (max-width: 768px) {
+  .auth-cloud-1 {
+    width: 140px;
+    top: 70px;
+    left: -30px;
   }
-
-  .auth-page__container {
-    padding: 1.25rem 1rem;
-    border-radius: 18px;
+  .auth-cloud-2 {
+    width: 170px;
+    top: 120px;
+    right: -40px;
   }
-
-  .auth-page__title {
-    font-size: 1.75rem;
+  .auth-cloud-3 {
+    width: 130px;
+    bottom: 50px;
+    left: -20px;
   }
-
-  .auth-form__submit {
-    min-height: 2.9rem;
-    font-size: 0.9rem;
+  .auth-cloud-4 {
+    width: 150px;
+    bottom: 80px;
+    right: -25px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-cloud {
+    animation: none;
+  }
+}
+

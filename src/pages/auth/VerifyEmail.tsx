@@ -3,6 +3,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
+import { AuthLayout } from '../../components/auth/AuthLayout'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
@@ -167,7 +168,7 @@ const VerifyEmail = () => {
   // Loading screen
   if (status === 'loading') {
     return (
-      <main className="auth-page">
+      <AuthLayout>
         <section className="auth-page__container" style={{ textAlign: 'center' }}>
           <div className="auth-page__header">
             <div
@@ -202,14 +203,14 @@ const VerifyEmail = () => {
             <p className="auth-page__subtitle">{t('verifyEmail.verifyingSubtitle')}</p>
           </div>
         </section>
-      </main>
+      </AuthLayout>
     )
   }
 
   // Success screen
   if (status === 'success') {
     return (
-      <main className="auth-page">
+      <AuthLayout>
         <section className="auth-page__container" style={{ textAlign: 'center' }}>
           <div className="auth-page__header">
             <div
@@ -246,13 +247,13 @@ const VerifyEmail = () => {
             </Link>
           </div>
         </section>
-      </main>
+      </AuthLayout>
     )
   }
 
   // Error screen
   return (
-    <main className="auth-page">
+    <AuthLayout>
       <section className="auth-page__container">
         <div className="auth-page__header" style={{ textAlign: 'center' }}>
           <div
@@ -313,7 +314,7 @@ const VerifyEmail = () => {
           </p>
         </form>
       </section>
-    </main>
+    </AuthLayout>
   )
 }
 

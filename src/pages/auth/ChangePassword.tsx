@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { authService } from '../../services/authService'
 import { FormInput } from '../../components/auth/FormInput'
+import { AuthLayout } from '../../components/auth/AuthLayout'
 import toast from 'react-hot-toast'
 import '../../styles/pages/auth.css'
 
@@ -48,7 +49,7 @@ const ChangePassword = () => {
   }
 
   return (
-    <main className="auth-page">
+    <AuthLayout>
       <section className="auth-page__container">
         <div className="auth-page__header">
           <h1 className="auth-page__title">{t('changePassword.title')}</h1>
@@ -91,7 +92,7 @@ const ChangePassword = () => {
           </button>
         </form>
       </section>
-    </main>
+    </AuthLayout>
   )
 }
 
